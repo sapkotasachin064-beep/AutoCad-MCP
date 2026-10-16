@@ -1,0 +1,189 @@
+"""Catalog data: architecture, residential, structural, Civil 3D, survey,
+plumbing/drainage, electrical, HVAC/mechanical, P&ID. Drafting aids only:
+nothing here certifies a design against a building code."""
+
+T = ["unit"]
+TH = ["unit", "headless_dxf"]
+GMH = ["golden_regression", "mock_com", "headless_dxf"]
+N = []
+DRAFT = "drafting aid from user-supplied dimensions and limits; not a design or code check"
+
+V = ("V", "Architectural plans: walls, doors, windows, stairs and rooms", {"inputs": ["dimensions in a declared unit"], "outputs": ["handles", "schedules"],
+     "failure_modes": ["E_INVALID_INPUT", "E_UNITS_MISMATCH", "E_VERIFICATION_FAILED"], "reference": DRAFT}, [
+    ("wall", "Draw a straight double-line wall of a given thickness", "Walls without hand-offsetting lines", "tested", "both", "write", ["autocad_draw_wall"], TH),
+    ("door_symbol", "Door symbol: jamb ticks, leaf drawn open and swing arc", "Readable door openings", "tested", "both", "write", ["autocad_generate_2d_floor_plan", "autocad_generate_floor_plan"], GMH),
+    ("window_symbol", "Window symbol: three glazing lines across the wall", "Readable window openings", "tested", "both", "write", ["autocad_generate_2d_floor_plan", "autocad_generate_floor_plan"], GMH),
+    ("room_labels", "Room labels carrying the clear area in m2 or ft2", "Plans state room areas", "tested", "both", "write", ["autocad_generate_floor_plan"], TH),
+    ("clear_area", "Clear room width, depth and area after wall thicknesses", "Correct carpet areas", "tested", "pure", "read", ["autocad_generate_floor_plan"], T),
+    ("stair_design", "Straight-flight stair design with stated limits and pass/fail checks", "Riser/tread numbers without hand calculation", "tested", "pure", "read", ["autocad_design_stair"], T),
+    ("stair_plan", "Stair plan: outline, nosings, walking line and 'UP nR' note", "Stairs drawn from the design", "tested", "both", "write", ["autocad_draw_stair_plan"], TH),
+    ("room_schedule", "Room schedule (name, clear size, clear area)", "Area tables for drawings and reports", "tested", "pure", "read", ["autocad_generate_floor_plan"], TH),
+    ("door_schedule", "Door schedule with marks, widths and connected rooms", "Door tables", "tested", "pure", "read", ["autocad_generate_floor_plan"], TH),
+    ("window_schedule", "Window schedule with marks, widths and rooms", "Window tables", "tested", "pure", "read", ["autocad_generate_floor_plan"], TH),
+    ("wall_chains", "Multi-segment wall chains with mitred corners", "Continuous walls in one call", "planned", "both", "write", [], N),
+    ("wall_junctions", "Clean L, T and X wall junctions", "Presentation-quality plans", "planned", "both", "write", [], N),
+    ("openings_cut", "Cut door and window openings into wall outlines", "Walls broken at openings", "planned", "both", "write", [], N),
+    ("wall_justification", "Wall justification (centre, left, right)", "Draw to finished faces", "planned", "both", "write", [], N),
+    ("door_types", "Door types: single, double, sliding, pocket", "Correct symbols per door", "planned", "both", "write", [], N),
+    ("window_types", "Window types with sill and head heights", "Window data for elevations", "planned", "both", "write", [], N),
+    ("opening_blocks", "Doors and windows as blocks with tag attributes", "Schedules read from the drawing", "planned", "both", "write", [], N),
+    ("room_detection", "Detect rooms from existing wall linework", "Areas from other people's drawings", "planned", "both", "read", [], N),
+    ("furniture", "Insert furniture and sanitary blocks with nominal sizes", "Furnished plans", "planned", "both", "write", [], N),
+    ("kitchen_run", "Kitchen counter run layout", "Kitchen planning", "planned", "both", "write", [], N),
+    ("bathroom_layout", "Bathroom fixture layout with user clearances", "Bathroom planning", "planned", "both", "write", [], N),
+    ("ramp", "Ramp plan with slope check against user limits", "Accessible entrances", "planned", "both", "write", [], N),
+    ("stair_landings", "L- and U-shaped stairs with landings", "Common residential stairs", "planned", "both", "write", [], N),
+    ("railings", "Balconies and railings in plan", "Complete upper floors", "planned", "both", "write", [], N),
+    ("columns_in_walls", "Columns embedded in walls", "Framed buildings", "planned", "both", "write", [], N),
+    ("roof_plan", "Roof outlines, ridges, hips and slope arrows", "Roof plans", "planned", "both", "write", [], N),
+    ("elevation", "Elevation drafting from the plan and storey heights", "Front/side elevations", "planned", "both", "write", [], N),
+    ("section", "Building section drafting from plan and heights", "Sections for submissions", "planned", "both", "write", [], N),
+    ("ceiling_plan", "Reflected ceiling plan grid and fixtures", "Ceiling coordination", "planned", "both", "write", [], N),
+    ("floor_finishes", "Floor finish hatching per room", "Finish plans", "planned", "both", "write", [], N),
+])
+
+W = ("W", "Residential building layouts and drafting automation", {"inputs": ["rooms, doors, windows"], "outputs": ["plan", "schedules"],
+     "failure_modes": ["E_INVALID_INPUT", "E_VERIFICATION_FAILED"], "reference": DRAFT}, [
+    ("legacy_grid_plan", "The V0.2.3 2x3 grid floor plan, unchanged output", "Quick starter plan", "tested", "both", "write", ["autocad_generate_2d_floor_plan"], GMH, {"kind": "workflow"}),
+    ("room_plan", "Floor plan from explicit room rectangles forming any rectilinear footprint", "Draw a house from a room list", "tested", "both", "write", ["autocad_generate_floor_plan"], TH, {"kind": "workflow"}),
+    ("door_tree", "Connect every room to the entry room with doors through shared walls", "No unreachable rooms by accident", "tested", "pure", "write", ["autocad_generate_floor_plan"], TH),
+    ("unreachable_rooms", "Report rooms that no door can reach", "Catch planning mistakes", "tested", "pure", "read", ["autocad_generate_floor_plan"], T),
+    ("auto_windows", "One window per room on its longest outside wall, clear of the entry door", "Daylight without manual placement", "tested", "pure", "write", ["autocad_generate_floor_plan"], TH),
+    ("explicit_doors", "Doors between named rooms with width and position", "Control circulation", "tested", "pure", "write", ["autocad_generate_floor_plan"], T),
+    ("plan_validation", "Reject overlapping rooms, duplicate names and doors on non-shared walls", "Invalid plans never reach the drawing", "tested", "pure", "read", ["autocad_generate_floor_plan"], T),
+    ("units_any", "Plans in feet, inches, metres or millimetres in any drawing unit", "Metric and imperial projects", "tested", "pure", "write", ["autocad_generate_floor_plan"], TH),
+    ("plan_dry_run", "Dry-run a plan to see schedules and entity counts first", "Review before drawing", "tested", "both", "read", ["autocad_generate_floor_plan"], ["headless_dxf"]),
+    ("plan_origin", "Place a plan at a chosen origin", "Several plans in one drawing", "implemented", "both", "write", ["autocad_generate_floor_plan"], N),
+    ("multi_storey", "Multi-storey plans with stacked walls and stairs", "Two-storey houses", "planned", "both", "write", [], N),
+    ("plot_setbacks", "Plot boundary with user-entered setbacks and a coverage summary", "Fit a house on a plot", "planned", "both", "write", [], N),
+    ("site_plan", "Site plan: plot, footprint, access and north arrow", "Submission site plans", "planned", "both", "write", [], N),
+    ("room_programme", "Arrange a room programme (sizes and adjacencies) into candidate layouts", "Early layout options", "planned", "pure", "read", [], N),
+    ("orientation_report", "Report which rooms face which direction", "Daylight and ventilation discussion", "planned", "pure", "read", [], N),
+    ("auto_furniture", "Auto-place standard furniture per room type", "Furnished plans quickly", "planned", "both", "write", [], N),
+    ("setback_check", "Check a footprint against user-entered setback rules", "Early compliance hints", "planned", "pure", "read", [], N),
+    ("area_statement", "Area statement: plinth, built-up and carpet areas", "Submission area tables", "planned", "pure", "read", [], N),
+    ("house_sheet_set", "Generate a sheet set: plan, elevation, section, schedules", "Complete drawing sets", "planned", "both", "write", [], N),
+    ("rule_files", "Load project rule files (by-laws) supplied by the user; none built in", "Local rules without hard-coding them", "planned", "pure", "read", [], N),
+])
+
+X = ("X", "Structural drafting: grids, columns, beams and reinforcement", {"inputs": ["bay spacings", "member sizes"], "outputs": ["handles", "marks"],
+     "failure_modes": ["E_INVALID_INPUT"], "reference": "drafting only: no spans, loads or member sizes are designed or checked"}, [
+    ("grid_lines", "Column grid with numbered and lettered lines", "Set out a frame", "tested", "both", "write", ["autocad_draw_structural_grid"], TH),
+    ("grid_bubbles", "Grid bubbles and labels; I and O skipped by convention, AA after Z", "Readable grid references", "tested", "pure", "write", ["autocad_draw_structural_grid"], T),
+    ("column_marks", "Filled column marks at every grid intersection", "Column layout", "tested", "both", "write", ["autocad_draw_structural_grid"], TH),
+    ("column_list", "Column marks (A1, B2, ...) with centres and sizes", "Column schedules", "tested", "pure", "read", ["autocad_draw_structural_grid"], TH),
+    ("beam_layout", "Beam lines between columns with marks", "Framing plans", "planned", "both", "write", [], N),
+    ("slab_panels", "Slab panel outlines and marks", "Slab plans", "planned", "both", "write", [], N),
+    ("footing_plan", "Isolated footing outlines at columns", "Foundation plans", "planned", "both", "write", [], N),
+    ("footing_schedule", "Footing schedule table", "Foundation schedules", "planned", "both", "write", [], N),
+    ("beam_rebar_detail", "Beam reinforcement detail from user-entered bars and stirrups", "Detailing drawings", "planned", "both", "write", [], N),
+    ("column_rebar_detail", "Column cross-section reinforcement detail", "Column details", "planned", "both", "write", [], N),
+    ("bar_bending_schedule", "Bar bending schedule from detailed bars (user-entered shapes)", "Steel quantities", "planned", "pure", "read", [], N),
+    ("slab_rebar_plan", "Slab reinforcement plan notation", "Slab detailing", "planned", "both", "write", [], N),
+    ("stair_waist_detail", "Waist-slab stair section detail", "Stair detailing", "planned", "both", "write", [], N),
+    ("lintels", "Lintel details over openings", "Opening details", "planned", "both", "write", [], N),
+    ("structural_notes", "General notes block with user-entered material grades", "Standard notes", "planned", "both", "write", [], N),
+    ("steel_sections", "Steel section outlines from user-supplied dimensions", "Steel detailing", "planned", "both", "write", [], N),
+    ("foundation_section", "Foundation section drafting", "Foundation details", "planned", "both", "write", [], N),
+])
+
+Y = ("Y", "Civil 3D surfaces, alignments, profiles, corridors and grading", {"inputs": ["Civil 3D objects"], "outputs": ["Civil 3D objects"],
+     "failure_modes": ["E_UNSUPPORTED_BACKEND"], "reference": "needs Civil 3D (AeccXUiLand COM or a .NET plugin); not installed here"}, [
+    ("tin_surface", "Create TIN surfaces from points and breaklines", "Existing ground models", "planned", "civil3d", "write", [], N),
+    ("surface_contours", "Surface contour display and labels", "Contour plans", "planned", "civil3d", "write", [], N),
+    ("surface_volumes", "Surface-to-surface volumes", "Cut and fill", "planned", "civil3d", "read", [], N),
+    ("alignment", "Horizontal alignments from polylines", "Road and canal centrelines", "planned", "civil3d", "write", [], N),
+    ("stations", "Station and offset queries and labels", "Chainages", "planned", "civil3d", "read", [], N),
+    ("eg_profile", "Existing-ground profiles from surfaces", "Long sections", "planned", "civil3d", "write", [], N),
+    ("design_profile", "Design profiles with vertical curves", "Road grades", "planned", "civil3d", "write", [], N),
+    ("profile_views", "Profile views with bands", "Profile sheets", "planned", "civil3d", "write", [], N),
+    ("assemblies", "Assemblies and subassemblies", "Typical cross-sections", "planned", "civil3d", "write", [], N),
+    ("corridors", "Corridors and corridor surfaces", "Road models", "planned", "civil3d", "write", [], N),
+    ("sections", "Sample lines and section views", "Cross-section sheets", "planned", "civil3d", "write", [], N),
+    ("grading", "Feature-line grading", "Pads and slopes", "planned", "civil3d", "write", [], N),
+    ("pipe_networks", "Gravity pipe networks", "Sewer and storm design drafting", "planned", "civil3d", "write", [], N),
+    ("parcels", "Parcels from boundaries", "Subdivision plans", "planned", "civil3d", "write", [], N),
+    ("data_shortcuts", "Data shortcuts between drawings", "Team projects", "planned", "civil3d", "read", [], N),
+    ("mass_haul", "Mass haul and earthwork quantities", "Earthwork planning", "planned", "civil3d", "read", [], N),
+    ("cogo_points", "COGO points and point groups", "Survey data in Civil 3D", "planned", "civil3d", "write", [], N),
+    ("superelevation", "Superelevation", "Road design drafting", "planned", "civil3d", "write", [], N),
+    ("intersections", "Road intersections", "Junction design drafting", "planned", "civil3d", "write", [], N),
+    ("catchments", "Catchment areas", "Drainage areas", "planned", "civil3d", "read", [], N),
+])
+
+Z = ("Z", "Surveying, coordinates, parcels and earthwork", {"inputs": ["coordinates, bearings, levels"], "outputs": ["geometry", "tables"],
+     "failure_modes": ["E_INVALID_INPUT"], "reference": "pure computation + drafting; works without Civil 3D"}, [
+    ("traverse", "Traverse computation with closure error from bearings and distances", "Close a site survey", "planned", "pure", "read", [], N),
+    ("bearing_distance", "Draw lines from bearing and distance", "Plot deed boundaries", "planned", "both", "write", [], N),
+    ("points_import", "Import N/E/Z points from CSV", "Bring survey points into a drawing", "planned", "both", "write", [], N),
+    ("points_export", "Export point coordinates to CSV", "Setting-out data", "planned", "both", "read", [], N),
+    ("area_from_coordinates", "Parcel area from coordinates", "Land areas", "planned", "pure", "read", [], N),
+    ("subdivision", "Subdivide a parcel by area or frontage", "Plot division", "planned", "pure", "read", [], N),
+    ("contours", "Contours from spot levels (TIN) without Civil 3D", "Site contour plans", "planned", "both", "write", [], N),
+    ("grid_cut_fill", "Grid-method cut and fill volumes", "Earthwork estimates", "planned", "pure", "read", [], N),
+    ("level_sections", "Cross-sections from levels", "Road and channel sections", "planned", "both", "write", [], N),
+    ("setting_out_table", "Setting-out coordinate tables", "Site layout", "planned", "both", "write", [], N),
+    ("coordinate_transform", "Transform between local and projected coordinates (user-given parameters)", "Combine survey and design", "planned", "pure", "read", [], N),
+    ("chainage_offset", "Chainage and offset along a centreline", "Linear works", "planned", "pure", "read", [], N),
+    ("boundary_plan", "Boundary survey plan with bearings and distances", "Survey drawings", "planned", "both", "write", [], N),
+    ("levelling", "Levelling reduction (rise-and-fall and height-of-instrument)", "Field book reduction", "planned", "pure", "read", [], N),
+    ("tacheometry", "Tacheometric reduction", "Fast topographic surveys", "planned", "pure", "read", [], N),
+])
+
+AA = ("AA", "Water supply, drainage, sanitary systems and plumbing", {"inputs": ["runs, sizes, levels"], "outputs": ["drawing, schedules"],
+      "failure_modes": ["E_INVALID_INPUT"], "reference": DRAFT}, [
+    ("pipe_runs", "Pipe runs with sizes and flow arrows", "Plumbing layouts", "planned", "both", "write", [], N),
+    ("fixture_symbols", "Plumbing fixture symbols", "Sanitary layouts", "planned", "both", "write", [], N),
+    ("drainage_layout", "Drainage layout with manholes and user-entered gradients", "Drainage plans", "planned", "both", "write", [], N),
+    ("manhole_schedule", "Manhole schedule (cover and invert levels, depth)", "Drainage tables", "planned", "pure", "read", [], N),
+    ("pipe_long_section", "Pipe long section from invert levels", "Sewer profiles without Civil 3D", "planned", "both", "write", [], N),
+    ("water_isometric", "Water supply isometric diagram", "Plumbing isometrics", "planned", "both", "write", [], N),
+    ("septic_tank_detail", "Septic tank detail from user dimensions", "Sanitary details", "planned", "both", "write", [], N),
+    ("rainwater_pipes", "Rainwater downpipe layout", "Roof drainage", "planned", "both", "write", [], N),
+    ("pipe_takeoff", "Pipe length takeoff by size and layer", "Plumbing quantities", "planned", "pure", "read", [], N),
+    ("gradient_check", "Check drain gradients against user minimums", "Catch flat drains", "planned", "pure", "read", [], N),
+    ("fixture_units", "Fixture-unit tally with user-supplied unit values", "Pipe sizing inputs", "planned", "pure", "read", [], N),
+])
+
+AB = ("AB", "Electrical schematics, circuits, panels and cable schedules", {"inputs": ["symbols, circuits"], "outputs": ["drawing, schedules"],
+      "failure_modes": ["E_INVALID_INPUT"], "reference": DRAFT}, [
+    ("points_layout", "Socket, switch and light symbol placement", "Electrical layouts", "planned", "both", "write", [], N),
+    ("circuit_schedule", "Circuit schedule table", "Circuit documentation", "planned", "pure", "read", [], N),
+    ("board_schedule", "Distribution board schedule", "Panel documentation", "planned", "pure", "read", [], N),
+    ("single_line", "Single-line diagram drafting", "Power distribution diagrams", "planned", "both", "write", [], N),
+    ("cable_schedule", "Cable schedule from tagged runs", "Cable documentation", "planned", "pure", "read", [], N),
+    ("conduits", "Conduit runs with lengths", "Conduit takeoff", "planned", "both", "write", [], N),
+    ("lighting_grid", "Lighting layout grid per room", "Ceiling lighting", "planned", "both", "write", [], N),
+    ("earthing", "Earthing layout", "Earthing drawings", "planned", "both", "write", [], N),
+    ("load_tally", "Connected-load tally from tagged blocks (user ratings)", "Load summaries", "planned", "pure", "read", [], N),
+    ("legend", "Electrical symbol legend", "Readable drawings", "planned", "both", "write", [], N),
+    ("acade_projects", "AutoCAD Electrical projects and wire numbering", "Electrical toolset users", "planned", "electrical", "write", [], N),
+])
+
+AC = ("AC", "HVAC, mechanical drafting and equipment layouts", {"inputs": ["equipment, sizes"], "outputs": ["drawing, schedules"],
+      "failure_modes": ["E_INVALID_INPUT"], "reference": DRAFT}, [
+    ("duct_runs", "Duct runs with sizes", "HVAC layouts", "planned", "both", "write", [], N),
+    ("diffusers", "Diffuser and grille layout", "Air terminals", "planned", "both", "write", [], N),
+    ("equipment", "Equipment placement with tags", "Plant rooms", "planned", "both", "write", [], N),
+    ("equipment_schedule", "Equipment schedule", "Equipment documentation", "planned", "pure", "read", [], N),
+    ("part_views", "Mechanical part views (front, side, section)", "Part drawings", "planned", "both", "write", [], N),
+    ("fasteners", "Standard fastener symbols", "Assembly drawings", "planned", "both", "write", [], N),
+    ("gdt", "GD&T feature control frames", "Tolerancing", "planned", "both", "write", [], N),
+    ("surface_finish", "Surface texture symbols", "Machining notes", "planned", "both", "write", [], N),
+    ("weld_symbols", "Weld symbols", "Fabrication drawings", "planned", "both", "write", [], N),
+])
+
+AD = ("AD", "P&ID symbols, piping, valves, instruments and schedules", {"inputs": ["symbols, tags"], "outputs": ["drawing, lists"],
+      "failure_modes": ["E_INVALID_INPUT"], "reference": DRAFT}, [
+    ("symbol_library", "P&ID symbol library (valves, pumps, vessels, instruments)", "Process diagrams", "planned", "both", "write", [], N),
+    ("line_routing", "Orthogonal process line routing between symbol ports", "Clean P&IDs", "planned", "both", "write", [], N),
+    ("tag_parsing", "ISA-5.1 instrument tag parsing", "Valid tags", "planned", "pure", "read", [], N),
+    ("line_list", "Line list extraction", "Piping documentation", "planned", "pure", "read", [], N),
+    ("equipment_list", "Equipment list", "Process documentation", "planned", "pure", "read", [], N),
+    ("instrument_index", "Instrument index", "Instrumentation documentation", "planned", "pure", "read", [], N),
+    ("valve_list", "Valve list", "Valve documentation", "planned", "pure", "read", [], N),
+    ("pid_checks", "Dangling-line and duplicate-tag checks", "P&ID QA", "planned", "pure", "read", [], N),
+    ("plant3d_read", "Read Plant 3D project data read-only", "Plant 3D users", "planned", "plant3d", "read", [], N),
+])
+
+DOMAINS = [V, W, X, Y, Z, AA, AB, AC, AD]

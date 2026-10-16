@@ -207,3 +207,134 @@ def test_scan_all_entities_and_execute_query_round_trip(fresh_drawing, tmp_path)
 
     with pytest.raises(db.QueryRejected):
         db.execute_readonly_query(db_path, "DELETE FROM entities")
+
+
+# ======= V0.3.0 live tests =======
+#
+# Same rules as above: every test works in its own fresh unsaved drawing
+# (fresh_drawing closes it without saving), writes files only under tmp_path,
+# and is skipped -- never faked -- when AutoCAD is not running. These are the
+# tests that turn the V0.3.0 COM tools from "mock-tested" into "live-verified".
+
+import math  # noqa: E402
+
+from core import session  # noqa: E402
+from tools import annotation, blocks, documents, modify, output, query  # noqa: E402
+
+
+@pytest.fixture
+def clean_session():
+    session.unpin_document()
+    session.set_units_override(None)
+    yield
+    session.unpin_document()
+    session.set_units_override(None)
+
+
+@requires_autocad
+def test_v030_list_drawings_and_units(fresh_drawing, clean_session):
+    listed = documents.list_drawings()
+    active = [d for d in listed["drawings"] if d["active"]]
+    assert active and active[0]["identity"] == fresh_drawing["drawing_identity"]
+    result = documents.set_drawing_units("metric_mm")
+    assert result["insunits"] == 4
+    entities.draw_line([0, 0], [1000, 0])  # the session preset must stick (no flip back to inches)
+    with connection.com_initialized():
+        doc = connection.get_active_document(connection.get_connected_app(), for_write=False)
+        assert connection.read_insunits(doc) == 4
+
+
+@requires_autocad
+def test_v030_summary_list_and_detail(fresh_drawing, clean_session):
+    line = entities.draw_line([0, 0], [3, 4], layer="MCP_Q")
+    entities.draw_circle([10, 10], 2)
+    summary = query.drawing_summary()
+    assert summary["counts_by_type"].get("LINE") == 1 and summary["counts_by_type"].get("CIRCLE") == 1
+    listed = query.list_entities(entity_types=["LINE"], layers=["MCP_Q"])
+    assert [e["handle"] for e in listed["entities"]] == [line["handle"]]
+    detail = query.get_entity(line["handle"])["entity"]
+    assert detail["length"] == pytest.approx(5.0)
+    snap = query.snapshot_entities()
+    assert snap["total"] == 2
+
+
+@requires_autocad
+def test_v030_modify_suite(fresh_drawing, clean_session):
+    handle = entities.draw_line([0, 0], [10, 0])["handle"]
+    assert modify.scale_entity(handle, [0, 0], 2.0)["verified"] is True
+    assert modify.mirror_entity(handle, [0, 5], [10, 5])["new_handle"]
+    assert len(modify.offset_entity(handle, 1.0)["new_handles"]) == 1
+    assert len(modify.array_rectangular(handle, 2, 2, 5.0, 5.0)["new_handles"]) == 3
+    props = modify.set_entity_properties([handle], layer="MCP_PROPS", color_index=3, lineweight=35)
+    assert props["verified"] is True
+    plan = modify.delete_entities([handle])
+    assert plan["dry_run"] is True
+    done = modify.delete_entities([handle], dry_run=False)
+    assert done["verified"] is True
+
+
+@requires_autocad
+def test_v030_annotation_live(fresh_drawing, clean_session):
+    arc = annotation.draw_arc([0, 0], 5, 0, 90)
+    assert arc["end_angle_degrees"] == pytest.approx(90)
+    assert annotation.draw_mtext(r"Kitchen\P12 m2", [0, 0], 2.5, width=30)["verified"] is True
+    aligned = annotation.add_dimension("aligned", [0, 0], [3, 4], [-2, 2])
+    assert aligned["measurement"] == pytest.approx(5.0)
+    linear = annotation.add_dimension("linear", [0, 0], [3, 4], [0, -3], rotation_degrees=0)
+    assert linear["measurement"] == pytest.approx(3.0)
+    # Settles the AddHatch pattern-type constant live: the pattern must read back as ANSI31.
+    hatch = annotation.add_hatch(boundary_points=[[0, 0], [4, 0], [4, 3], [0, 3]], pattern="ANSI31")
+    assert hatch["pattern"] == "ANSI31" and hatch["area"] == pytest.approx(12.0)
+
+
+@requires_autocad
+def test_v030_blocks_live(fresh_drawing, clean_session):
+    with connection.com_initialized():
+        doc = connection.get_active_document(connection.get_connected_app())
+        block = doc.Blocks.Add(connection.point_variant((0.0, 0.0, 0.0)), "MCP_TAG")
+        block.AddCircle(connection.point_variant((0.0, 0.0, 0.0)), 1.0)
+        # AddAttribute(Height, Mode, Prompt, InsertionPoint, Tag, Value)
+        block.AddAttribute(0.5, 0, "Mark", connection.point_variant((0.0, -1.5, 0.0)), "MARK", "?")
+    inserted = blocks.insert_block("MCP_TAG", [5, 5], attributes={"MARK": "D1"})
+    assert inserted["attributes"]["MARK"] == "D1"
+    updated = blocks.set_block_attributes(inserted["handle"], {"MARK": "D2"})
+    assert updated["verified"] is True
+    assert any(b["name"] == "MCP_TAG" for b in blocks.list_blocks()["blocks"])
+
+
+@requires_autocad
+def test_v030_export_and_plot_live(fresh_drawing, clean_session, tmp_path):
+    entities.draw_rectangle(corner1=[0, 0], corner2=[420, 297])
+    exported = output.export_dxf(str(tmp_path / "copy.dxf"))
+    assert exported["verified"] is True and exported["document_unchanged"] is True
+    plotted = output.plot_pdf(str(tmp_path / "sheet.pdf"))
+    assert plotted["verified"] is True and plotted["file"]["size_bytes"] > 0
+    assert plotted["layout_settings_restored"] is True
+    layouts = output.list_layouts()
+    assert any(lo["is_model"] for lo in layouts["layouts"])
+
+
+@requires_autocad
+def test_v030_save_as_then_close(fresh_drawing, clean_session, tmp_path):
+    entities.draw_line([0, 0], [1, 1])
+    saved = documents.save_drawing(str(tmp_path / "saved.dwg"))
+    assert saved["verified"] is True and saved["drawing_identity"].endswith("saved.dwg")
+    closed = documents.close_drawing()
+    assert closed["verified"] is True
+
+
+@requires_autocad
+def test_v030_generators_live(fresh_drawing, clean_session):
+    import server
+
+    plan = server.autocad_generate_floor_plan(
+        rooms=[{"name": "Living", "x": 0, "y": 0, "width": 15, "depth": 12},
+               {"name": "Bed", "x": 15, "y": 0, "width": 12, "depth": 12}], unit="ft")
+    assert plan["verified"] is True and len(plan["rooms"]) == 2
+    grid = server.autocad_draw_structural_grid(x_spacings=[15, 12], y_spacings=[12], unit="ft",
+                                               origin=[0, -400])
+    assert grid["verified"] is True
+    legacy = server.autocad_generate_2d_floor_plan()
+    assert legacy["verified"] is True and legacy["entity_count"] == 50
+    check = server.autocad_check_drawing()
+    assert check["entity_count"] > 0 and not math.isnan(check["issue_count"])

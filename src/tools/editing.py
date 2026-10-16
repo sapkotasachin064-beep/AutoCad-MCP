@@ -14,18 +14,35 @@ import pywintypes
 
 import db
 from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity, point_variant
+from core.errors import CadStateError
+from core.evidence import validate_limit
 from utils import geometry
 from utils.constants import TEXT_OBJECT_NAMES, get_db_path
 
 ORIGIN = (0.0, 0.0, 0.0)
 AC_ALL_VIEWPORTS = 1
+_MOVE_TOLERANCE = 1e-6
 
 
 def _get_entity(doc, handle: str):
     try:
         return _retry_com(lambda: doc.HandleToObject(handle))
     except pywintypes.com_error as exc:
-        raise RuntimeError(f"No entity found with handle {handle!r}: {exc}") from exc
+        raise CadStateError(
+            f"No entity found with handle {handle!r}: {exc}",
+            code="E_ENTITY_NOT_FOUND",
+            details={"handle": handle},
+        ) from exc
+
+
+def _bounding_box(entity):
+    """(min_point, max_point) as 3-tuples, or None if AutoCAD can't give one
+    for this entity (some types have no extents)."""
+    try:
+        min_point, max_point = _retry_com(lambda: entity.GetBoundingBox())
+        return tuple(min_point), tuple(max_point)
+    except (pywintypes.com_error, TypeError, ValueError):
+        return None
 
 
 def _regen(doc) -> None:
@@ -43,6 +60,7 @@ def move_entity(handle: str, displacement) -> dict:
         app = get_connected_app()
         doc = get_active_document(app)
         entity = _get_entity(doc, handle)
+        before = _bounding_box(entity)
 
         try:
             _retry_com(lambda: entity.Move(point_variant(ORIGIN), point_variant(disp)))
@@ -50,14 +68,29 @@ def move_entity(handle: str, displacement) -> dict:
             raise RuntimeError(f"Failed to move entity {handle}: {exc}") from exc
 
         # Read back through the handle again to confirm the entity still
-        # resolves after the edit.
-        _get_entity(doc, handle)
+        # resolves after the edit, then check its extents shifted by exactly
+        # the displacement (when AutoCAD can report extents for this type).
+        entity = _get_entity(doc, handle)
+        after = _bounding_box(entity)
+        if before is not None and after is not None:
+            expected = tuple(b + d for b, d in zip(before[0], disp))
+            scale = max(1.0, *(abs(e) for e in expected))
+            if max(abs(a - e) for a, e in zip(after[0], expected)) > _MOVE_TOLERANCE * scale:
+                raise RuntimeError(
+                    f"Move could not be verified: extents min went {before[0]} -> {after[0]}, "
+                    f"expected {expected}."
+                )
+            verification = "bounding_box_shifted_by_displacement"
+        else:
+            verification = "handle_resolves_after_edit"
 
         identity = get_drawing_identity(doc)
         return {
             "status": "ok",
             "handle": handle,
             "displacement": disp,
+            "verified": True,
+            "verification": verification,
             "drawing_identity": identity.identity,
             "message": f"Moved entity {handle} by {disp}.",
         }
@@ -88,6 +121,8 @@ def rotate_entity(handle: str, base_point, angle_degrees: float) -> dict:
             "handle": handle,
             "base_point": base,
             "angle_degrees": angle_degrees,
+            "verified": True,
+            "verification": "handle_resolves_after_edit",
             "angle_convention": "counterclockwise-positive, viewed from +Z",
             "drawing_identity": identity.identity,
             "message": f"Rotated entity {handle} by {angle_degrees} degrees about {base}.",
@@ -129,6 +164,8 @@ def copy_entity(handle: str, displacement) -> dict:
             "source_handle": handle,
             "new_handle": new_handle,
             "displacement": disp,
+            "verified": True,
+            "verification": "modelspace_count_plus_one_and_new_handle",
             "drawing_identity": identity.identity,
             "message": f"Copied entity {handle} to new entity {new_handle}, offset by {disp}.",
         }
@@ -148,7 +185,10 @@ def highlight_entity(
 
     with com_initialized():
         app = get_connected_app()
-        doc = get_active_document(app)
+        # A temporary highlight is a display flag that is never saved to the
+        # DWG, so it opens the drawing read-only (no units/keystroke side
+        # effects); a persistent highlight changes Color and is a write.
+        doc = get_active_document(app, for_write=(method == "persistent"))
         entity = _get_entity(doc, handle)
 
         if method == "temporary":
@@ -165,6 +205,8 @@ def highlight_entity(
                 "method": "temporary",
                 "highlighted": want_on,
                 "color": _retry_com(lambda: entity.Color),
+                "verified": False,
+                "verification": "not_verifiable_highlight_state_is_not_readable_over_com",
                 "drawing_identity": identity.identity,
                 "message": f"Entity {handle} temporary highlight set to {want_on}; original color untouched.",
             }
@@ -174,6 +216,7 @@ def highlight_entity(
             _retry_com(lambda: setattr(entity, "Color", color))
         except pywintypes.com_error as exc:
             raise RuntimeError(f"Failed to set persistent highlight color on {handle}: {exc}") from exc
+        applied = _retry_com(lambda: entity.Color)
         identity = get_drawing_identity(doc)
         return {
             "status": "ok",
@@ -181,6 +224,8 @@ def highlight_entity(
             "method": "persistent",
             "original_color": original_color,
             "color": color,
+            "verified": applied == color,
+            "verification": "color_read_back",
             "drawing_identity": identity.identity,
             "message": f"Entity {handle} color changed from {original_color} to {color} (persistent).",
         }
@@ -230,7 +275,7 @@ def query_and_highlight(
 
     with com_initialized():
         app = get_connected_app()
-        doc = get_active_document(app)
+        doc = get_active_document(app, for_write=(method == "persistent"))
 
         highlighted = []
         not_found = []
@@ -270,8 +315,12 @@ def highlight_text_matches(
     method: str = "temporary",
     color: int = 1,
     clear: bool = False,
+    limit: int = 500,
 ) -> dict:
+    """Highlight every matching TEXT/MTEXT entity; the returned `matches`
+    list holds at most `limit` entries (match_count is the full count)."""
     pattern = geometry.validate_text(pattern, "pattern")
+    limit = validate_limit(limit, default=500, maximum=10000)
     if not pattern and not use_regex:
         raise geometry.ValidationError("pattern must not be empty")
     if method not in ("temporary", "persistent"):
@@ -287,7 +336,7 @@ def highlight_text_matches(
 
     with com_initialized():
         app = get_connected_app()
-        doc = get_active_document(app)
+        doc = get_active_document(app, for_write=(method == "persistent"))
         model_space = _retry_com(lambda: doc.ModelSpace)
         count = _retry_com(lambda: model_space.Count)
 
@@ -329,7 +378,8 @@ def highlight_text_matches(
             "use_regex": use_regex,
             "method": method,
             "match_count": len(matches),
-            "matches": matches,
+            "matches": matches[:limit],
+            "truncated": len(matches) > limit,
             "drawing_identity": identity.identity,
             "message": f"{len(matches)} text entity(ies) matched {pattern!r}; text content was not modified.",
         }

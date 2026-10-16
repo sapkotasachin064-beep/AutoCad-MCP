@@ -21,6 +21,9 @@ import pythoncom
 import pywintypes
 import win32com.client
 
+from core import session
+from core.errors import CadStateError
+from domain import units
 from utils.constants import MIN_SUPPORTED_RELEASE, RELEASE_TO_YEAR
 
 PROG_ID = "AutoCAD.Application"
@@ -259,74 +262,158 @@ def launch_and_wait(timeout: float = LAUNCH_TIMEOUT_SECONDS) -> AutocadStatus:
 
 
 def get_connected_app():
-    """Return a verified, ready COM Application object, or raise RuntimeError.
-    Caller must already be inside a com_initialized() context (drawing.py's
-    public entry points provide one)."""
+    """Return a verified, ready COM Application object, or raise
+    CadStateError (a RuntimeError). Caller must already be inside a
+    com_initialized() context (drawing.py's public entry points provide one)."""
     app = get_running_instance()
     if app is None:
-        raise RuntimeError("AutoCAD is not running. Call autocad_launch_application first.")
+        raise CadStateError(
+            "AutoCAD is not running. Call autocad_launch_application first.",
+            code="E_AUTOCAD_NOT_RUNNING",
+        )
     status = verify_connection(app)
     if not status.connected:
-        raise RuntimeError(status.message)
+        raise CadStateError(status.message, code="E_AUTOCAD_NOT_RESPONDING")
     if not status.supported:
-        raise RuntimeError(status.message)
+        raise CadStateError(
+            status.message, code="E_AUTOCAD_UNSUPPORTED_RELEASE", details={"version": status.version}
+        )
     return app
 
 
-def get_active_document(app):
-    """Return the ActiveDocument, or raise RuntimeError if none is open.
-    Caller must already be inside a com_initialized() context."""
+def get_active_document(app, *, for_write: bool = True):
+    """Return the ActiveDocument, or raise CadStateError (a RuntimeError).
+    Caller must already be inside a com_initialized() context.
+
+    Every tool reaches the drawing through here, so this is where the
+    document pin is enforced (a pinned session refuses to touch any other
+    drawing). for_write=True (the default, and the only V0.2.x behaviour) is
+    for tools that change the drawing: a command left pending at AutoCAD's
+    command line is cancelled and the configured units preset is applied --
+    each only when needed, and each reported as a notice. for_write=False is
+    for read-only tools, which never send keystrokes or change variables."""
     count = _retry_com(lambda: app.Documents.Count)
     if count == 0:
-        raise RuntimeError(
-            "No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first."
+        raise CadStateError(
+            "No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first.",
+            code="E_NO_ACTIVE_DOCUMENT",
         )
     doc = _retry_com(lambda: app.ActiveDocument)
-    clear_pending_command(doc)
-    set_engineering_units(doc)
+    check_pinned_document(doc)
+    if for_write:
+        clear_pending_command(doc)
+        apply_units_policy(doc)
+    else:
+        note_active_command(doc)
     return doc
 
 
-# ======= Mandatory Engineering units =======
-#
-# Civil/architectural tools (tools/architectural.py) assume feet-and-inches
-# Engineering units and draw in inches. AutoCAD's LUNITS=2 is Decimal, not
-# Engineering -- Engineering (feet'-decimal inches", e.g. 0'-0.00") is
-# LUNITS=3. Likewise MEASUREMENT=1 selects the Metric hatch/linetype library
-# (acadiso.*), not Imperial -- Imperial (acad.*) is MEASUREMENT=0. Forced here
-# with the real values, not the ones a mislabeled spec might suggest.
+def check_pinned_document(doc) -> None:
+    pinned = session.pinned_document()
+    if pinned is None:
+        return
+    actual = get_drawing_identity(doc).identity
+    if actual != pinned:
+        raise CadStateError(
+            f"The active drawing is {actual!r}, but this session is pinned to {pinned!r}. "
+            "Nothing was changed.",
+            code="E_DOCUMENT_CHANGED",
+            details={"pinned_document": pinned, "active_document": actual},
+        )
 
-_ENGINEERING_UNITS_VARS = (
-    ("LUNITS", 3),      # Engineering: feet and decimal inches, e.g. 0'-0.00"
-    ("LUPREC", 4),      # 4 decimal places of precision
-    ("INSUNITS", 1),    # Inches, for block/insert scaling
-    ("MEASUREMENT", 0),  # Imperial (acad.* hatch/linetype library)
-)
+
+# ======= Units policy =======
+#
+# V0.2.3 forced Engineering units (LUNITS=3, LUPREC=4, INSUNITS=1,
+# MEASUREMENT=0) on every active document before every tool, read-only ones
+# included. Since V0.3.0 the preset comes from AUTOCAD_MCP_UNITS
+# (domain/units.py; default still "engineering"), is applied only by tools
+# that change the drawing, skips variables that already have the preset's
+# value (so an already-correct drawing is not marked modified), and reports
+# every change as a "units_changed" notice. AutoCAD's LUNITS=2 is Decimal,
+# not Engineering (LUNITS=3); MEASUREMENT=0 is the Imperial acad.* library,
+# MEASUREMENT=1 the Metric acadiso.* one.
+
+_ENGINEERING_UNITS_VARS = units.UNIT_PRESETS["engineering"]
+
+
+def _get_variable(doc, name: str):
+    getter = getattr(doc, "GetVariable", None)
+    if getter is None:
+        return None
+    try:
+        return _retry_com(lambda: getter(name))
+    except (pywintypes.com_error, AttributeError):
+        return None
+
+
+def _apply_variables(doc, variables) -> tuple[dict, dict]:
+    changed, failed = {}, {}
+    for name, value in variables:
+        current = _get_variable(doc, name)
+        if current is not None and current == value:
+            continue
+        try:
+            _retry_com(lambda name=name, value=value: doc.SetVariable(name, value))
+            changed[name] = {"from": current, "to": value}
+        except (pywintypes.com_error, AttributeError) as exc:
+            failed[name] = str(exc)
+    return changed, failed
+
+
+def apply_units_policy(doc) -> None:
+    """Apply the AUTOCAD_MCP_UNITS preset, best-effort (never fatal to the
+    tool call that triggered it) and reported as a notice when it changed or
+    failed to change anything."""
+    preset = units.preset_name()
+    changed, failed = _apply_variables(doc, units.preset_variables(preset))
+    if changed:
+        session.add_notice("units_changed", preset=preset, variables=changed)
+    if failed:
+        session.add_notice("units_not_applied", preset=preset, errors=failed)
 
 
 def set_engineering_units(doc) -> None:
-    """Force Engineering units on doc via SetVariable, best-effort (same
-    never-fatal contract as clear_pending_command): a failed SetVariable must
-    not block the tool call that triggered it."""
-    for name, value in _ENGINEERING_UNITS_VARS:
-        try:
-            _retry_com(lambda name=name, value=value: doc.SetVariable(name, value))
-        except pywintypes.com_error:
-            pass
+    """Force the Engineering preset on doc regardless of AUTOCAD_MCP_UNITS
+    (the V0.2.3 helper, kept for direct callers). Best-effort."""
+    _apply_variables(doc, _ENGINEERING_UNITS_VARS)
+
+
+def read_insunits(doc) -> int | None:
+    value = _get_variable(doc, "INSUNITS")
+    return int(value) if value is not None else None
+
+
+def _command_active(doc) -> int | None:
+    value = _get_variable(doc, "CMDACTIVE")
+    return int(value) if value is not None else None
+
+
+def note_active_command(doc) -> None:
+    active = _command_active(doc)
+    if active:
+        session.add_notice("autocad_command_active", cmdactive=active,
+                           message="A command is active in AutoCAD; it was left untouched.")
 
 
 def clear_pending_command(doc) -> None:
     """Best-effort: cancel a command the user left pending at AutoCAD's
     command line (e.g. a LINE command started interactively and never
-    finished) before a tool issues its own COM call. Two ESC characters
-    match the ESC ESC convention AutoCAD itself documents for SendCommand
-    to back out of a nested prompt. Never raises -- a failed cancel is not
-    fatal to the tool call that follows it, and there being nothing to
-    cancel is the common case, not an error."""
+    finished) before a tool changes the drawing. Since V0.3.0, CMDACTIVE is
+    read first and ESC is only sent when a command is actually active; when
+    CMDACTIVE cannot be read, ESC is sent as in V0.2.x. Two ESC characters
+    match the ESC ESC convention AutoCAD itself documents for SendCommand to
+    back out of a nested prompt. Never raises -- a failed cancel is not
+    fatal to the tool call that follows it."""
+    active = _command_active(doc)
+    if active == 0:
+        return
     try:
         _retry_com(lambda: doc.SendCommand("\x1b\x1b"))
-    except pywintypes.com_error:
-        pass
+    except (pywintypes.com_error, AttributeError):
+        return
+    if active:
+        session.add_notice("pending_command_cancelled", cmdactive=active)
 
 
 # ======= VARIANT conversion (shared by entity creation and editing) =======
@@ -372,26 +459,6 @@ def get_drawing_identity(doc) -> DrawingIdentity:
 
 # ======= Best-effort OpenCode host detection =======
 #
-# OpenCode exposes no documented API for an MCP server to confirm it is
-# running inside an active OpenCode session. This checks environment
-# variables OpenCode is known to set for child processes; absence does not
-# prove OpenCode is absent, only that it was not detected. This never starts
-# an OpenCode process itself.
+# Moved to core/hosts.py in V0.3.0 (pure, importable without pywin32).
 
-_OPENCODE_ENV_MARKERS = ("OPENCODE_SESSION_ID", "OPENCODE_SESSION", "OPENCODE")
-
-
-def detect_opencode() -> dict:
-    found = [name for name in _OPENCODE_ENV_MARKERS if os.environ.get(name)]
-    if found:
-        return {
-            "detected": True,
-            "confidence": "heuristic",
-            "message": f"OpenCode session markers present: {', '.join(found)}.",
-        }
-    return {
-        "detected": False,
-        "confidence": "heuristic",
-        "message": "No OpenCode session markers found in environment. This does not "
-        "confirm OpenCode is unavailable, only that no known marker was detected.",
-    }
+from core.hosts import _OPENCODE_ENV_MARKERS, detect_opencode  # noqa: E402,F401

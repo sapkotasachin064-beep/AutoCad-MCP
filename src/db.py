@@ -15,6 +15,8 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 
+from core.errors import CadError
+
 SCHEMA_VERSION = 1
 
 _WRITE_KEYWORDS = (
@@ -28,9 +30,12 @@ _WRITE_KEYWORD_RE = re.compile(
 _LEADING_COMMENT_RE = re.compile(r"\s*(--[^\n]*\n|/\*.*?\*/)\s*", re.DOTALL)
 
 
-class QueryRejected(ValueError):
+class QueryRejected(CadError, ValueError):
     """Raised when execute_query is asked to run something outside the
-    read-only, single-statement scope this tool is approved for."""
+    read-only, single-statement scope this tool is approved for. Reaches the
+    client as E_QUERY_REJECTED; still a ValueError, as in V0.2.x."""
+
+    code = "E_QUERY_REJECTED"
 
 
 @dataclass(frozen=True)
@@ -38,6 +43,7 @@ class QueryResult:
     columns: list[str]
     rows: list[dict]
     row_count: int
+    truncated: bool = False
 
 
 def _strip_leading_comments(sql: str) -> str:
@@ -166,7 +172,9 @@ def _validate_readonly_sql(sql: str) -> str:
     return body
 
 
-def execute_readonly_query(db_path: str, sql: str, params: list | None = None) -> QueryResult:
+def execute_readonly_query(
+    db_path: str, sql: str, params: list | None = None, max_rows: int | None = None
+) -> QueryResult:
     """Run a validated single-statement SELECT against a read-only connection.
 
     Two independent layers of enforcement: a keyword/shape check that gives a
@@ -174,6 +182,9 @@ def execute_readonly_query(db_path: str, sql: str, params: list | None = None) -
     mode=ro URI flag, which refuses any write at the file level even if a
     query slips past the keyword check (e.g. a modern SQLite
     `WITH ... DELETE` CTE that lacks a SELECT keyword written out in full).
+
+    max_rows (None = no limit, the V0.2.x behaviour) caps the rows returned;
+    `truncated` says whether more rows matched.
     """
     statement = _validate_readonly_sql(sql)
     if not os.path.exists(db_path):
@@ -183,8 +194,15 @@ def execute_readonly_query(db_path: str, sql: str, params: list | None = None) -
     try:
         cursor = conn.execute(statement, params or [])
         columns = [d[0] for d in cursor.description] if cursor.description else []
-        rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
-        return QueryResult(columns=columns, rows=rows, row_count=len(rows))
+        if max_rows is None:
+            fetched = cursor.fetchall()
+            truncated = False
+        else:
+            fetched = cursor.fetchmany(max_rows + 1)
+            truncated = len(fetched) > max_rows
+            fetched = fetched[:max_rows]
+        rows = [dict(zip(columns, row)) for row in fetched]
+        return QueryResult(columns=columns, rows=rows, row_count=len(rows), truncated=truncated)
     except sqlite3.OperationalError as exc:
         if "readonly" in str(exc).lower() or "read-only" in str(exc).lower():
             raise QueryRejected(f"query attempted a write and was rejected by the read-only connection: {exc}") from exc

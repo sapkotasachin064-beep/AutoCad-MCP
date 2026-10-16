@@ -14,6 +14,9 @@ from datetime import datetime
 import pywintypes
 
 from cad_engine import _retry_com, com_initialized, flat_variant, get_active_document, get_connected_app, get_drawing_identity, point_variant
+from core import session
+from core.errors import CadStateError, VerificationError
+from core.paths import input_path
 from tools.layers import apply_layer_to_entity
 from utils import geometry
 from utils.constants import get_output_dir
@@ -27,14 +30,42 @@ def _verify_added(model_space, count_before: int, expected_object_name: str, ent
     count_after = _retry_com(lambda: model_space.Count)
     object_name = _retry_com(lambda: entity.ObjectName)
     if count_after != count_before + 1 or object_name != expected_object_name:
-        raise RuntimeError(
+        raise VerificationError(
             f"Entity creation could not be verified: expected ModelSpace count "
             f"{count_before + 1} and ObjectName {expected_object_name!r}, got "
             f"count {count_after} and ObjectName {object_name!r}."
         )
 
 
-def create_new_drawing(template: str | None = None) -> dict:
+def _validate_template(template):
+    """A bare file name ("acad.dwt") is passed through for AutoCAD to find on
+    its own template path; anything with a folder must be an existing .dwt."""
+    if template is None:
+        return None
+    if not isinstance(template, str) or not template.strip():
+        raise geometry.ValidationError(f"template must be a non-empty string, got {template!r}")
+    template = template.strip()
+    if os.path.basename(template) == template:
+        if not template.lower().endswith(".dwt"):
+            raise geometry.ValidationError(f"template must be a .dwt file, got {template!r}")
+        return template
+    return str(input_path(template, suffixes=(".dwt",)))
+
+
+def create_new_drawing(template: str | None = None, pin: bool = False) -> dict:
+    """Documents.Add(), never touching disk. While a document pin is set the
+    new drawing would become active and break the pinned job, so this refuses
+    unless pin=True, which moves the pin to the new drawing."""
+    template = _validate_template(template)
+    previous_pin = session.pinned_document()
+    if previous_pin is not None and not pin:
+        raise CadStateError(
+            f"This session is pinned to {previous_pin!r}; creating a drawing would switch the active "
+            "drawing away from it. Pass pin=true to move the pin to the new drawing, or unpin first.",
+            code="E_DOCUMENT_PINNED",
+            details={"pinned_document": previous_pin},
+        )
+
     with com_initialized():
         app = get_connected_app()
         try:
@@ -52,12 +83,18 @@ def create_new_drawing(template: str | None = None) -> dict:
             )
 
         identity = get_drawing_identity(doc)
+        if pin:
+            session.pin_document(identity.identity)
         return {
             "status": "ok",
             "drawing_name": doc.Name,
             "drawing_identity": identity.identity,
             "saved": identity.saved,
-            "message": f"Created new drawing {doc.Name!r}.",
+            "pinned": bool(pin),
+            "previous_pin": previous_pin,
+            "verified": True,
+            "verification": "new_document_is_active",
+            "message": f"Created new drawing {doc.Name!r}." + (" Pinned." if pin else ""),
         }
 
 
@@ -89,6 +126,8 @@ def draw_line(start_point, end_point, layer: str | None = None) -> dict:
             "start_point": start,
             "end_point": end,
             "layer": _retry_com(lambda: line.Layer),
+            "verified": True,
+            "verification": "modelspace_count_plus_one_and_object_name",
             "drawing_identity": identity.identity,
             "message": f"Created line {line.Handle} from {start} to {end}.",
         }
@@ -128,6 +167,8 @@ def draw_polyline(points, closed: bool = False, layer: str | None = None) -> dic
             "points": validated_points,
             "closed": closed,
             "layer": _retry_com(lambda: pline.Layer),
+            "verified": True,
+            "verification": "modelspace_count_plus_one_and_object_name",
             "drawing_identity": identity.identity,
             "message": f"Created polyline {pline.Handle} with {len(validated_points)} points.",
         }
@@ -197,6 +238,8 @@ def draw_circle(center, radius, layer: str | None = None) -> dict:
             "center": center_point,
             "radius": radius,
             "layer": _retry_com(lambda: circle.Layer),
+            "verified": True,
+            "verification": "modelspace_count_plus_one_and_object_name",
             "drawing_identity": identity.identity,
             "message": f"Created circle {circle.Handle} at {center_point} with radius {radius}.",
         }
@@ -248,6 +291,8 @@ def draw_text(
             "height": height,
             "rotation_degrees": rotation_degrees,
             "layer": _retry_com(lambda: text_obj.Layer),
+            "verified": True,
+            "verification": "modelspace_count_plus_one_and_object_name",
             "drawing_identity": identity.identity,
             "message": f"Created text {text_obj.Handle} at {point}.",
         }

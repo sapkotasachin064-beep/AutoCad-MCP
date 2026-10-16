@@ -2,6 +2,13 @@ __pycache__/
 *.pyc
 .pytest_cache/
 
+# Virtual environment and build output (README installs into .venv; an
+# editable install writes src/autocad_mcp.egg-info).
+.venv/
+*.egg-info/
+build/
+dist/
+
 # AutoCAD drawing output/lock files, in case AUTOCAD_MCP_OUTPUT_DIR is ever
 # pointed inside the repo instead of its default (Documents/AutoCAD MCP Output).
 *.dwg

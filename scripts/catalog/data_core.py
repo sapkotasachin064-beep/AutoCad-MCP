@@ -1,0 +1,233 @@
+"""Catalog data: platform, sessions, backends, launch, documents, inspection,
+entities, units, selection, undo. Tuple layout:
+(slug, description, user problem, status, backend, safety, exposed_by, test_evidence[, extra])
+"""
+
+T = ["unit"]
+TS = ["unit", "stdio_e2e"]
+TM = ["unit", "mock_com"]
+MH = ["mock_com", "headless_dxf"]
+TMH = ["unit", "mock_com", "headless_dxf"]
+ALL = ["unit", "mock_com", "headless_dxf", "stdio_e2e"]
+H = ["headless_dxf"]
+TH = ["unit", "headless_dxf"]
+N = []
+
+A = ("A", "MCP protocol and client interoperability", {"inputs": ["MCP JSON-RPC requests"], "outputs": ["MCP results"],
+     "failure_modes": ["E_INVALID_INPUT", "E_INTERNAL"]}, [
+    ("stdio_transport", "Serve MCP over stdio for local clients", "Connect Claude Code, OpenCode, Codex or Claude Desktop without a network port", "tested", "pure", "read", [], ["stdio_e2e"]),
+    ("typed_tool_schemas", "Advertise JSON Schemas generated from typed tool signatures", "Clients validate arguments before calling", "tested", "pure", "read", [], TS),
+    ("tool_annotations", "Publish read-only, destructive and idempotent hints for every tool", "Clients can ask before running tools that change or delete work", "tested", "pure", "read", [], TS),
+    ("error_envelope", "Return failures as JSON with a stable code, message, recoverable flag and recommended action", "The model sees why a call failed and how to recover instead of 'Error executing tool'", "tested", "pure", "read", [], TS, {"reference": "defect D1, core/errors.py"}),
+    ("server_instructions", "Send concise usage rules in the MCP initialize result", "Models learn the safe workflow (status, pin, dry run, save) up front", "implemented", "pure", "read", [], N),
+    ("resource_capabilities", "Expose the capability map as resource autocad://capabilities", "Clients read capabilities without spending a tool call", "tested", "pure", "read", [], T),
+    ("resource_units", "Expose unit presets and drafting defaults as resource autocad://units", "Models pick correct units and sizes", "tested", "pure", "read", [], T),
+    ("resource_layer_standard", "Expose generator layer names, colors and paper sizes as resource autocad://layer-standard", "Drawings follow one layer convention", "tested", "pure", "read", [], T),
+    ("prompt_floor_plan", "Prompt template for the residential floor-plan workflow", "Repeatable plan -> dry run -> draw -> check -> save sequence", "tested", "pure", "read", [], T, {"kind": "workflow"}),
+    ("prompt_review", "Prompt template for a read-only drawing review", "Review a drawing without accidentally changing it", "tested", "pure", "read", [], T, {"kind": "workflow"}),
+    ("prompt_sheet_plot", "Prompt template for title block and PDF output", "Produce a sheet and verified PDF in the right order", "tested", "pure", "read", [], T, {"kind": "workflow"}),
+    ("toolsets", "Advertise only selected toolsets (AUTOCAD_MCP_TOOLSETS)", "Clients with tight tool budgets load fewer tool descriptions", "tested", "pure", "read", [], T),
+    ("result_backend_field", "Name the backend that produced every result", "No doubt whether a live drawing or a DXF file was edited", "tested", "pure", "read", [], ALL),
+    ("state_block", "Report accepted, preflight, executed, verified and saved separately for every mutating call", "Executed-but-unsaved or unverified work is never mistaken for done", "tested", "pure", "read", [], ["unit", "headless_dxf"]),
+    ("streamable_http", "Serve over streamable HTTP on loopback with a bearer token", "Clients that cannot spawn stdio processes", "planned", "pure", "external", [], N, {"reference": "MCP SDK run('streamable-http'); auth design needed first"}),
+    ("output_schemas", "Declare output schemas (structuredContent) for core tools", "Clients parse results without guessing their shape", "planned", "pure", "read", [], N),
+    ("progress_notifications", "Send progress notifications during long plots, scans and generators", "Users see long operations advancing", "planned", "pure", "read", [], N),
+    ("cancellation", "Honour MCP cancellation for COM jobs that have not started", "A mistaken long call can be withdrawn safely", "planned", "pure", "session", [], N),
+    ("search_tools_mode", "Optional search-and-call proxy mode exposing two tools", "Very small tool budgets", "planned", "pure", "read", [], N, {"reference": "U-C4N DISCOVERY_MODE idea (MIT)"}),
+    ("elicitation_confirm", "Ask the user to confirm destructive calls through MCP elicitation", "Human approval for deletes and overwrites where the client supports it", "planned", "pure", "session", [], N),
+    ("entity_resource_template", "Resource template autocad://entity/{handle}", "Fetch entity details as a resource", "planned", "both", "read", [], N),
+    ("argument_completion", "Argument completion for layer, block and layout names", "Fewer typos in names", "planned", "both", "read", [], N),
+    ("log_notifications", "Forward server log messages to the client via MCP logging", "Diagnose problems from the client UI", "planned", "pure", "read", [], N),
+])
+
+B = ("B", "Connection lifecycle and session management", {"inputs": ["tool call"], "outputs": ["result or error"],
+     "failure_modes": ["E_COM_TIMEOUT", "E_COM_BUSY", "E_AUTOCAD_NOT_RESPONDING"]}, [
+    ("com_thread", "Run every COM call on one dedicated, COM-initialised thread", "Concurrent tool calls never drive AutoCAD from several threads", "tested", "com", "read", [], T, {"reference": "core/com_executor.py; U-C4N/beiming183 ideas (MIT)"}),
+    ("com_timeout", "Bound every COM call by AUTOCAD_MCP_COM_TIMEOUT", "A modal dialog cannot hang the server forever", "tested", "com", "read", [], T),
+    ("worker_replacement", "Abandon a stuck COM worker after a timeout and serve later calls on a fresh one", "One hung call does not block every later call", "tested", "com", "read", [], T),
+    ("busy_not_started", "Cancel a call still queued behind a slow call and say nothing was sent", "Safe retry when AutoCAD was merely busy", "tested", "com", "read", [], T),
+    ("timeout_may_still_land", "Warn that a timed-out call may still complete inside AutoCAD", "Avoid double-applying a change by retrying blindly", "tested", "com", "read", [], T),
+    ("retry_call_rejected", "Retry RPC_E_CALL_REJECTED (AutoCAD busy) with jittered backoff", "Calls survive AutoCAD's short busy periods", "implemented", "com", "read", [], N),
+    ("retry_dispatch_glitch", "Retry transient AttributeError raised by dynamic dispatch under load", "Rapid sequences of calls do not fail spuriously", "implemented", "com", "read", [], N),
+    ("pending_command_cancel", "Cancel a command pending at the command line only when CMDACTIVE shows one, and only for writes", "A forgotten LINE prompt does not break a tool; an idle user is not interrupted", "tested", "com", "write", [], TM, {"reference": "defect D5"}),
+    ("command_active_notice", "Tell read-only callers that a command is active without touching it", "Reads never cancel the user's work", "tested", "com", "read", [], T),
+    ("notices", "Return unrequested side effects (units applied, command cancelled) as notices", "Nothing happens to a drawing silently", "tested", "both", "read", [], ["unit", "mock_com", "headless_dxf"]),
+    ("backend_pin", "Fix the backend for the process lifetime with no automatic fallback", "A live-drawing session never turns into editing a DXF silently", "tested", "pure", "read", [], ["unit", "stdio_e2e"]),
+    ("worker_stats", "Report COM worker generation, abandoned workers and call count", "Diagnose timeouts and stuck calls", "tested", "com", "read", ["autocad_get_capabilities"], T),
+    ("session_units", "Keep a units preset chosen at run time for the rest of the session", "Metric work is not flipped back to inches by the next tool", "tested", "both", "session", ["autocad_set_drawing_units"], MH),
+    ("cross_process_mutex", "Serialise COM across several server processes with a named mutex", "Two clients cannot interleave edits in one AutoCAD", "planned", "com", "session", [], N, {"reference": "beiming183 com_sta.py idea (MIT)"}),
+    ("restart_detection", "Detect an AutoCAD restart and drop stale document state", "No call is aimed at a document that no longer exists", "planned", "com", "read", [], N),
+    ("idempotency_keys", "Idempotency keys with a durable journal (replay, conflict, in-progress)", "Retries after timeouts never double-draw", "planned", "both", "session", [], N, {"reference": "beiming183 journal.py idea (MIT)"}),
+    ("job_log", "Append-only JSONL log of every mutating call with input hash and outcome", "Audit what the assistant changed", "planned", "both", "session", [], N),
+    ("graceful_shutdown", "Release COM apartments and flush logs on shutdown", "Clean restarts", "planned", "com", "session", [], N),
+    ("heartbeat", "Cheap responsiveness probe that does not touch any document", "Check AutoCAD is alive before a long job", "planned", "com", "read", [], N),
+    ("instance_selection", "Choose among several running AutoCAD instances", "Machines running two releases side by side", "planned", "com", "session", [], N),
+])
+
+C = ("C", "Backend discovery and capability negotiation", {"inputs": [], "outputs": ["capability map"], "failure_modes": ["E_UNSUPPORTED_BACKEND"]}, [
+    ("capability_map", "Derive per-backend support from the code (overridden operations)", "Advertised capabilities cannot drift from behaviour", "tested", "pure", "read", ["autocad_get_capabilities"], T),
+    ("capabilities_tool", "Report version, backend, toolsets, tools, configuration and dependencies", "One call tells the client what is possible here", "tested", "pure", "read", ["autocad_get_capabilities"], ["unit", "headless_dxf"]),
+    ("typed_refusal", "Refuse unsupported operations naming operation, backend and reason", "The model switches strategy instead of retrying", "tested", "pure", "read", [], ["unit", "headless_dxf", "stdio_e2e"]),
+    ("dependency_refusal", "Refuse when an optional dependency is missing, naming the extra to install", "Clear fix for 'module not found'", "tested", "dxf", "read", [], H),
+    ("headless_backend", "Headless DXF backend selected with AUTOCAD_MCP_BACKEND=dxf", "Draft and test without an AutoCAD licence", "tested", "dxf", "read", [], ["headless_dxf", "stdio_e2e"]),
+    ("release_detection", "Detect the AutoCAD release and map it to a year (2021-2027)", "Know which AutoCAD is attached", "tested", "com", "read", ["autocad_get_status"], T, {"reference": "defect D2"}),
+    ("release_gate", "Refuse AutoCAD releases older than 2021", "Avoid untested old COM behaviour", "tested", "com", "read", [], T),
+    ("headless_import_isolation", "Headless backend imports no pywin32 code", "Headless mode can run where pywin32 is unavailable", "tested", "dxf", "read", [], T),
+    ("lt_detection", "Detect AutoCAD LT installs and explain the supported alternatives", "LT users get a clear answer", "planned", "pure", "read", [], N),
+    ("lt_ipc_backend", "AutoCAD LT 2024+ backend over an AutoLISP file-IPC dispatcher", "Automate LT, which has no COM", "planned", "lt_ipc", "write", [], N, {"reference": "puran-water file_ipc.py design (MIT)"}),
+    ("dotnet_backend", "In-process .NET plugin backend with a token-authenticated named pipe", "Transactions and vertical object models", "planned", "dotnet", "write", [], N, {"reference": "bimwright dwg-mcp architecture (Apache-2.0)"}),
+    ("accore_backend", "Batch backend running scripts through accoreconsole.exe", "Process many closed DWGs without the UI", "planned", "accore", "write", [], N),
+    ("progid_option", "Configurable ProgID for COM-compatible CADs, reported as untested", "Try BricsCAD/ZWCAD/GstarCAD knowingly", "planned", "com", "read", [], N, {"reference": "AnCode666 multiCAD config idea (Apache-2.0)"}),
+    ("vertical_detection", "Detect Civil 3D, Map 3D, Plant 3D or Electrical in the running AutoCAD", "Enable vertical tools only where they work", "planned", "com", "read", [], N),
+    ("member_probe", "Probe the live seat for optional ActiveX members and report them", "Know before calling a member that may not exist", "planned", "com", "read", [], N),
+    ("hide_unsupported_tools", "Hide tools the pinned backend cannot run", "Smaller, accurate tool list per backend", "planned", "pure", "read", [], N),
+])
+
+D = ("D", "Application launch and connection verification", {"inputs": [], "outputs": ["status"], "failure_modes": ["E_AUTOCAD_NOT_INSTALLED", "E_AUTOCAD_NOT_RUNNING", "E_AUTOCAD_NOT_RESPONDING"]}, [
+    ("status", "Report installed / running / connected / supported without starting AutoCAD", "Know the state before acting", "tested", "both", "read", ["autocad_get_status"], TS),
+    ("install_detection", "Detect installation via the AutoCAD.Application ProgID", "Explain missing installs", "tested", "com", "read", ["autocad_get_status"], T),
+    ("process_vs_com", "Tell 'not running' apart from 'running but not answering COM'", "Wait or fix startup dialogs instead of relaunching", "implemented", "com", "read", ["autocad_get_status"], N),
+    ("launch", "Launch AutoCAD and wait until it answers COM", "Start the session from the assistant", "implemented", "com", "external", ["autocad_launch_application"], N),
+    ("launch_visible", "Make a launched AutoCAD window visible", "The user sees what is drawn", "implemented", "com", "external", ["autocad_launch_application"], N),
+    ("launch_deadline", "Bound launch waiting, with an executor deadline beyond it", "A failed start does not hang the client", "implemented", "com", "external", ["autocad_launch_application"], N),
+    ("launch_refused_headless", "Refuse launching AutoCAD on the headless backend", "No surprise AutoCAD processes", "tested", "dxf", "read", ["autocad_launch_application"], ["headless_dxf", "stdio_e2e"]),
+    ("opencode_detection", "Heuristic detection of an OpenCode host session", "Context for client-specific advice", "implemented", "pure", "read", ["autocad_get_status"], N),
+    ("smoke_drawing", "V0.1.0 smoke test: new drawing with one line, saved and checked on disk", "Prove the COM path end to end", "implemented", "com", "external", ["autocad_create_test_drawing_with_line"], N),
+    ("launch_version", "Launch a specific installed release", "Machines with several AutoCAD versions", "planned", "com", "external", [], N),
+    ("launch_profile", "Launch with a named AutoCAD profile", "Separate automation profile from the user's", "planned", "com", "external", [], N),
+    ("startup_dialog_detection", "Detect startup dialogs (licence, recovery) blocking COM", "Explain why AutoCAD does not answer", "planned", "com", "read", [], N),
+    ("installed_releases", "List every installed AutoCAD release from the registry", "Choose what to launch", "planned", "com", "read", [], N),
+    ("accore_detection", "Detect accoreconsole.exe beside each install", "Enable batch processing where available", "planned", "accore", "read", [], N),
+])
+
+E = ("E", "Document discovery, identity, ownership and lifecycle", {"inputs": ["path or identity"], "outputs": ["drawing identity", "state"],
+     "failure_modes": ["E_DOCUMENT_NOT_FOUND", "E_DOCUMENT_PINNED", "E_UNSAVED_CHANGES", "E_OUTPUT_EXISTS"]}, [
+    ("new_drawing", "Create a new unsaved drawing", "Start clean without risking an existing file", "tested", "both", "write", ["autocad_create_new_drawing"], ["unit", "headless_dxf", "stdio_e2e"]),
+    ("new_from_template", "Create a drawing from a .dwt (live) or .dxf (headless) template", "Start from office standards", "implemented", "both", "write", ["autocad_create_new_drawing"], N),
+    ("template_validation", "Validate template paths before use", "Bad paths fail fast with a clear message", "tested", "both", "read", ["autocad_create_new_drawing"], T),
+    ("list_drawings", "List open drawings with identity, unsaved and read-only flags", "See what is open before acting", "tested", "both", "read", ["autocad_list_drawings"], MH),
+    ("open_read_only", "Open drawings read-only by default", "Inspect production drawings without risk", "tested", "both", "write", ["autocad_open_drawing"], MH),
+    ("open_already_open", "Activate an already-open drawing instead of opening a second copy", "No duplicate read-only copies", "tested", "com", "write", ["autocad_open_drawing"], ["mock_com"]),
+    ("open_recover_dxf", "Open DXF files in recover mode and report audit errors and fixes", "Damaged DXF files still open, with evidence", "tested", "dxf", "write", ["autocad_open_drawing"], H),
+    ("save_own_file", "Save a drawing back to its own file", "Ordinary save", "tested", "both", "destructive", ["autocad_save_drawing"], MH),
+    ("save_as_dwg_versions", "Save as DWG R2000-R2018", "Deliver to recipients on older AutoCAD", "tested", "com", "destructive", ["autocad_save_drawing"], ["mock_com"]),
+    ("save_as_dxf", "Save as DXF", "Exchange with other CAD tools", "tested", "both", "destructive", ["autocad_save_drawing"], MH),
+    ("overwrite_guard", "Refuse to replace another existing file unless overwrite=true", "Never lose a file by accident", "tested", "both", "destructive", ["autocad_save_drawing", "autocad_export_dxf", "autocad_plot_pdf"], MH),
+    ("save_evidence", "Report the saved file's size and SHA-256 read back from disk", "Proof of what was written", "tested", "both", "read", ["autocad_save_drawing"], MH),
+    ("pin_follows_save_as", "Move the document pin when save-as changes the identity", "Pinned jobs survive the first save", "tested", "both", "session", ["autocad_save_drawing"], ["mock_com", "headless_dxf"]),
+    ("close_guard", "Refuse to close with unsaved changes unless discard_changes=true", "Work is not thrown away silently", "tested", "both", "destructive", ["autocad_close_drawing"], MH),
+    ("activate", "Activate an open drawing by identity", "Switch drawings deliberately", "tested", "both", "write", ["autocad_activate_drawing"], MH),
+    ("pin", "Pin tool calls to one drawing", "A tab switch mid-job cannot redirect edits", "tested", "both", "session", ["autocad_pin_document"], ["unit", "headless_dxf"]),
+    ("pin_enforced", "Refuse any call against a different active drawing (E_DOCUMENT_CHANGED)", "Edits land only in the intended drawing", "tested", "both", "read", [], ["unit", "headless_dxf"]),
+    ("pin_switch_guard", "Refuse to create, open or activate another drawing while pinned unless pin=true", "Pinned jobs are not broken by the assistant itself", "tested", "both", "session", [], TMH),
+    ("unpin", "Remove the document pin", "End a pinned job", "tested", "both", "session", ["autocad_unpin_document"], T),
+    ("identity_model", "Identify drawings by full path (saved) or session name (unsaved)", "Stable keys for scans, pins and reports", "tested", "both", "read", [], T),
+    ("headless_one_document", "Headless backend holds one drawing and refuses to replace unsaved work", "No silent loss in headless mode", "tested", "dxf", "destructive", [], H),
+    ("recover_dwg", "Open a damaged DWG with RECOVER", "Rescue corrupted drawings", "planned", "com", "write", [], N),
+    ("partial_open", "Partially open very large drawings (selected layers or views)", "Work with huge drawings quickly", "planned", "com", "write", [], N),
+    ("drawing_properties", "Read and write DWGPROPS summary and custom properties", "Title/author/project metadata", "planned", "both", "write", [], N),
+    ("save_all", "Save every modified drawing that has a path", "End-of-session save", "planned", "com", "destructive", [], N),
+    ("save_template", "Save the active drawing as a .dwt template", "Create office templates", "planned", "com", "external", [], N),
+    ("lock_detection", "Detect .dwl lock files before opening", "Avoid editing a drawing someone else has open", "planned", "both", "read", [], N),
+    ("backup_before_overwrite", "Keep a timestamped backup before replacing a file", "Undo an overwrite", "planned", "both", "external", [], N),
+])
+
+F = ("F", "Drawing inspection and metadata", {"inputs": ["bounds and limits"], "outputs": ["summary"], "failure_modes": ["E_NO_ACTIVE_DOCUMENT"]}, [
+    ("summary", "Summarise identity, units, extents, counts by type and layer, layers, blocks, layouts", "Understand an unfamiliar drawing in one call", "tested", "both", "read", ["autocad_drawing_summary"], MH),
+    ("bounded_summary", "Cap entity iteration and say when a summary was truncated", "Huge drawings cannot flood the client", "tested", "both", "read", ["autocad_drawing_summary"], MH),
+    ("units_report", "Report INSUNITS, LUNITS and imperial/metric measurement", "Draw with the right numbers", "tested", "both", "read", ["autocad_drawing_summary"], MH),
+    ("extents_report", "Report drawing extents", "Know where the geometry is", "tested", "both", "read", ["autocad_drawing_summary"], MH),
+    ("layout_list_in_summary", "List layouts and the current layer in the summary", "Sheets and drafting state at a glance", "tested", "both", "read", ["autocad_drawing_summary"], MH),
+    ("dirty_flag", "Report whether the drawing has unsaved changes", "Remind to save", "tested", "both", "read", ["autocad_drawing_summary"], MH),
+    ("scan_sqlite", "Scan model-space entities into a per-drawing SQLite snapshot", "Query drawings with SQL", "tested", "both", "read", ["autocad_scan_all_entities"], ["unit", "headless_dxf"]),
+    ("readonly_sql", "Run one read-only SELECT over scans with two independent write guards", "Safe ad-hoc analysis", "tested", "pure", "read", ["autocad_execute_query"], TS),
+    ("sql_row_limit", "Cap SQL rows and report truncation", "Large results stay bounded", "tested", "pure", "read", ["autocad_execute_query"], T),
+    ("text_search", "Count and list TEXT/MTEXT matching a substring or regex", "Find tags and notes", "tested", "both", "read", ["autocad_count_text_patterns"], ["unit", "headless_dxf"]),
+    ("sysvar_read", "Read a whitelisted set of system variables", "Inspect drafting settings", "planned", "both", "read", [], N),
+    ("paper_space_scan", "Scan paper-space entities and layouts", "Title blocks and sheet notes", "planned", "both", "read", [], N),
+    ("block_content_scan", "Scan inside block definitions and nested references", "Count what blocks contain", "planned", "both", "read", [], N),
+    ("xref_inventory", "List external references with paths and status", "Find missing references", "planned", "both", "read", [], N),
+    ("style_inventory", "List text styles, dimension styles and linetypes", "Check drawing standards", "planned", "both", "read", [], N),
+    ("spatial_grid_summary", "Budget-capped spatial grid summary of where entities sit", "Navigate large drawings", "planned", "both", "read", [], N, {"reference": "new-acad summarizeDrawing idea (MIT)"}),
+    ("drawing_statistics", "Statistics: average entity size, text heights, layer usage", "Spot inconsistent drafting", "planned", "both", "read", [], N),
+])
+
+G = ("G", "Entity creation, selection, querying, editing and deletion", {"inputs": ["handles", "vectors"], "outputs": ["handles", "verification"],
+     "failure_modes": ["E_ENTITY_NOT_FOUND", "E_INVALID_INPUT", "E_VERIFICATION_FAILED"]}, [
+    ("list_entities", "Page through model-space entities with type, layer and window filters", "Find what to edit without dumping the drawing", "tested", "both", "read", ["autocad_list_entities"], MH),
+    ("get_entity", "Full detail of one entity by handle", "Read exact geometry before changing it", "tested", "both", "read", ["autocad_get_entity"], MH),
+    ("move", "Move an entity by a vector, verified by its extents", "Reposition precisely", "tested", "both", "write", ["autocad_move_entity"], ALL[:3]),
+    ("rotate", "Rotate an entity about a point", "Orient elements", "tested", "both", "write", ["autocad_rotate_entity"], ["unit", "headless_dxf"]),
+    ("copy", "Copy an entity by a vector and return the new handle", "Repeat elements", "tested", "both", "write", ["autocad_copy_entity"], ["unit", "headless_dxf"]),
+    ("scale", "Scale an entity about a point, verified by extents", "Resize symbols and details", "tested", "both", "write", ["autocad_scale_entity"], MH),
+    ("mirror", "Mirror an entity, optionally deleting the original", "Symmetric layouts", "tested", "both", "write", ["autocad_mirror_entity"], MH),
+    ("offset", "Offset curves by a distance", "Parallel walls, kerbs and edges", "tested", "both", "write", ["autocad_offset_entity"], MH),
+    ("array_rect", "Rectangular array with copy-count verification", "Repeat columns, piles or fixtures", "tested", "both", "write", ["autocad_array_rectangular"], MH),
+    ("delete_dry_run", "Delete by handle with a dry run by default", "See exactly what would go before deleting", "tested", "both", "destructive", ["autocad_delete_entities"], MH),
+    ("delete_verified", "Verify deleted handles no longer resolve", "Proof the deletion happened", "tested", "both", "destructive", ["autocad_delete_entities"], MH),
+    ("set_properties", "Set layer, color, linetype and lineweight on many entities and read them back", "Fix drafting standards in bulk", "tested", "both", "write", ["autocad_set_entity_properties"], MH),
+    ("highlight_temporary", "Temporary visual highlight that is never saved and never changes color", "Show the user what was found", "tested", "com", "read", ["autocad_highlight_entity"], TM),
+    ("highlight_persistent", "Persistent color highlight with read-back", "Mark entities for review", "tested", "com", "write", ["autocad_highlight_entity"], TM),
+    ("highlight_text", "Highlight every TEXT/MTEXT matching a pattern", "Locate notes and tags visually", "tested", "com", "write", ["autocad_highlight_text_matches"], TM),
+    ("query_highlight", "Highlight entities returned by a read-only SQL query", "Visualise analysis results", "implemented", "com", "write", ["autocad_query_and_highlight"], N),
+    ("array_polar", "Polar array around a centre", "Bolt circles, radial seating", "planned", "both", "write", [], N),
+    ("array_path", "Array along a path", "Street lights, fence posts", "planned", "com", "write", [], N),
+    ("stretch", "Stretch vertices inside a window", "Resize rooms without redrawing", "planned", "com", "write", [], N),
+    ("trim_extend", "Trim and extend to boundary edges", "Clean wall intersections", "planned", "both", "write", [], N),
+    ("fillet_chamfer", "Fillet and chamfer two curves", "Rounded and bevelled corners", "planned", "both", "write", [], N),
+    ("break_join", "Break curves at points and join collinear pieces", "Openings and clean-up", "planned", "both", "write", [], N),
+    ("explode", "Explode blocks and polylines with a dry run", "Edit block contents in place", "planned", "both", "destructive", [], N),
+    ("match_properties", "Copy properties from one entity to others", "Standardise quickly", "planned", "both", "write", [], N),
+    ("transform_matrix", "Apply a general transformation matrix", "Precise coordinate transforms", "planned", "both", "write", [], N),
+    ("align", "Align an entity by source/target point pairs", "Fit imported details", "planned", "both", "write", [], N),
+    ("draw_order", "Bring to front / send to back", "Hatches behind text", "planned", "com", "write", [], N),
+    ("change_space", "Move entities between model and paper space", "Fix annotation placed in the wrong space", "planned", "both", "write", [], N),
+])
+
+M = ("M", "Units, coordinate systems, transformations and precision", {"inputs": ["preset or unit"], "outputs": ["variables changed"], "failure_modes": ["E_INVALID_CONFIG", "E_UNITS_MISMATCH"]}, [
+    ("units_policy", "Apply a units preset (engineering, architectural, metric_mm, metric_m, preserve) only on writes", "Read-only tools never alter a drawing's units", "tested", "both", "write", [], ["unit", "mock_com", "headless_dxf"], {"reference": "defect D4"}),
+    ("units_skip_equal", "Skip unit variables that already match so the drawing is not marked modified", "No spurious 'unsaved changes'", "tested", "both", "write", [], T),
+    ("set_units", "Set a units preset explicitly for the session", "Switch to metric for a project", "tested", "both", "write", ["autocad_set_drawing_units"], MH),
+    ("unit_conversion", "Convert lengths between in, ft, mm, cm, m and other INSUNITS units", "Generators accept feet or metres in any drawing", "tested", "pure", "read", [], T),
+    ("drafting_defaults", "Per-unit-system drafting defaults (walls, doors, windows, text)", "Sensible sizes without hard-coded inches", "tested", "pure", "read", [], T),
+    ("unit_aware_wall_default", "Default wall thickness from the drawing's INSUNITS", "230 mm walls in metric drawings", "tested", "both", "write", ["autocad_draw_wall"], H),
+    ("legacy_plan_scaling", "Draw the V0.2.3 floor plan in any drawing unit, identical in inches", "Metric users can use the legacy macro", "tested", "both", "write", ["autocad_generate_2d_floor_plan"], ["golden_regression", "mock_com"]),
+    ("wcs_convention", "All coordinates are WCS; angles degrees counterclockwise", "Predictable geometry", "tested", "both", "read", [], T),
+    ("angle_conversion", "Convert degrees at the tool boundary to radians for ActiveX", "No radian mistakes", "tested", "com", "read", [], TM),
+    ("ucs_list_set", "List, set and restore named UCS for the operator", "Work on rotated site plans", "planned", "both", "write", [], N),
+    ("translate_coordinates", "Translate points between WCS and a UCS", "Read survey-oriented coordinates", "planned", "com", "read", [], N),
+    ("geo_location", "Read geographic location / coordinate system assignment", "Georeferenced drawings", "planned", "map3d", "read", [], N),
+    ("precision_report", "Report LUPREC/AUPREC and suspicious near-coincident points", "Precision problems in imported data", "planned", "both", "read", [], N),
+    ("scale_drawing_units", "Rescale a whole drawing between unit systems with a dry run", "Fix drawings drawn in the wrong units", "planned", "both", "write", [], N),
+])
+
+O = ("O", "Selection filters, handles, spatial queries and indexing", {"inputs": ["filters"], "outputs": ["handles"], "failure_modes": ["E_INVALID_INPUT"]}, [
+    ("filter_by_type", "Filter entities by DXF type names", "Work on one kind of object", "tested", "both", "read", ["autocad_list_entities"], MH),
+    ("filter_by_layer", "Filter entities by layer (case-insensitive)", "Work on one discipline", "tested", "both", "read", ["autocad_list_entities"], MH),
+    ("filter_by_window", "Filter entities lying inside a window", "Work on one area", "tested", "both", "read", ["autocad_list_entities"], H),
+    ("pagination", "Offset/limit pagination with total and next_offset", "Walk large result sets", "tested", "both", "read", ["autocad_list_entities"], MH),
+    ("handle_validation", "Validate hex handles before any COM call", "Typos fail fast", "tested", "pure", "read", [], T),
+    ("dxf_type_vocabulary", "One DXF type vocabulary on both backends", "Same filters live and headless", "tested", "both", "read", [], T),
+    ("filter_by_property", "Filter by color, linetype, block name or text content", "Precise selections", "planned", "both", "read", [], N),
+    ("crossing_window", "Crossing-window and fence selections", "Select what touches an area", "planned", "both", "read", [], N),
+    ("selection_sets", "Named selection sets kept for a session", "Reuse a selection across calls", "planned", "com", "session", [], N),
+    ("user_selection", "Read the user's current pickfirst selection", "Act on what the user selected", "planned", "com", "read", [], N),
+    ("nearest_query", "Nearest entity to a point", "Snap-like lookups", "planned", "both", "read", [], N),
+    ("spatial_index", "Session R-tree index of entity extents", "Fast window queries on large drawings", "planned", "both", "read", [], N),
+    ("osnap_points", "Endpoint, midpoint, centre and intersection points by handle", "No guessed coordinates", "planned", "both", "read", [], N, {"reference": "U-C4N point_from_snap idea (MIT)"}),
+])
+
+P = ("P", "Undo, redo, transactions, rollback and recovery", {"inputs": [], "outputs": [], "failure_modes": ["E_COM_ERROR"]}, [
+    ("dry_run_generators", "Dry run for every generator: the exact plan, nothing drawn", "Review before drawing", "tested", "both", "read", [], ["mock_com", "headless_dxf", "golden_regression"]),
+    ("dry_run_delete", "Dry run for deletes", "Review before deleting", "tested", "both", "read", ["autocad_delete_entities"], MH),
+    ("atomic_file_replace", "Write outputs to a temporary name and replace the target only on success", "A failed export never destroys the old file", "tested", "both", "external", [], MH),
+    ("count_verification", "Verify generators by model-space count growth", "Partial drawing is detected", "tested", "both", "read", [], ["mock_com", "headless_dxf", "golden_regression"]),
+    ("undo_group_per_call", "Wrap each mutating tool call in one undo group", "One Ctrl+Z undoes one tool call", "planned", "com", "write", [], N, {"reference": "U-C4N transaction design (MIT)"}),
+    ("transaction_rollback", "Begin/commit/rollback using an UNDO mark plus group", "Undo a multi-step job safely", "planned", "com", "write", [], N, {"reference": "U-C4N: UNDO Mark before StartUndoMark (MIT)"}),
+    ("undo_tool", "Undo the last N tool calls", "Recover from a mistake via the assistant", "planned", "com", "write", [], N),
+    ("headless_snapshots", "Headless undo by document snapshots", "Undo in headless mode", "planned", "dxf", "write", [], N),
+    ("partial_failure_report", "Report exactly which primitives were drawn before a failure", "Clean up partial work", "planned", "both", "read", [], N),
+    ("recovery_procedure", "Documented recovery for interrupted jobs (inspect, undo, rerun)", "Know what to do after a timeout", "implemented", "pure", "read", [], N, {"reference": "docs/troubleshooting.md"}),
+])
+
+DOMAINS = [A, B, C, D, E, F, G, M, O, P]

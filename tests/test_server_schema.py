@@ -47,6 +47,69 @@ EXPECTED_V0_2_3_TOOLS = {
     "autocad_generate_2d_floor_plan",
 }
 
+# V0.3.0 additions. Every V0.1-V0.2.3 tool above is kept with its name and
+# required arguments; this set grows as V0.3.0 tools land.
+EXPECTED_V0_3_0_TOOLS = {
+    # foundation
+    "autocad_get_capabilities",
+    "autocad_pin_document",
+    "autocad_unpin_document",
+    # documents
+    "autocad_list_drawings",
+    "autocad_open_drawing",
+    "autocad_save_drawing",
+    "autocad_close_drawing",
+    "autocad_activate_drawing",
+    "autocad_set_drawing_units",
+    # drawing
+    "autocad_draw_arc",
+    "autocad_draw_mtext",
+    # layers
+    "autocad_list_layers",
+    "autocad_set_layer_properties",
+    # editing
+    "autocad_scale_entity",
+    "autocad_mirror_entity",
+    "autocad_offset_entity",
+    "autocad_array_rectangular",
+    "autocad_delete_entities",
+    "autocad_set_entity_properties",
+    # query
+    "autocad_drawing_summary",
+    "autocad_list_entities",
+    "autocad_get_entity",
+    # annotation
+    "autocad_add_dimension",
+    "autocad_add_hatch",
+    # blocks
+    "autocad_list_blocks",
+    "autocad_insert_block",
+    "autocad_get_block_attributes",
+    "autocad_set_block_attributes",
+    # output
+    "autocad_list_layouts",
+    "autocad_export_dxf",
+    "autocad_plot_pdf",
+    "autocad_render_preview",
+    # residential / civil workflows
+    "autocad_generate_floor_plan",
+    "autocad_draw_structural_grid",
+    "autocad_design_stair",
+    "autocad_draw_stair_plan",
+    "autocad_draw_sheet",
+    # analysis
+    "autocad_check_drawing",
+    "autocad_quantity_takeoff",
+    "autocad_save_report",
+    "autocad_compare_dxf",
+    "autocad_validate_dxf_file",
+}
+
+LEGACY_TOOLS = (
+    EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS | EXPECTED_V0_2_2_TOOLS | EXPECTED_V0_2_3_TOOLS
+)
+ALL_EXPECTED_TOOLS = LEGACY_TOOLS | EXPECTED_V0_3_0_TOOLS
+
 
 def _list_tools():
     return asyncio.run(server.server.list_tools())
@@ -82,11 +145,17 @@ def test_no_duplicate_tool_names():
     assert len(names) == len(set(names))
 
 
-def test_exactly_22_tools_total():
+def test_registered_tools_are_exactly_the_expected_set():
+    # V0.2.3 asserted exactly 22 tools; V0.3.0 keeps all 22 and adds the
+    # EXPECTED_V0_3_0_TOOLS set, so the total is pinned here instead.
     names = {tool.name for tool in _list_tools()}
-    assert names == (
-        EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS | EXPECTED_V0_2_2_TOOLS | EXPECTED_V0_2_3_TOOLS
-    )
+    assert names == ALL_EXPECTED_TOOLS
+
+
+def test_every_legacy_tool_is_still_registered():
+    names = {tool.name for tool in _list_tools()}
+    assert LEGACY_TOOLS <= names
+    assert len(LEGACY_TOOLS) == 22
 
 
 def test_draw_wall_schema_has_thickness_and_layer_defaults():

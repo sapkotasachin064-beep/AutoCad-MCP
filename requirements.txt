@@ -1,2 +1,2 @@
-mcp>=1.2.0
-pywin32
+mcp>=2.3,<3
+pywin32; sys_platform == "win32"

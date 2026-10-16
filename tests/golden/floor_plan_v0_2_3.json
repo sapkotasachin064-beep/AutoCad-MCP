@@ -1,0 +1,1546 @@
+{
+ "source": "git 3cf9254:src/tools/architectural.py",
+ "cases": {
+  "default_24x30": {
+   "kwargs": {},
+   "entities": [
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      0.0,
+      4.5,
+      0.0,
+      288.0,
+      4.5,
+      0.0,
+      288.0,
+      -4.5,
+      0.0,
+      0.0,
+      -4.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      283.5,
+      0.0,
+      0.0,
+      283.5,
+      360.0,
+      0.0,
+      292.5,
+      360.0,
+      0.0,
+      292.5,
+      0.0,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      288.0,
+      355.5,
+      0.0,
+      0.0,
+      355.5,
+      0.0,
+      0.0,
+      364.5,
+      0.0,
+      288.0,
+      364.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      4.5,
+      360.0,
+      0.0,
+      4.5,
+      0.0,
+      0.0,
+      -4.5,
+      0.0,
+      0.0,
+      -4.5,
+      360.0,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      141.75,
+      121.5,
+      0.0,
+      141.75,
+      238.5,
+      0.0,
+      146.25,
+      238.5,
+      0.0,
+      146.25,
+      121.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      141.75,
+      238.5,
+      0.0,
+      141.75,
+      355.5,
+      0.0,
+      146.25,
+      355.5,
+      0.0,
+      146.25,
+      238.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      4.5,
+      123.75,
+      0.0,
+      144.0,
+      123.75,
+      0.0,
+      144.0,
+      119.25,
+      0.0,
+      4.5,
+      119.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      144.0,
+      123.75,
+      0.0,
+      283.5,
+      123.75,
+      0.0,
+      283.5,
+      119.25,
+      0.0,
+      144.0,
+      119.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      4.5,
+      240.75,
+      0.0,
+      144.0,
+      240.75,
+      0.0,
+      144.0,
+      236.25,
+      0.0,
+      4.5,
+      236.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      144.0,
+      240.75,
+      0.0,
+      283.5,
+      240.75,
+      0.0,
+      283.5,
+      236.25,
+      0.0,
+      144.0,
+      236.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Living Room",
+     "InsertionPoint": [
+      144.0,
+      63.0,
+      0.0
+     ],
+     "Width": 275.0,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Kitchen",
+     "InsertionPoint": [
+      74.25,
+      180.0,
+      0.0
+     ],
+     "Width": 135.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Bath",
+     "InsertionPoint": [
+      213.75,
+      180.0,
+      0.0
+     ],
+     "Width": 135.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Bedroom 1",
+     "InsertionPoint": [
+      74.25,
+      297.0,
+      0.0
+     ],
+     "Width": 135.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Bedroom 2",
+     "InsertionPoint": [
+      213.75,
+      297.0,
+      0.0
+     ],
+     "Width": 135.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      126.0,
+      -2.25,
+      0.0
+     ],
+     "EndPoint": [
+      126.0,
+      2.25,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      162.0,
+      -2.25,
+      0.0
+     ],
+     "EndPoint": [
+      162.0,
+      2.25,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      125.125,
+      0.0,
+      0.0,
+      125.125,
+      36.0,
+      0.0,
+      126.875,
+      36.0,
+      0.0,
+      126.875,
+      0.0,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      126.0,
+      0.0,
+      0.0
+     ],
+     "Radius": 36.0,
+     "StartAngle": 0.0,
+     "EndAngle": 1.570796
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      146.25,
+      165.0,
+      0.0
+     ],
+     "EndPoint": [
+      141.75,
+      165.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      146.25,
+      195.0,
+      0.0
+     ],
+     "EndPoint": [
+      141.75,
+      195.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      144.0,
+      164.125,
+      0.0,
+      114.0,
+      164.125,
+      0.0,
+      114.0,
+      165.875,
+      0.0,
+      144.0,
+      165.875,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      144.0,
+      165.0,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 1.570796,
+     "EndAngle": 3.141593
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      198.75,
+      119.25,
+      0.0
+     ],
+     "EndPoint": [
+      198.75,
+      123.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      228.75,
+      119.25,
+      0.0
+     ],
+     "EndPoint": [
+      228.75,
+      123.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      197.875,
+      121.5,
+      0.0,
+      197.875,
+      151.5,
+      0.0,
+      199.625,
+      151.5,
+      0.0,
+      199.625,
+      121.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      198.75,
+      121.5,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 0.0,
+     "EndAngle": 1.570796
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      146.25,
+      282.0,
+      0.0
+     ],
+     "EndPoint": [
+      141.75,
+      282.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      146.25,
+      312.0,
+      0.0
+     ],
+     "EndPoint": [
+      141.75,
+      312.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      144.0,
+      281.125,
+      0.0,
+      114.0,
+      281.125,
+      0.0,
+      114.0,
+      282.875,
+      0.0,
+      144.0,
+      282.875,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      144.0,
+      282.0,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 1.570796,
+     "EndAngle": 3.141593
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      198.75,
+      236.25,
+      0.0
+     ],
+     "EndPoint": [
+      198.75,
+      240.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      228.75,
+      236.25,
+      0.0
+     ],
+     "EndPoint": [
+      228.75,
+      240.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      197.875,
+      238.5,
+      0.0,
+      197.875,
+      268.5,
+      0.0,
+      199.625,
+      268.5,
+      0.0,
+      199.625,
+      238.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      198.75,
+      238.5,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 0.0,
+     "EndAngle": 1.570796
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      292.5,
+      39.0,
+      0.0
+     ],
+     "EndPoint": [
+      292.5,
+      87.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      288.0,
+      39.0,
+      0.0
+     ],
+     "EndPoint": [
+      288.0,
+      87.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      283.5,
+      39.0,
+      0.0
+     ],
+     "EndPoint": [
+      283.5,
+      87.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      4.5,
+      156.0,
+      0.0
+     ],
+     "EndPoint": [
+      4.5,
+      204.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -0.0,
+      156.0,
+      0.0
+     ],
+     "EndPoint": [
+      0.0,
+      204.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -4.5,
+      156.0,
+      0.0
+     ],
+     "EndPoint": [
+      -4.5,
+      204.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      292.5,
+      156.0,
+      0.0
+     ],
+     "EndPoint": [
+      292.5,
+      204.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      288.0,
+      156.0,
+      0.0
+     ],
+     "EndPoint": [
+      288.0,
+      204.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      283.5,
+      156.0,
+      0.0
+     ],
+     "EndPoint": [
+      283.5,
+      204.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      4.5,
+      273.0,
+      0.0
+     ],
+     "EndPoint": [
+      4.5,
+      321.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -0.0,
+      273.0,
+      0.0
+     ],
+     "EndPoint": [
+      0.0,
+      321.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -4.5,
+      273.0,
+      0.0
+     ],
+     "EndPoint": [
+      -4.5,
+      321.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      292.5,
+      273.0,
+      0.0
+     ],
+     "EndPoint": [
+      292.5,
+      321.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      288.0,
+      273.0,
+      0.0
+     ],
+     "EndPoint": [
+      288.0,
+      321.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      283.5,
+      273.0,
+      0.0
+     ],
+     "EndPoint": [
+      283.5,
+      321.0,
+      0.0
+     ]
+    }
+   ],
+   "layer_colors": {
+    "0": 7,
+    "A-WALL-EXT": 3,
+    "A-WALL-INT": 2,
+    "A-DOOR": 1,
+    "A-GLAZ": 4,
+    "A-TEXT": 7,
+    "A-DIM": 6
+   }
+  },
+  "36x40": {
+   "kwargs": {
+    "width_ft": 36.0,
+    "length_ft": 40.0
+   },
+   "entities": [
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      0.0,
+      4.5,
+      0.0,
+      432.0,
+      4.5,
+      0.0,
+      432.0,
+      -4.5,
+      0.0,
+      0.0,
+      -4.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      427.5,
+      0.0,
+      0.0,
+      427.5,
+      480.0,
+      0.0,
+      436.5,
+      480.0,
+      0.0,
+      436.5,
+      0.0,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      432.0,
+      475.5,
+      0.0,
+      0.0,
+      475.5,
+      0.0,
+      0.0,
+      484.5,
+      0.0,
+      432.0,
+      484.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-EXT",
+     "Coordinates": [
+      4.5,
+      480.0,
+      0.0,
+      4.5,
+      0.0,
+      0.0,
+      -4.5,
+      0.0,
+      0.0,
+      -4.5,
+      480.0,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      213.75,
+      161.5,
+      0.0,
+      213.75,
+      318.5,
+      0.0,
+      218.25,
+      318.5,
+      0.0,
+      218.25,
+      161.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      213.75,
+      318.5,
+      0.0,
+      213.75,
+      475.5,
+      0.0,
+      218.25,
+      475.5,
+      0.0,
+      218.25,
+      318.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      4.5,
+      163.75,
+      0.0,
+      216.0,
+      163.75,
+      0.0,
+      216.0,
+      159.25,
+      0.0,
+      4.5,
+      159.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      216.0,
+      163.75,
+      0.0,
+      427.5,
+      163.75,
+      0.0,
+      427.5,
+      159.25,
+      0.0,
+      216.0,
+      159.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      4.5,
+      320.75,
+      0.0,
+      216.0,
+      320.75,
+      0.0,
+      216.0,
+      316.25,
+      0.0,
+      4.5,
+      316.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-WALL-INT",
+     "Coordinates": [
+      216.0,
+      320.75,
+      0.0,
+      427.5,
+      320.75,
+      0.0,
+      427.5,
+      316.25,
+      0.0,
+      216.0,
+      316.25,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Living Room",
+     "InsertionPoint": [
+      216.0,
+      83.0,
+      0.0
+     ],
+     "Width": 419.0,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Kitchen",
+     "InsertionPoint": [
+      110.25,
+      240.0,
+      0.0
+     ],
+     "Width": 207.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Bath",
+     "InsertionPoint": [
+      321.75,
+      240.0,
+      0.0
+     ],
+     "Width": 207.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Bedroom 1",
+     "InsertionPoint": [
+      110.25,
+      397.0,
+      0.0
+     ],
+     "Width": 207.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbMText",
+     "layer": "A-TEXT",
+     "TextString": "Bedroom 2",
+     "InsertionPoint": [
+      321.75,
+      397.0,
+      0.0
+     ],
+     "Width": 207.5,
+     "Height": 6.0
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      198.0,
+      -2.25,
+      0.0
+     ],
+     "EndPoint": [
+      198.0,
+      2.25,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      234.0,
+      -2.25,
+      0.0
+     ],
+     "EndPoint": [
+      234.0,
+      2.25,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      197.125,
+      0.0,
+      0.0,
+      197.125,
+      36.0,
+      0.0,
+      198.875,
+      36.0,
+      0.0,
+      198.875,
+      0.0,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      198.0,
+      0.0,
+      0.0
+     ],
+     "Radius": 36.0,
+     "StartAngle": 0.0,
+     "EndAngle": 1.570796
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      218.25,
+      225.0,
+      0.0
+     ],
+     "EndPoint": [
+      213.75,
+      225.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      218.25,
+      255.0,
+      0.0
+     ],
+     "EndPoint": [
+      213.75,
+      255.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      216.0,
+      224.125,
+      0.0,
+      186.0,
+      224.125,
+      0.0,
+      186.0,
+      225.875,
+      0.0,
+      216.0,
+      225.875,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      216.0,
+      225.0,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 1.570796,
+     "EndAngle": 3.141593
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      306.75,
+      159.25,
+      0.0
+     ],
+     "EndPoint": [
+      306.75,
+      163.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      336.75,
+      159.25,
+      0.0
+     ],
+     "EndPoint": [
+      336.75,
+      163.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      305.875,
+      161.5,
+      0.0,
+      305.875,
+      191.5,
+      0.0,
+      307.625,
+      191.5,
+      0.0,
+      307.625,
+      161.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      306.75,
+      161.5,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 0.0,
+     "EndAngle": 1.570796
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      218.25,
+      382.0,
+      0.0
+     ],
+     "EndPoint": [
+      213.75,
+      382.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      218.25,
+      412.0,
+      0.0
+     ],
+     "EndPoint": [
+      213.75,
+      412.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      216.0,
+      381.125,
+      0.0,
+      186.0,
+      381.125,
+      0.0,
+      186.0,
+      382.875,
+      0.0,
+      216.0,
+      382.875,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      216.0,
+      382.0,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 1.570796,
+     "EndAngle": 3.141593
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      306.75,
+      316.25,
+      0.0
+     ],
+     "EndPoint": [
+      306.75,
+      320.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-DOOR",
+     "StartPoint": [
+      336.75,
+      316.25,
+      0.0
+     ],
+     "EndPoint": [
+      336.75,
+      320.75,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDb3dPolyline",
+     "layer": "A-DOOR",
+     "Coordinates": [
+      305.875,
+      318.5,
+      0.0,
+      305.875,
+      348.5,
+      0.0,
+      307.625,
+      348.5,
+      0.0,
+      307.625,
+      318.5,
+      0.0
+     ],
+     "Closed": true
+    },
+    {
+     "object_name": "AcDbArc",
+     "layer": "A-DOOR",
+     "Center": [
+      306.75,
+      318.5,
+      0.0
+     ],
+     "Radius": 30.0,
+     "StartAngle": 0.0,
+     "EndAngle": 1.570796
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      436.5,
+      59.0,
+      0.0
+     ],
+     "EndPoint": [
+      436.5,
+      107.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      432.0,
+      59.0,
+      0.0
+     ],
+     "EndPoint": [
+      432.0,
+      107.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      427.5,
+      59.0,
+      0.0
+     ],
+     "EndPoint": [
+      427.5,
+      107.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      4.5,
+      216.0,
+      0.0
+     ],
+     "EndPoint": [
+      4.5,
+      264.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -0.0,
+      216.0,
+      0.0
+     ],
+     "EndPoint": [
+      0.0,
+      264.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -4.5,
+      216.0,
+      0.0
+     ],
+     "EndPoint": [
+      -4.5,
+      264.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      436.5,
+      216.0,
+      0.0
+     ],
+     "EndPoint": [
+      436.5,
+      264.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      432.0,
+      216.0,
+      0.0
+     ],
+     "EndPoint": [
+      432.0,
+      264.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      427.5,
+      216.0,
+      0.0
+     ],
+     "EndPoint": [
+      427.5,
+      264.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      4.5,
+      373.0,
+      0.0
+     ],
+     "EndPoint": [
+      4.5,
+      421.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -0.0,
+      373.0,
+      0.0
+     ],
+     "EndPoint": [
+      0.0,
+      421.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      -4.5,
+      373.0,
+      0.0
+     ],
+     "EndPoint": [
+      -4.5,
+      421.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      436.5,
+      373.0,
+      0.0
+     ],
+     "EndPoint": [
+      436.5,
+      421.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      432.0,
+      373.0,
+      0.0
+     ],
+     "EndPoint": [
+      432.0,
+      421.0,
+      0.0
+     ]
+    },
+    {
+     "object_name": "AcDbLine",
+     "layer": "A-GLAZ",
+     "StartPoint": [
+      427.5,
+      373.0,
+      0.0
+     ],
+     "EndPoint": [
+      427.5,
+      421.0,
+      0.0
+     ]
+    }
+   ],
+   "layer_colors": {
+    "0": 7,
+    "A-WALL-EXT": 3,
+    "A-WALL-INT": 2,
+    "A-DOOR": 1,
+    "A-GLAZ": 4,
+    "A-TEXT": 7,
+    "A-DIM": 6
+   }
+  }
+ }
+}

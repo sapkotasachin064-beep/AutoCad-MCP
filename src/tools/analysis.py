@@ -13,6 +13,7 @@ import pywintypes
 
 import db
 from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity
+from core.evidence import validate_limit
 from utils import geometry
 from utils.constants import TEXT_OBJECT_NAMES, get_db_path
 
@@ -50,7 +51,7 @@ def _read_properties(entity, object_name: str) -> dict | None:
 def scan_all_entities() -> dict:
     with com_initialized():
         app = get_connected_app()
-        doc = get_active_document(app)
+        doc = get_active_document(app, for_write=False)
         model_space = _retry_com(lambda: doc.ModelSpace)
         count = _retry_com(lambda: model_space.Count)
 
@@ -94,10 +95,14 @@ def scan_all_entities() -> dict:
         }
 
 
-def count_text_patterns(pattern: str, use_regex: bool = False) -> dict:
+def count_text_patterns(pattern: str, use_regex: bool = False, limit: int = 500) -> dict:
+    """Count every matching TEXT/MTEXT entity; list at most `limit` of them
+    (match_count is always the full count, `truncated` says if the list was
+    cut)."""
     pattern = geometry.validate_text(pattern, "pattern")
     if not pattern:
         raise geometry.ValidationError("pattern must not be empty")
+    limit = validate_limit(limit, default=500, maximum=10000)
     compiled = None
     if use_regex:
         try:
@@ -107,7 +112,7 @@ def count_text_patterns(pattern: str, use_regex: bool = False) -> dict:
 
     with com_initialized():
         app = get_connected_app()
-        doc = get_active_document(app)
+        doc = get_active_document(app, for_write=False)
         model_space = _retry_com(lambda: doc.ModelSpace)
         count = _retry_com(lambda: model_space.Count)
 
@@ -137,7 +142,8 @@ def count_text_patterns(pattern: str, use_regex: bool = False) -> dict:
             "pattern": pattern,
             "use_regex": use_regex,
             "match_count": len(matches),
-            "matches": matches,
+            "matches": matches[:limit],
+            "truncated": len(matches) > limit,
             "drawing_identity": identity.identity,
             "message": f"{len(matches)} text entity(ies) match {pattern!r} ({'regex' if use_regex else 'literal substring'}).",
         }

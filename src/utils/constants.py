@@ -11,14 +11,21 @@ MIN_SUPPORTED_RELEASE = 24.0  # AutoCAD 2021 == internal release 24.0
 
 # Known internal release -> marketing year. AutoCAD exposes no official
 # "year" property, only ACADVER release numbers, so this map is best effort
-# and extended as new releases ship.
+# and extended as new releases ship. 24.3 (2024) is the release this server
+# was verified against live. 25.0/25.1/26.0 come from reference evidence
+# (docs/analysis/gap-analysis.md, defect D2): AutoCAD 2025 reports 25.0,
+# 2026 reports 25.1 and 2027 moved to 26.0 -- there is no 24.4, which V0.2.x
+# wrongly mapped to 2025.
 RELEASE_TO_YEAR = {
     24.0: 2021,
     24.1: 2022,
     24.2: 2023,
     24.3: 2024,
-    24.4: 2025,
+    25.0: 2025,
+    25.1: 2026,
+    26.0: 2027,
 }
+LIVE_VERIFIED_RELEASES = frozenset({24.3})
 
 
 def get_output_dir() -> str:

@@ -9,12 +9,15 @@ COM calls never run with unchecked numbers.
 import math
 import re
 
+from core.errors import InvalidInputError
+
 HANDLE_RE = re.compile(r"^[0-9A-Fa-f]+$")
 
 
-class ValidationError(ValueError):
+class ValidationError(InvalidInputError):
     """Raised for bad tool input; caught at the server boundary and returned
-    as a structured error instead of propagating as a COM call."""
+    to the client as an E_INVALID_INPUT error envelope instead of propagating
+    as a COM call. Still a ValueError, as in V0.2.x."""
 
 
 def _require_number(value, label: str) -> float:
@@ -23,6 +26,11 @@ def _require_number(value, label: str) -> float:
     if not math.isfinite(value):
         raise ValidationError(f"{label} must be finite, got {value}")
     return float(value)
+
+
+def validate_number(value, label: str) -> float:
+    """Any finite number (bool rejected)."""
+    return _require_number(value, label)
 
 
 def validate_point(point, label: str = "point") -> tuple[float, float, float]:

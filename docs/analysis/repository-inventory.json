@@ -1,0 +1,3994 @@
+{
+ "schema_version": 1,
+ "generated": "2026-10-16",
+ "collection_root": "%USERPROFILE%\\Desktop\\AutoCads Mcp Servers",
+ "method": {
+  "scan": "file reads only; no code from any reference repo was executed; git metadata read from .git/* files",
+  "dirty_state": "git --no-optional-locks -c core.fsmonitor=false status --porcelain (no index writes): all clones clean except acad-mcp-loop (1 modified file: LoopHost/LoopHost.csproj)",
+  "license": "first 700 bytes of the top-level LICENSE/COPYING file; NONE = no top-level license file (all rights reserved by default)",
+  "fork_detection": "sha1 of CRLF-normalized source files (.py/.ts/.js/.cs/.lsp/...), Jaccard overlap",
+  "heuristic_fields": [
+   "mcp_sdk_markers",
+   "tool_registration_markers",
+   "backend_markers",
+   "domain_hit_files"
+  ],
+  "heuristic_warning": "regex hit counts over source files; indicators for triage, not verified capabilities"
+ },
+ "repo_count": 83,
+ "repos": [
+  {
+   "folder": "AEC-Agent",
+   "identity": "jabluetooth/AEC-Agent",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "f956c770531a0b8d9880192f9d7e49fcd5b23e19",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 95129,
+    "C#": 3924,
+    "PowerShell": 645
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 109,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "DXF:ezdxf",
+    "FileIPC(json/lisp polling)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "structural(grid/column/beam/rebar)": 14,
+    "dimensions": 41,
+    "screenshot/preview": 19,
+    "electrical": 66,
+    "plumbing/drainage": 58,
+    "hvac/mechanical": 50,
+    "P&ID symbols": 40,
+    "rooms/floorplan": 53,
+    "spline/ellipse/arc": 18,
+    "semantic/NLP search": 73,
+    "undo/transaction": 16,
+    "walls/doors/windows": 42,
+    "drawing diff/compare": 23,
+    "plot/pdf": 35,
+    "survey/coordinates/parcels": 3,
+    "hatch": 13,
+    "stairs": 9,
+    "tables/schedules": 12,
+    "xrefs": 1,
+    "drawing audit/purge/validation": 2,
+    "title block/sheet": 9,
+    "civil(alignment/profile/surface)": 16,
+    "leaders": 6,
+    "selection sets/filters": 3,
+    "blocks/attributes": 8,
+    "quantity/BOQ/takeoff": 3,
+    "dxf export/import": 8,
+    "layouts/viewports": 5,
+    "raw lisp/code execution": 1
+   },
+   "test_files": 39,
+   "readme_title": "AEC Agent",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "AUTOCAD-ELECTRICAL-MCP-main",
+   "identity": "Igualguana/AUTOCAD-ELECTRICAL-MCP (README clone URL)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 9721,
+    "JavaScript": 1505
+   },
+   "license": "AGPL-3.0",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 47,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "COM:.NET interop",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "electrical": 29,
+    "screenshot/preview": 1,
+    "layouts/viewports": 4,
+    "blocks/attributes": 3,
+    "dxf export/import": 1,
+    "selection sets/filters": 1,
+    "semantic/NLP search": 1,
+    "spline/ellipse/arc": 2,
+    "dimensions": 2,
+    "3D solids": 1,
+    "raw lisp/code execution": 1,
+    "quantity/BOQ/takeoff": 1
+   },
+   "test_files": 2,
+   "readme_title": "AUTOCAD-ELECTRICAL-MCP",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE (AGPL-3.0)",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCAD-MCP-1",
+   "identity": "codesknight/AutoCAD-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "5e8379835c7dced142e6fcf9339741975b8dfae0",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 2828,
+    "JavaScript": 157
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 36,
+   "backend_markers": [
+    "COM:win32com/pywin32",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "hatch": 2,
+    "dimensions": 5,
+    "blocks/attributes": 9,
+    "layouts/viewports": 1,
+    "plot/pdf": 1,
+    "dxf export/import": 3,
+    "spline/ellipse/arc": 1,
+    "selection sets/filters": 1,
+    "civil(alignment/profile/surface)": 1,
+    "screenshot/preview": 1
+   },
+   "test_files": 8,
+   "readme_title": "AutoCAD MCP",
+   "fork_family": "F4 codesknight: fully contained in NXChieu-Autocad-MCP",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCAD-MCP-10",
+   "identity": "rhtmdgks/AutoCAD-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "e507d9bbfb486313e1ba399a3a8b966fd3fada7a",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4046
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 1,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "COM:win32com/pywin32",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "quantity/BOQ/takeoff": 7,
+    "dxf export/import": 2,
+    "raw lisp/code execution": 1,
+    "walls/doors/windows": 8,
+    "dimensions": 2,
+    "3D solids": 2,
+    "layouts/viewports": 3,
+    "rooms/floorplan": 3,
+    "civil(alignment/profile/surface)": 1,
+    "hatch": 1,
+    "spline/ellipse/arc": 1,
+    "plot/pdf": 1,
+    "screenshot/preview": 1
+   },
+   "test_files": 2,
+   "readme_title": "autocad-mcp",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCAD-MCP-Server",
+   "identity": "StreetParkourZombie/AutoCAD-MCP-Server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "5eff53c430e18ee70f368b9822ee625accf2fb05",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 5763,
+    "AutoLISP": 2084
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 8,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 11,
+    "selection sets/filters": 2,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "hatch": 4,
+    "dimensions": 9,
+    "leaders": 6,
+    "plot/pdf": 5,
+    "undo/transaction": 7,
+    "spline/ellipse/arc": 1,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 12,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4,
+    "civil(alignment/profile/surface)": 1
+   },
+   "test_files": 7,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": "F2 puran-water lineage: derivative (61% of puran files shared)",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCAD-MCP-main-1",
+   "identity": "beiming183-cloud/AutoCAD-MCP (README badges, pyproject URLs)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 27255,
+    "AutoLISP": 2199,
+    "C#": 1250,
+    "PowerShell": 71
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 12,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "NamedPipe",
+    "Plant3D/P&ID",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "dimensions": 23,
+    "plot/pdf": 18,
+    "screenshot/preview": 21,
+    "survey/coordinates/parcels": 4,
+    "drawing diff/compare": 15,
+    "dxf export/import": 23,
+    "drawing audit/purge/validation": 17,
+    "semantic/NLP search": 15,
+    "selection sets/filters": 3,
+    "electrical": 4,
+    "P&ID symbols": 12,
+    "hatch": 11,
+    "leaders": 8,
+    "undo/transaction": 16,
+    "3D solids": 2,
+    "plumbing/drainage": 8,
+    "civil(alignment/profile/surface)": 6,
+    "title block/sheet": 1,
+    "tables/schedules": 1,
+    "layouts/viewports": 5,
+    "raw lisp/code execution": 4,
+    "blocks/attributes": 1,
+    "spline/ellipse/arc": 1
+   },
+   "test_files": 22,
+   "readme_title": "AutoCAD-MCP",
+   "fork_family": "F2 puran-water lineage: heavily rewritten fork (6 files shared, same LICENSE line)",
+   "inspection_depth": "deep",
+   "inspection_evidence": "journal.py, session.py, errors.py, contracts.py, delivery.py, com_sta.py, docs/INCIDENT-20260718-EXECUTION-HANG.md",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCAD_MCP",
+   "identity": "qq7995516/AutoCAD_MCP",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "b9d257ef1d9117b195215319473c08c6680e35fc",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 1741
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 19,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "spline/ellipse/arc": 1,
+    "layouts/viewports": 1,
+    "dxf export/import": 1
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD 2008 MCP Server (C# + COM)",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCAD_MCP_archive-main",
+   "identity": "ACKaraca/AutoCAD_MCP archive (README banner)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 63171,
+    "PowerShell": 175
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 14,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:comtypes",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "FileIPC(json/lisp polling)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "drawing diff/compare": 7,
+    "civil(alignment/profile/surface)": 16,
+    "dimensions": 20,
+    "leaders": 1,
+    "title block/sheet": 2,
+    "layouts/viewports": 26,
+    "3D solids": 5,
+    "undo/transaction": 9,
+    "plot/pdf": 3,
+    "selection sets/filters": 7,
+    "spline/ellipse/arc": 4,
+    "semantic/NLP search": 5,
+    "raw lisp/code execution": 11,
+    "hatch": 2,
+    "blocks/attributes": 1,
+    "walls/doors/windows": 2,
+    "rooms/floorplan": 2,
+    "drawing audit/purge/validation": 2,
+    "screenshot/preview": 3,
+    "tables/schedules": 1,
+    "plumbing/drainage": 1
+   },
+   "test_files": 43,
+   "readme_title": "AutoCAD MCP",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCad-MCP-6",
+   "identity": "Porta048/AutoCad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "239923a2a4b508cdf634d95ee647adeff733eb47",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 2650
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 11,
+   "backend_markers": [
+    "COM:win32com/pywin32",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)"
+   ],
+   "domain_hit_files": {
+    "hatch": 3,
+    "dimensions": 3,
+    "layouts/viewports": 1,
+    "spline/ellipse/arc": 1
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "AutoCadMcp-main",
+   "identity": "unverified (README names no upstream; C# AutoCADMcpPlugin)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 472
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 3,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {},
+   "test_files": 0,
+   "readme_title": "Project Purpose",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "Autocad-MCP-15",
+   "identity": "lfisher7401/Autocad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "24fa107ce82594362f5ce7ee527112fcd1025943",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 221
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "DXF:ezdxf"
+   ],
+   "domain_hit_files": {},
+   "test_files": 1,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "Autocad-MCP-16",
+   "identity": "mehmetsharma372/Autocad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "d2295dbb823b28c58680f4dc2417d1bbeb9a3b8a",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 95
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "DXF:ezdxf"
+   ],
+   "domain_hit_files": {},
+   "test_files": 1,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "Autocad-MCP-17",
+   "identity": "kazukim9869/Autocad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "5b44b50bc60a98a3c9998b04ec8e777cd0f12d5e",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 165
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "DXF:ezdxf"
+   ],
+   "domain_hit_files": {},
+   "test_files": 1,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "Autocad-MCP-18",
+   "identity": "malialvarez481/Autocad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "4fd1a4a190b08ffc5dbdbe6052da21d14ce4ab56",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 123
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "DXF:ezdxf"
+   ],
+   "domain_hit_files": {},
+   "test_files": 1,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "Autocad-MCP-19",
+   "identity": "U-C4N/Autocad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "cdb10638963898b3ea9b10cdd96a2c9bc495f184",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 134104
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)"
+   ],
+   "tool_registration_markers": 228,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "Plant3D/P&ID",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 110,
+    "plot/pdf": 46,
+    "dxf export/import": 133,
+    "screenshot/preview": 41,
+    "undo/transaction": 46,
+    "walls/doors/windows": 75,
+    "hatch": 63,
+    "xrefs": 17,
+    "drawing audit/purge/validation": 22,
+    "rooms/floorplan": 51,
+    "stairs": 27,
+    "dimensions": 110,
+    "leaders": 33,
+    "selection sets/filters": 8,
+    "spline/ellipse/arc": 16,
+    "tables/schedules": 18,
+    "title block/sheet": 44,
+    "quantity/BOQ/takeoff": 32,
+    "electrical": 24,
+    "plumbing/drainage": 41,
+    "P&ID symbols": 77,
+    "civil(alignment/profile/surface)": 52,
+    "survey/coordinates/parcels": 24,
+    "semantic/NLP search": 9,
+    "raw lisp/code execution": 8,
+    "blocks/attributes": 4,
+    "3D solids": 1,
+    "drawing diff/compare": 16,
+    "structural(grid/column/beam/rebar)": 7
+   },
+   "test_files": 178,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": "F1 U-C4N AutoCAD MCP Pro (373/373 source files identical)",
+   "inspection_depth": "deep",
+   "inspection_evidence": "identical sources to Autocad-MCP-main (hash-verified)",
+   "not_autocad": false
+  },
+  {
+   "folder": "Autocad-MCP-main",
+   "identity": "U-C4N/Autocad-MCP (README badges, pyproject URLs)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 134340
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)"
+   ],
+   "tool_registration_markers": 234,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "Plant3D/P&ID",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 110,
+    "plot/pdf": 46,
+    "dxf export/import": 133,
+    "screenshot/preview": 41,
+    "undo/transaction": 46,
+    "walls/doors/windows": 75,
+    "hatch": 63,
+    "xrefs": 17,
+    "drawing audit/purge/validation": 22,
+    "rooms/floorplan": 51,
+    "stairs": 27,
+    "dimensions": 110,
+    "leaders": 33,
+    "selection sets/filters": 8,
+    "spline/ellipse/arc": 16,
+    "tables/schedules": 18,
+    "title block/sheet": 44,
+    "quantity/BOQ/takeoff": 32,
+    "electrical": 24,
+    "plumbing/drainage": 41,
+    "P&ID symbols": 77,
+    "civil(alignment/profile/surface)": 52,
+    "survey/coordinates/parcels": 24,
+    "semantic/NLP search": 9,
+    "raw lisp/code execution": 8,
+    "blocks/attributes": 4,
+    "3D solids": 1,
+    "drawing diff/compare": 16,
+    "structural(grid/column/beam/rebar)": 7
+   },
+   "test_files": 178,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": "F1 U-C4N AutoCAD MCP Pro (373/373 source files identical)",
+   "inspection_depth": "deep",
+   "inspection_evidence": "security.py, config.py, backends/capability.py, backends/quarantine.py, com_backend.py (_run executor/timeout, transactions, PDF plot, capability map), CLAUDE.md",
+   "not_autocad": false
+  },
+  {
+   "folder": "BimOnMcp-main",
+   "identity": "General-Soju/BimOnMcp (README)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 4851,
+    "Python": 236,
+    "PowerShell": 74
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "NamedPipe",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "dimensions": 2,
+    "blocks/attributes": 1,
+    "layouts/viewports": 2,
+    "undo/transaction": 4,
+    "plumbing/drainage": 5,
+    "walls/doors/windows": 1,
+    "rooms/floorplan": 2,
+    "tables/schedules": 2,
+    "civil(alignment/profile/surface)": 3,
+    "selection sets/filters": 1,
+    "raw lisp/code execution": 1,
+    "electrical": 1
+   },
+   "test_files": 0,
+   "readme_title": "BimOn MCP",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "CADx",
+   "identity": "FuxuanNet/CADx",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "2d0f19cebd8c73ce2edd79d3c519a9d4e363e098",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4118,
+    "AutoLISP": 348
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 1,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "plot/pdf": 5,
+    "drawing diff/compare": 3,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4,
+    "selection sets/filters": 1,
+    "walls/doors/windows": 1,
+    "rooms/floorplan": 1,
+    "dimensions": 1
+   },
+   "test_files": 9,
+   "readme_title": "CADx",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "CadBridge",
+   "identity": "moshouhot/CadBridge",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "ba532fcdda43519c44a1a6e709eb4b4801915cfc",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 8040,
+    "C#": 1805,
+    "PowerShell": 456,
+    "AutoCAD script": 135
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "SendCommand",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "undo/transaction": 7,
+    "plumbing/drainage": 4,
+    "P&ID symbols": 2,
+    "civil(alignment/profile/surface)": 5,
+    "survey/coordinates/parcels": 1,
+    "semantic/NLP search": 4,
+    "dimensions": 1,
+    "layouts/viewports": 1,
+    "drawing audit/purge/validation": 3,
+    "drawing diff/compare": 1,
+    "selection sets/filters": 3,
+    "raw lisp/code execution": 1
+   },
+   "test_files": 1,
+   "readme_title": null,
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "Codex-Integration-with-Creative-Industry-Software",
+   "identity": "newvision798/Codex-Integration-with-Creative-Industry-Software",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "ea369047fc1888ea1f3b00be9a2b829a7e24a464",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 23746,
+    "PowerShell": 1714,
+    "JavaScript": 802,
+    "TypeScript": 404
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 11,
+   "backend_markers": [
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "hatch": 4,
+    "dimensions": 10,
+    "spline/ellipse/arc": 4,
+    "dxf export/import": 16,
+    "plot/pdf": 7,
+    "screenshot/preview": 29,
+    "selection sets/filters": 1,
+    "layouts/viewports": 2,
+    "leaders": 2,
+    "drawing diff/compare": 1,
+    "undo/transaction": 4,
+    "civil(alignment/profile/surface)": 1,
+    "plumbing/drainage": 1
+   },
+   "test_files": 43,
+   "readme_title": "星桥三联：StarBridge Creative Software MCP",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE",
+   "not_autocad": false
+  },
+  {
+   "folder": "DeepBIM-MCP-Autocad-Plugin-main",
+   "identity": "unverified (README names no upstream)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 3419,
+    "PowerShell": 594
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "ts-modelcontextprotocol-sdk"
+   ],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "FileIPC(json/lisp polling)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "survey/coordinates/parcels": 1,
+    "undo/transaction": 24,
+    "dxf export/import": 3,
+    "layouts/viewports": 2,
+    "plot/pdf": 1,
+    "blocks/attributes": 1
+   },
+   "test_files": 0,
+   "readme_title": "DeepBIM-MCP Autocad Plugin",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "Easy-MCP-AutoCad-main",
+   "identity": "zh19980811/Easy-MCP-AutoCad (target README cites it as V0.2.0 reference)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 2031
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 42,
+   "backend_markers": [
+    "COM:comtypes",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "plot/pdf": 1,
+    "dxf export/import": 2,
+    "selection sets/filters": 2,
+    "raw lisp/code execution": 1
+   },
+   "test_files": 3,
+   "readme_title": "AutoCAD MCP 服务器 / AutoCAD MCP Server",
+   "fork_family": "F5 Easy-MCP lineage: root",
+   "inspection_depth": "skim",
+   "inspection_evidence": "file list, README",
+   "not_autocad": false
+  },
+  {
+   "folder": "HHH",
+   "identity": "harishgatholiya-rgb/HHH",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "182243e727e1c5c4873228ef9a713d9cf5a6a611",
+   "shallow_clone": true,
+   "primary_language": null,
+   "lines_by_language": {},
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {},
+   "test_files": 0,
+   "readme_title": "HHH",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "MCP_AutocadMap3D",
+   "identity": "seb21-art/MCP_AutocadMap3D",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "9609a7f410fa7ea2d932fcd8df74b6c968ba0d64",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 32455,
+    "PowerShell": 4686
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 219,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "Civil3D",
+    "Map3D",
+    "NamedPipe",
+    "SendCommand",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "plumbing/drainage": 11,
+    "undo/transaction": 54,
+    "civil(alignment/profile/surface)": 29,
+    "survey/coordinates/parcels": 30,
+    "dimensions": 19,
+    "hatch": 7,
+    "blocks/attributes": 7,
+    "layouts/viewports": 20,
+    "plot/pdf": 7,
+    "spline/ellipse/arc": 15,
+    "dxf export/import": 32,
+    "leaders": 5,
+    "screenshot/preview": 4,
+    "walls/doors/windows": 1,
+    "drawing audit/purge/validation": 5,
+    "xrefs": 4,
+    "selection sets/filters": 3,
+    "3D solids": 9
+   },
+   "test_files": 4,
+   "readme_title": "MCP AutoCAD Map 3D",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE",
+   "not_autocad": false
+  },
+  {
+   "folder": "NXChieu-Autocad-MCP",
+   "identity": "hoangchieu91/NXChieu-Autocad-MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "44692423feda80f18e0faf07469cfd4c167abcb3",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 12571,
+    "AutoLISP": 1745,
+    "JavaScript": 157
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 123,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "Plant3D/P&ID",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "hatch": 11,
+    "dimensions": 19,
+    "blocks/attributes": 14,
+    "layouts/viewports": 11,
+    "plot/pdf": 8,
+    "dxf export/import": 19,
+    "spline/ellipse/arc": 4,
+    "selection sets/filters": 3,
+    "civil(alignment/profile/surface)": 1,
+    "screenshot/preview": 18,
+    "walls/doors/windows": 4,
+    "undo/transaction": 8,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "leaders": 8,
+    "drawing audit/purge/validation": 5,
+    "raw lisp/code execution": 6,
+    "rooms/floorplan": 4
+   },
+   "test_files": 12,
+   "readme_title": "NXChieu-Autocad-MCP",
+   "fork_family": "F2 puran-water lineage: superset (all 18 puran files) + F4 (contains all of codesknight)",
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "acad-mcp-loop",
+   "identity": "lianzheduohuanxi/acad-mcp-loop",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "5b5cea3880c35ca7772765c63afc68bfbf0eb2d6",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 8857,
+    "PowerShell": 70
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "NamedPipe",
+    "Plant3D/P&ID",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "plumbing/drainage": 5,
+    "drawing diff/compare": 1,
+    "layouts/viewports": 3,
+    "plot/pdf": 3,
+    "screenshot/preview": 3,
+    "undo/transaction": 4
+   },
+   "test_files": 0,
+   "readme_title": "acad-mcp-loop",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-ai-mcp",
+   "identity": "haianhdskt-boop/autocad-ai-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "9f982a71447402cad17261fde1e983af3255abeb",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 5568,
+    "PowerShell": 92,
+    "AutoLISP": 51
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)"
+   ],
+   "tool_registration_markers": 54,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "plot/pdf": 10,
+    "walls/doors/windows": 10,
+    "rooms/floorplan": 8,
+    "stairs": 7,
+    "structural(grid/column/beam/rebar)": 1,
+    "quantity/BOQ/takeoff": 3,
+    "title block/sheet": 2,
+    "plumbing/drainage": 5,
+    "dimensions": 13,
+    "civil(alignment/profile/surface)": 3,
+    "drawing audit/purge/validation": 7,
+    "hatch": 5,
+    "layouts/viewports": 6,
+    "electrical": 1,
+    "hvac/mechanical": 1,
+    "blocks/attributes": 5,
+    "dxf export/import": 9,
+    "screenshot/preview": 4,
+    "raw lisp/code execution": 1,
+    "tables/schedules": 1
+   },
+   "test_files": 2,
+   "readme_title": "AutoCAD AI MCP - Trợ Lý Kiến Trúc Sư Chuyên Nghiệp",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-com-mcp",
+   "identity": "ey2h/autocad-com-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "ffda2ed39fa5cae2832f4914dba76bd9215600b7",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1402
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 16,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 2,
+    "plot/pdf": 3,
+    "dxf export/import": 2,
+    "selection sets/filters": 2,
+    "semantic/NLP search": 2,
+    "leaders": 2
+   },
+   "test_files": 0,
+   "readme_title": "autocad-com-mcp",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mac-mcp",
+   "identity": "medjbilou/autocad-mac-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "f6375ec82aed94e966e08f8bd708b472b5132154",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 543
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 15,
+   "backend_markers": [
+    "AutoLISP",
+    "FileIPC(json/lisp polling)",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "hatch": 1,
+    "plot/pdf": 1,
+    "dxf export/import": 1,
+    "screenshot/preview": 1,
+    "undo/transaction": 1,
+    "selection sets/filters": 1,
+    "raw lisp/code execution": 1
+   },
+   "test_files": 0,
+   "readme_title": "example session (numbers are illustrative)",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp",
+   "identity": "thewisekape/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "7034dc444ba5b5680145a1eff52b4d83a262a75a",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 13846,
+    "AutoLISP": 6684,
+    "PowerShell": 274
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 23,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "Plant3D/P&ID",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "leaders": 11,
+    "dxf export/import": 14,
+    "undo/transaction": 8,
+    "selection sets/filters": 3,
+    "electrical": 7,
+    "P&ID symbols": 13,
+    "rooms/floorplan": 1,
+    "hatch": 7,
+    "dimensions": 13,
+    "xrefs": 6,
+    "layouts/viewports": 9,
+    "plot/pdf": 8,
+    "tables/schedules": 4,
+    "title block/sheet": 6,
+    "plumbing/drainage": 3,
+    "hvac/mechanical": 2,
+    "drawing audit/purge/validation": 8,
+    "walls/doors/windows": 1,
+    "civil(alignment/profile/surface)": 3,
+    "screenshot/preview": 11,
+    "raw lisp/code execution": 4,
+    "blocks/attributes": 1,
+    "spline/ellipse/arc": 1
+   },
+   "test_files": 8,
+   "readme_title": "AutoCAD MCP Server v5.0 — Unified",
+   "fork_family": "F2 puran-water lineage: derivative (NOTICE credits puran-water, ngk0, AnCode666)",
+   "inspection_depth": "medium",
+   "inspection_evidence": "README tool table, NOTICE, backends/com_backend.py outline",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-11",
+   "identity": "MuriloM676/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "4958e0e40dd7530ce3a80f681efc046ff731d442",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4083,
+    "AutoLISP": 1745
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 8,
+   "backend_markers": [
+    "AutoLISP",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 10,
+    "selection sets/filters": 2,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "hatch": 4,
+    "dimensions": 9,
+    "leaders": 6,
+    "plot/pdf": 5,
+    "undo/transaction": 6,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 10,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4
+   },
+   "test_files": 3,
+   "readme_title": "🏗️ AutoCAD MCP Server",
+   "fork_family": "F2 puran-water lineage: identical copy",
+   "inspection_depth": "deep",
+   "inspection_evidence": "identical sources to autocad-mcp-main4 (hash-verified)",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-12",
+   "identity": "Aaradhya-Dev-Tamrakar/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "9233b8588ba2c1f5b7aaecc2c10c88c0abe5da02",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 450,
+    "PowerShell": 48
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "COM:.NET interop",
+    "COM:comtypes",
+    "COM:win32com/pywin32",
+    "Civil3D",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "walls/doors/windows": 2,
+    "plot/pdf": 2,
+    "civil(alignment/profile/surface)": 1
+   },
+   "test_files": 1,
+   "readme_title": "Autodesk AutoCAD & Civil 3D MCP Bridge (`autocad-mcp`)",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-13",
+   "identity": "paulseongminpark/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "fbf19c6da81272de4f09358742eae046e9fdf9f4",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 206856,
+    "C++": 9354,
+    "PowerShell": 6659,
+    "C#": 1096,
+    "JavaScript": 228,
+    "C/C++ header": 172,
+    "AutoCAD script": 163
+   },
+   "license": "PROPRIETARY",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp",
+    "python-mcp-mcpserver(v2)"
+   ],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:comtypes",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "NamedPipe",
+    "SendCommand",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "hatch": 73,
+    "dimensions": 85,
+    "blocks/attributes": 69,
+    "dxf export/import": 81,
+    "walls/doors/windows": 108,
+    "semantic/NLP search": 75,
+    "drawing diff/compare": 88,
+    "rooms/floorplan": 23,
+    "spline/ellipse/arc": 42,
+    "P&ID symbols": 23,
+    "survey/coordinates/parcels": 43,
+    "drawing audit/purge/validation": 56,
+    "civil(alignment/profile/surface)": 103,
+    "raw lisp/code execution": 8,
+    "structural(grid/column/beam/rebar)": 4,
+    "xrefs": 26,
+    "layouts/viewports": 69,
+    "plot/pdf": 17,
+    "plumbing/drainage": 24,
+    "leaders": 15,
+    "screenshot/preview": 6,
+    "undo/transaction": 20,
+    "3D solids": 17,
+    "electrical": 12,
+    "quantity/BOQ/takeoff": 3,
+    "selection sets/filters": 3,
+    "title block/sheet": 4,
+    "tables/schedules": 2,
+    "stairs": 1
+   },
+   "test_files": 253,
+   "readme_title": "CAD OS",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE (proprietary)",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-14",
+   "identity": "lucasqdn/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "ef437fca36a5bb3f6145694cf54578971592d070",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 5862
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 1,
+   "backend_markers": [
+    "COM:comtypes",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "plumbing/drainage": 1,
+    "hatch": 6,
+    "civil(alignment/profile/surface)": 1,
+    "plot/pdf": 4,
+    "drawing audit/purge/validation": 6,
+    "raw lisp/code execution": 4,
+    "dimensions": 4,
+    "layouts/viewports": 2,
+    "blocks/attributes": 5,
+    "spline/ellipse/arc": 2,
+    "undo/transaction": 2,
+    "xrefs": 1,
+    "dxf export/import": 1,
+    "walls/doors/windows": 2
+   },
+   "test_files": 8,
+   "readme_title": "AutoCAD MCP",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-2",
+   "identity": "moisesbritez92/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "79e4fffa46e874e53684c0860d0872181f65b4e0",
+   "shallow_clone": true,
+   "primary_language": "TypeScript",
+   "lines_by_language": {
+    "TypeScript": 3652,
+    "AutoLISP": 2746,
+    "C#": 2189,
+    "PowerShell": 1442,
+    "Python": 640,
+    "AutoCAD script": 96
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "ts-modelcontextprotocol-sdk"
+   ],
+   "tool_registration_markers": 64,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "DXF:ezdxf",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "rooms/floorplan": 19,
+    "hatch": 2,
+    "dimensions": 14,
+    "leaders": 2,
+    "blocks/attributes": 5,
+    "undo/transaction": 2,
+    "spline/ellipse/arc": 3,
+    "drawing audit/purge/validation": 2,
+    "selection sets/filters": 12,
+    "walls/doors/windows": 26,
+    "semantic/NLP search": 5,
+    "electrical": 12,
+    "layouts/viewports": 12,
+    "civil(alignment/profile/surface)": 6,
+    "plumbing/drainage": 2,
+    "xrefs": 1,
+    "dxf export/import": 3,
+    "plot/pdf": 1,
+    "raw lisp/code execution": 1,
+    "screenshot/preview": 2
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP Server & Plugin",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-3",
+   "identity": "andagni/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "ba96a629b43874e907a973df772ee9e56105b712",
+   "shallow_clone": true,
+   "primary_language": "Rust",
+   "lines_by_language": {
+    "Rust": 207364,
+    "AutoLISP": 61
+   },
+   "license": "GPL-3.0",
+   "mcp_sdk_markers": [
+    "rust-mcp"
+   ],
+   "tool_registration_markers": 17,
+   "backend_markers": [
+    "AutoLISP",
+    "Civil3D",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "accoreconsole",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "xrefs": 74,
+    "civil(alignment/profile/surface)": 31,
+    "screenshot/preview": 57,
+    "plot/pdf": 50,
+    "title block/sheet": 50,
+    "semantic/NLP search": 58,
+    "dimensions": 30,
+    "layouts/viewports": 52,
+    "dxf export/import": 59,
+    "undo/transaction": 16,
+    "P&ID symbols": 9,
+    "drawing audit/purge/validation": 8,
+    "hatch": 5,
+    "plumbing/drainage": 4,
+    "survey/coordinates/parcels": 27,
+    "tables/schedules": 3,
+    "selection sets/filters": 6,
+    "walls/doors/windows": 6,
+    "blocks/attributes": 6,
+    "leaders": 5,
+    "spline/ellipse/arc": 2,
+    "3D solids": 1,
+    "raw lisp/code execution": 1,
+    "drawing diff/compare": 4
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE (GPL-3.0)",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-4",
+   "identity": "Slacker-LLC/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "2723b4fae13ac7bc91274fcd502528b92da7a6a5",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 3230
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 30,
+   "backend_markers": [
+    "COM:win32com/pywin32"
+   ],
+   "domain_hit_files": {
+    "dimensions": 2,
+    "blocks/attributes": 2,
+    "layouts/viewports": 2,
+    "plot/pdf": 2,
+    "dxf export/import": 3,
+    "screenshot/preview": 2,
+    "spline/ellipse/arc": 3,
+    "quantity/BOQ/takeoff": 1,
+    "civil(alignment/profile/surface)": 1
+   },
+   "test_files": 1,
+   "readme_title": "autocad-mcp",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-5",
+   "identity": "C48H74/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "b296bf0508bbbe9d244b821624a97a6b6d2ca5d9",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 8887
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "Plant3D/P&ID",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "dimensions": 18,
+    "layouts/viewports": 14,
+    "plot/pdf": 15,
+    "dxf export/import": 18,
+    "screenshot/preview": 7,
+    "plumbing/drainage": 7,
+    "drawing audit/purge/validation": 10,
+    "hatch": 7,
+    "leaders": 5,
+    "title block/sheet": 4,
+    "P&ID symbols": 4,
+    "civil(alignment/profile/surface)": 2,
+    "blocks/attributes": 11,
+    "undo/transaction": 11,
+    "selection sets/filters": 7,
+    "spline/ellipse/arc": 1,
+    "survey/coordinates/parcels": 1,
+    "raw lisp/code execution": 3,
+    "xrefs": 1
+   },
+   "test_files": 19,
+   "readme_title": "AutoCAD MCP for Piping & Pipe Supports",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-7",
+   "identity": "PeterPerez01/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "c9818ea7f8d77bb49891809ddef84b14a40064dd",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1713
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 22,
+   "backend_markers": [
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "walls/doors/windows": 1,
+    "rooms/floorplan": 1,
+    "structural(grid/column/beam/rebar)": 1,
+    "dimensions": 1,
+    "undo/transaction": 1,
+    "spline/ellipse/arc": 1,
+    "electrical": 1,
+    "plumbing/drainage": 1,
+    "hvac/mechanical": 1
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-8",
+   "identity": "id0o0bi/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "aff502aea534683da44ab378b2c9b8ddef6f5e01",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 2300
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-mcpserver(v2)"
+   ],
+   "tool_registration_markers": 5,
+   "backend_markers": [
+    "AutoLISP",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "hatch": 3,
+    "dxf export/import": 8,
+    "screenshot/preview": 7,
+    "drawing audit/purge/validation": 2,
+    "civil(alignment/profile/surface)": 5,
+    "raw lisp/code execution": 3,
+    "rooms/floorplan": 4,
+    "layouts/viewports": 1,
+    "plot/pdf": 3,
+    "undo/transaction": 1,
+    "dimensions": 4,
+    "title block/sheet": 2,
+    "walls/doors/windows": 2,
+    "leaders": 1,
+    "electrical": 1,
+    "selection sets/filters": 1,
+    "tables/schedules": 1,
+    "survey/coordinates/parcels": 1
+   },
+   "test_files": 0,
+   "readme_title": "autocad-mcp",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-9",
+   "identity": "Roy-y111/autocad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "59101db9968887f2d5d7283afad77d05a76e2a20",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 3345,
+    "PowerShell": 636,
+    "AutoLISP": 566
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 17,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "SendCommand",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "structural(grid/column/beam/rebar)": 3,
+    "dimensions": 8,
+    "layouts/viewports": 3,
+    "civil(alignment/profile/surface)": 3,
+    "hatch": 1,
+    "leaders": 2,
+    "walls/doors/windows": 2,
+    "rooms/floorplan": 1,
+    "dxf export/import": 2,
+    "selection sets/filters": 4,
+    "blocks/attributes": 4,
+    "tables/schedules": 1
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-main-2",
+   "identity": "ks40-academy/autocad-mcp (README clone URL; Vietnamese copy of puran-water)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4083,
+    "AutoLISP": 1745
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 8,
+   "backend_markers": [
+    "AutoLISP",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 10,
+    "selection sets/filters": 2,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "hatch": 4,
+    "dimensions": 9,
+    "leaders": 6,
+    "plot/pdf": 5,
+    "undo/transaction": 6,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 10,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4
+   },
+   "test_files": 3,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": "F2 puran-water lineage: identical copy",
+   "inspection_depth": "deep",
+   "inspection_evidence": "identical sources to autocad-mcp-main4 (hash-verified)",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-main4",
+   "identity": "puran-water/autocad-mcp (README clone URL)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4083,
+    "AutoLISP": 1745
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 8,
+   "backend_markers": [
+    "AutoLISP",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 10,
+    "selection sets/filters": 2,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "hatch": 4,
+    "dimensions": 9,
+    "leaders": 6,
+    "plot/pdf": 5,
+    "undo/transaction": 6,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 10,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4
+   },
+   "test_files": 3,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": "F2 puran-water lineage: root (18/18 files identical to -main-2 and -11)",
+   "inspection_depth": "deep",
+   "inspection_evidence": "backends/file_ipc.py, backends/base.py, server.py, config.py",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-master",
+   "identity": "xstaar/autocad-mcp (README)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "TypeScript",
+   "lines_by_language": {
+    "TypeScript": 2029,
+    "AutoLISP": 736,
+    "JavaScript": 350,
+    "PowerShell": 64
+   },
+   "license": "PROPRIETARY",
+   "mcp_sdk_markers": [
+    "ts-modelcontextprotocol-sdk"
+   ],
+   "tool_registration_markers": 5,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "FileIPC(json/lisp polling)"
+   ],
+   "domain_hit_files": {
+    "stairs": 4,
+    "dimensions": 5,
+    "walls/doors/windows": 5,
+    "rooms/floorplan": 2,
+    "hatch": 4,
+    "civil(alignment/profile/surface)": 4,
+    "dxf export/import": 3,
+    "leaders": 3,
+    "layouts/viewports": 2,
+    "plot/pdf": 2,
+    "plumbing/drainage": 1,
+    "drawing audit/purge/validation": 1,
+    "structural(grid/column/beam/rebar)": 1,
+    "tables/schedules": 1,
+    "title block/sheet": 1,
+    "raw lisp/code execution": 2
+   },
+   "test_files": 0,
+   "readme_title": "What is this?",
+   "fork_family": null,
+   "inspection_depth": "medium",
+   "inspection_evidence": "LICENSE (proprietary), OWNER-GUIDE.txt, src/ layout",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-server-1",
+   "identity": "AntiApus/autocad-mcp-server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "8015b466f0715c7191a2fd88db1076354379ed81",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1843
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 22,
+   "backend_markers": [
+    "COM:.NET interop",
+    "COM:win32com/pywin32"
+   ],
+   "domain_hit_files": {
+    "spline/ellipse/arc": 2,
+    "walls/doors/windows": 1,
+    "rooms/floorplan": 1,
+    "structural(grid/column/beam/rebar)": 1,
+    "dimensions": 1,
+    "undo/transaction": 1,
+    "electrical": 1,
+    "plumbing/drainage": 1,
+    "hvac/mechanical": 1
+   },
+   "test_files": 1,
+   "readme_title": "AutoCAD MCP Server - Complete Documentation",
+   "fork_family": "F6 AntiApus architectural server",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-server-2",
+   "identity": "ranvirw18/autocad-mcp-server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "c8edcef7515675e45522dc5fb4ac4f1b6cd91065",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 710
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "FileIPC(json/lisp polling)",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "plot/pdf": 3,
+    "dimensions": 4
+   },
+   "test_files": 3,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-server-3",
+   "identity": "vigneshpbmenon/autocad-mcp-server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "e7091ad32a8be68fdc36acfdd37d223c569a8dc9",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 91
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 6,
+   "backend_markers": [
+    "COM:pyautocad"
+   ],
+   "domain_hit_files": {
+    "spline/ellipse/arc": 1
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP Server v0.1",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-server-4",
+   "identity": "nMetaloumin/autocad-mcp-server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": null,
+   "shallow_clone": false,
+   "primary_language": null,
+   "lines_by_language": {},
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {},
+   "test_files": 0,
+   "readme_title": null,
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-server-main",
+   "identity": "unverified (README placeholder URL; variant of AntiApus/autocad-mcp-server; possibly thepiruthvirajan/autocad-mcp-server)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1840
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 22,
+   "backend_markers": [
+    "COM:.NET interop",
+    "COM:win32com/pywin32"
+   ],
+   "domain_hit_files": {
+    "spline/ellipse/arc": 2,
+    "walls/doors/windows": 1,
+    "rooms/floorplan": 1,
+    "structural(grid/column/beam/rebar)": 1,
+    "dimensions": 1,
+    "undo/transaction": 1,
+    "electrical": 1,
+    "plumbing/drainage": 1,
+    "hvac/mechanical": 1
+   },
+   "test_files": 1,
+   "readme_title": "AutoCAD MCP Server - Complete Documentation",
+   "fork_family": "F6 variant of AntiApus architectural server",
+   "inspection_depth": "medium",
+   "inspection_evidence": "autocad_mcp/server.py outline, diff against autocad-mcp-server-1",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-server1",
+   "identity": "hoangduong06052001/autocad-mcp-server1",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "219fef168806b46309dfd34d415afeba6c614b8a",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1161
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 21,
+   "backend_markers": [
+    "COM:comtypes",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf"
+   ],
+   "domain_hit_files": {
+    "plot/pdf": 1,
+    "dxf export/import": 1,
+    "selection sets/filters": 1
+   },
+   "test_files": 0,
+   "readme_title": "AutoCAD MCP 服务器 / AutoCAD MCP Server",
+   "fork_family": "F5 Easy-MCP lineage: 4/4 files from Easy-MCP-AutoCad",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-mcp-ultra",
+   "identity": "CaeliaEve/autocad-mcp-ultra",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "dba0602bac6bb25246c217e3689e73f8962a1d28",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 71485,
+    "Python": 27945,
+    "VB.NET": 2167,
+    "AutoLISP": 1378,
+    "PowerShell": 233
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)"
+   ],
+   "tool_registration_markers": 167,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "Civil3D",
+    "DXF:ezdxf",
+    "FileIPC(json/lisp polling)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "NamedPipe",
+    "Plant3D/P&ID",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 69,
+    "screenshot/preview": 85,
+    "undo/transaction": 180,
+    "spline/ellipse/arc": 15,
+    "walls/doors/windows": 10,
+    "civil(alignment/profile/surface)": 236,
+    "dimensions": 51,
+    "drawing diff/compare": 8,
+    "survey/coordinates/parcels": 28,
+    "dxf export/import": 36,
+    "plumbing/drainage": 8,
+    "hatch": 26,
+    "plot/pdf": 10,
+    "drawing audit/purge/validation": 14,
+    "3D solids": 13,
+    "leaders": 23,
+    "semantic/NLP search": 6,
+    "tables/schedules": 4,
+    "blocks/attributes": 11,
+    "selection sets/filters": 7,
+    "title block/sheet": 11,
+    "xrefs": 2,
+    "rooms/floorplan": 1,
+    "electrical": 2,
+    "P&ID symbols": 12,
+    "raw lisp/code execution": 8
+   },
+   "test_files": 9,
+   "readme_title": "AutoCAD MCP Ultra",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-tarch-mcp",
+   "identity": "unicronsmith/autocad-tarch-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "cfe237e54f9af73c7e64605600373f27ff9c4104",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 5981,
+    "C#": 625,
+    "PowerShell": 77
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 7,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "SendCommand",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "hatch": 6,
+    "dimensions": 7,
+    "leaders": 6,
+    "layouts/viewports": 7,
+    "plot/pdf": 4,
+    "dxf export/import": 10,
+    "selection sets/filters": 4,
+    "spline/ellipse/arc": 7,
+    "plumbing/drainage": 2,
+    "survey/coordinates/parcels": 2,
+    "raw lisp/code execution": 4,
+    "P&ID symbols": 1,
+    "blocks/attributes": 1,
+    "undo/transaction": 1,
+    "civil(alignment/profile/surface)": 1
+   },
+   "test_files": 0,
+   "readme_title": "autocad-tarch-mcp",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad-trimble-mcp",
+   "identity": "xuantinhnbs-rgb/autocad-trimble-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "f4b9bdcbef26d5b1e0c318ac86ec3fb3b2e00803",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 6330,
+    "C#": 1389,
+    "PowerShell": 274,
+    "AutoCAD script": 78,
+    "AutoLISP": 22
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp",
+    "python-mcp-mcpserver(v2)"
+   ],
+   "tool_registration_markers": 94,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:comtypes",
+    "COM:win32com/pywin32",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "dimensions": 4,
+    "plumbing/drainage": 3,
+    "hatch": 3,
+    "leaders": 2,
+    "blocks/attributes": 3,
+    "layouts/viewports": 4,
+    "plot/pdf": 3,
+    "dxf export/import": 2,
+    "selection sets/filters": 1,
+    "spline/ellipse/arc": 2,
+    "civil(alignment/profile/surface)": 2,
+    "drawing audit/purge/validation": 2,
+    "raw lisp/code execution": 2
+   },
+   "test_files": 5,
+   "readme_title": "autocad-trimble-mcp",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad_mcp-1",
+   "identity": "niaoAs2O3/autocad_mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "b525ed8a340014ff9fee35e631c0c19a1f56c49c",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1058
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 20,
+   "backend_markers": [
+    "COM:.NET interop",
+    "COM:win32com/pywin32"
+   ],
+   "domain_hit_files": {
+    "dimensions": 4,
+    "survey/coordinates/parcels": 1,
+    "leaders": 1,
+    "spline/ellipse/arc": 1
+   },
+   "test_files": 0,
+   "readme_title": null,
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocad_mcp_pro-1.6.0",
+   "identity": "U-C4N/Autocad-MCP v1.6.0 PyPI sdist (PKG-INFO)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 134340
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)"
+   ],
+   "tool_registration_markers": 234,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "Plant3D/P&ID",
+    "SendCommand",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 110,
+    "plot/pdf": 46,
+    "dxf export/import": 133,
+    "screenshot/preview": 41,
+    "undo/transaction": 46,
+    "walls/doors/windows": 75,
+    "hatch": 63,
+    "xrefs": 17,
+    "drawing audit/purge/validation": 22,
+    "rooms/floorplan": 51,
+    "stairs": 27,
+    "dimensions": 110,
+    "leaders": 33,
+    "selection sets/filters": 8,
+    "spline/ellipse/arc": 16,
+    "tables/schedules": 18,
+    "title block/sheet": 44,
+    "quantity/BOQ/takeoff": 32,
+    "electrical": 24,
+    "plumbing/drainage": 41,
+    "P&ID symbols": 77,
+    "civil(alignment/profile/surface)": 52,
+    "survey/coordinates/parcels": 24,
+    "semantic/NLP search": 9,
+    "raw lisp/code execution": 8,
+    "blocks/attributes": 4,
+    "3D solids": 1,
+    "drawing diff/compare": 16,
+    "structural(grid/column/beam/rebar)": 7
+   },
+   "test_files": 178,
+   "readme_title": "AutoCAD MCP Pro",
+   "fork_family": "F1 U-C4N AutoCAD MCP Pro (373/373 source files identical)",
+   "inspection_depth": "deep",
+   "inspection_evidence": "identical sources to Autocad-MCP-main (hash-verified)",
+   "not_autocad": false
+  },
+  {
+   "folder": "autocadplant3d-mcp",
+   "identity": "Romeraaa/autocadplant3d-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "dccb9bb2e04d6be9e90e01499ac26600143b31f1",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 27175,
+    "AutoLISP": 1745,
+    "C#": 1230
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 11,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoLISP",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 10,
+    "selection sets/filters": 3,
+    "electrical": 2,
+    "P&ID symbols": 37,
+    "hatch": 4,
+    "dimensions": 11,
+    "leaders": 6,
+    "plot/pdf": 13,
+    "undo/transaction": 6,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 10,
+    "layouts/viewports": 6,
+    "tables/schedules": 13,
+    "quantity/BOQ/takeoff": 2,
+    "plumbing/drainage": 20,
+    "civil(alignment/profile/surface)": 3,
+    "semantic/NLP search": 7,
+    "raw lisp/code execution": 4,
+    "survey/coordinates/parcels": 1,
+    "title block/sheet": 2
+   },
+   "test_files": 36,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": "F2 puran-water lineage: derivative (78% of puran files)",
+   "inspection_depth": "skim",
+   "inspection_evidence": "README, LICENSE",
+   "not_autocad": false
+  },
+  {
+   "folder": "best-cad-mcp-master",
+   "identity": "LokmenoWer/best-cad-mcp (README, pyproject)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 60409
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp",
+    "python-mcp-lowlevel",
+    "python-mcp-mcpserver(v2)"
+   ],
+   "tool_registration_markers": 324,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "COM:.NET interop",
+    "COM:comtypes",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "hatch": 18,
+    "dimensions": 32,
+    "leaders": 13,
+    "layouts/viewports": 16,
+    "plot/pdf": 13,
+    "dxf export/import": 9,
+    "screenshot/preview": 10,
+    "undo/transaction": 14,
+    "title block/sheet": 9,
+    "civil(alignment/profile/surface)": 15,
+    "semantic/NLP search": 37,
+    "survey/coordinates/parcels": 8,
+    "blocks/attributes": 10,
+    "xrefs": 7,
+    "selection sets/filters": 5,
+    "spline/ellipse/arc": 16,
+    "3D solids": 2,
+    "tables/schedules": 4,
+    "drawing audit/purge/validation": 12,
+    "raw lisp/code execution": 3,
+    "walls/doors/windows": 8,
+    "rooms/floorplan": 5,
+    "structural(grid/column/beam/rebar)": 2,
+    "quantity/BOQ/takeoff": 1,
+    "electrical": 4,
+    "plumbing/drainage": 1,
+    "hvac/mechanical": 2,
+    "drawing diff/compare": 2,
+    "stairs": 2
+   },
+   "test_files": 37,
+   "readme_title": "best-cad-mcp",
+   "fork_family": null,
+   "inspection_depth": "medium",
+   "inspection_evidence": "src/server.py (MCPServer v2 setup, tool registration wrapper, annotations), pyproject.toml",
+   "not_autocad": false
+  },
+  {
+   "folder": "cad-mcp",
+   "identity": "shtirlitsDva/cad-mcp",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "66cde124b011697d74dbe001f8cf8189434c2491",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 14653,
+    "PowerShell": 2073,
+    "AutoCAD script": 3
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 17,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "Civil3D",
+    "Map3D",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "NamedPipe",
+    "accoreconsole",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "plumbing/drainage": 57,
+    "drawing audit/purge/validation": 3,
+    "layouts/viewports": 1,
+    "civil(alignment/profile/surface)": 35,
+    "undo/transaction": 25,
+    "semantic/NLP search": 9,
+    "blocks/attributes": 1,
+    "walls/doors/windows": 4,
+    "electrical": 4,
+    "screenshot/preview": 2,
+    "dimensions": 1,
+    "tables/schedules": 2,
+    "dxf export/import": 1,
+    "hatch": 1
+   },
+   "test_files": 31,
+   "readme_title": "cad-mcp",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README",
+   "not_autocad": false
+  },
+  {
+   "folder": "cadbridge-autocad-mcp-server",
+   "identity": "dimitrovakulenko/cadbridge-autocad-mcp-server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "f9a0111c051ed02ee2b625246c06d67e9d3a3272",
+   "shallow_clone": true,
+   "primary_language": null,
+   "lines_by_language": {},
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {},
+   "test_files": 0,
+   "readme_title": null,
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "cadplot-mcp",
+   "identity": "agadraphy/cadplot-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "0b3c09a2ef199aa11452bbf79621afc69a42c205",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 45884,
+    "PowerShell": 9561,
+    "C#": 5776,
+    "JavaScript": 49
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp",
+    "python-mcp-mcpserver(v2)"
+   ],
+   "tool_registration_markers": 34,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "COM:win32com/pywin32",
+    "FileIPC(json/lisp polling)",
+    "NamedPipe",
+    "TCP/WebSocket/HTTP bridge",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "drawing audit/purge/validation": 38,
+    "plot/pdf": 55,
+    "dxf export/import": 5,
+    "raw lisp/code execution": 2,
+    "screenshot/preview": 13,
+    "undo/transaction": 14,
+    "semantic/NLP search": 6,
+    "civil(alignment/profile/surface)": 8,
+    "layouts/viewports": 37,
+    "plumbing/drainage": 17,
+    "rooms/floorplan": 3,
+    "dimensions": 12,
+    "survey/coordinates/parcels": 1,
+    "title block/sheet": 6,
+    "blocks/attributes": 7,
+    "xrefs": 3,
+    "leaders": 2,
+    "spline/ellipse/arc": 1,
+    "hatch": 2,
+    "walls/doors/windows": 1,
+    "stairs": 1,
+    "structural(grid/column/beam/rebar)": 1
+   },
+   "test_files": 65,
+   "readme_title": "CadPlot MCP",
+   "fork_family": null,
+   "inspection_depth": "medium",
+   "inspection_evidence": "backends/autocad_com.py plot-configuration reads (grep)",
+   "not_autocad": false
+  },
+  {
+   "folder": "dwg-mcp-master",
+   "identity": "bimwright/dwg-mcp (README)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 37223,
+    "PowerShell": 2000
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 82,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "AutoLISP",
+    "NamedPipe",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 35,
+    "screenshot/preview": 21,
+    "undo/transaction": 61,
+    "civil(alignment/profile/surface)": 17,
+    "drawing audit/purge/validation": 10,
+    "plumbing/drainage": 14,
+    "dimensions": 20,
+    "raw lisp/code execution": 14,
+    "semantic/NLP search": 3,
+    "leaders": 9,
+    "blocks/attributes": 10,
+    "hatch": 3,
+    "dxf export/import": 6,
+    "rooms/floorplan": 3,
+    "survey/coordinates/parcels": 2,
+    "structural(grid/column/beam/rebar)": 1,
+    "plot/pdf": 1,
+    "P&ID symbols": 1,
+    "walls/doors/windows": 2
+   },
+   "test_files": 87,
+   "readme_title": "Drawing Translation Should Not Stop At Manual Copy-Paste",
+   "fork_family": null,
+   "inspection_depth": "medium",
+   "inspection_evidence": "ARCHITECTURE.md (transport, auth, threading, LISP refusal); design doc, not code",
+   "not_autocad": false
+  },
+  {
+   "folder": "greenloom_CAD_MCP",
+   "identity": "softwelve/greenloom_CAD_MCP",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "7b1a723ce202172fb3ab26a447698d8d235c2631",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4083,
+    "AutoLISP": 1745
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 8,
+   "backend_markers": [
+    "AutoLISP",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 10,
+    "selection sets/filters": 2,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "hatch": 4,
+    "dimensions": 9,
+    "leaders": 6,
+    "plot/pdf": 5,
+    "undo/transaction": 6,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 10,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4
+   },
+   "test_files": 3,
+   "readme_title": "Greenloom CAD MCP Server",
+   "fork_family": "F2 puran-water lineage: partial derivative (22%)",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "lambdacad-mcp",
+   "identity": "Psalmustrack/lambdacad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "454c80416c01338048515dd18cfc1d82d9742d4b",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 5160,
+    "AutoLISP": 114
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)"
+   ],
+   "tool_registration_markers": 128,
+   "backend_markers": [
+    "AutoLISP",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)"
+   ],
+   "domain_hit_files": {
+    "rooms/floorplan": 2,
+    "hatch": 1,
+    "dimensions": 3,
+    "leaders": 1,
+    "blocks/attributes": 2,
+    "layouts/viewports": 2,
+    "plot/pdf": 2,
+    "dxf export/import": 2,
+    "screenshot/preview": 3,
+    "undo/transaction": 2,
+    "selection sets/filters": 3,
+    "spline/ellipse/arc": 1,
+    "title block/sheet": 3,
+    "quantity/BOQ/takeoff": 2,
+    "electrical": 2,
+    "P&ID symbols": 1,
+    "survey/coordinates/parcels": 1,
+    "drawing audit/purge/validation": 1,
+    "drawing diff/compare": 1,
+    "semantic/NLP search": 2,
+    "raw lisp/code execution": 3,
+    "walls/doors/windows": 2
+   },
+   "test_files": 2,
+   "readme_title": "λ lambdacad-mcp",
+   "fork_family": null,
+   "inspection_depth": "medium",
+   "inspection_evidence": "README capability/security sections, server.py function outline, NOTICE",
+   "not_autocad": false
+  },
+  {
+   "folder": "mcp-autocad-api",
+   "identity": "dimitrovakulenko/mcp-autocad-api",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "bae9e92bc326679ba9b84b10f79dfa40fa52a204",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1821
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 6,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "dimensions": 2,
+    "semantic/NLP search": 3,
+    "raw lisp/code execution": 1
+   },
+   "test_files": 1,
+   "readme_title": "AutoCAD Documentation MCP Server",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "mcp-connector-skills",
+   "identity": "AUTOM8LABS/mcp-connector-skills",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "27441dcf7e33abd17da3514456e793f1d6c8febb",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 674
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "plot/pdf": 1
+   },
+   "test_files": 1,
+   "readme_title": "AUTOM8LABS Connector Skills",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "multiCAD-mcp",
+   "identity": "ewuiyud/multiCAD-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "020d00b1740892556f693d2612b98e9b03f06552",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 22661,
+    "JavaScript": 786
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)",
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 18,
+   "backend_markers": [
+    "AutoCAD Electrical",
+    "COM:win32com/pywin32",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "screenshot/preview": 6,
+    "plumbing/drainage": 5,
+    "selection sets/filters": 11,
+    "blocks/attributes": 2,
+    "hatch": 5,
+    "dimensions": 14,
+    "leaders": 11,
+    "spline/ellipse/arc": 11,
+    "structural(grid/column/beam/rebar)": 1,
+    "drawing diff/compare": 1,
+    "dxf export/import": 10,
+    "civil(alignment/profile/surface)": 2,
+    "layouts/viewports": 4,
+    "drawing audit/purge/validation": 1,
+    "undo/transaction": 4,
+    "semantic/NLP search": 1,
+    "walls/doors/windows": 3,
+    "rooms/floorplan": 4,
+    "plot/pdf": 1,
+    "tables/schedules": 1,
+    "quantity/BOQ/takeoff": 2,
+    "survey/coordinates/parcels": 2,
+    "raw lisp/code execution": 2,
+    "stairs": 1,
+    "electrical": 1,
+    "hvac/mechanical": 1
+   },
+   "test_files": 9,
+   "readme_title": "multiCAD-mcp",
+   "fork_family": "F3 multiCAD: modified fork (Jaccard 0.52)",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  },
+  {
+   "folder": "multiCAD-mcp-main",
+   "identity": "AnCode666/multiCAD-mcp (README, pyproject)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 16140,
+    "JavaScript": 786
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "python-fastmcp(jlowin)",
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 1,
+   "backend_markers": [
+    "COM:win32com/pywin32",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "plumbing/drainage": 4,
+    "selection sets/filters": 11,
+    "blocks/attributes": 2,
+    "hatch": 5,
+    "dimensions": 11,
+    "leaders": 7,
+    "spline/ellipse/arc": 9,
+    "tables/schedules": 1,
+    "dxf export/import": 10,
+    "civil(alignment/profile/surface)": 2,
+    "layouts/viewports": 2,
+    "drawing audit/purge/validation": 1,
+    "screenshot/preview": 4,
+    "undo/transaction": 4,
+    "semantic/NLP search": 1,
+    "walls/doors/windows": 3,
+    "rooms/floorplan": 3,
+    "plot/pdf": 1
+   },
+   "test_files": 6,
+   "readme_title": "multiCAD-mcp",
+   "fork_family": "F3 multiCAD: root (AnCode666)",
+   "inspection_depth": "medium",
+   "inspection_evidence": "core/cad_interface.py, config.json, mcp_tools/shorthand.py, adapters/__init__.py",
+   "not_autocad": false
+  },
+  {
+   "folder": "new-acad-main",
+   "identity": "Jjo37/new-acad per task brief; archive itself names no upstream (LICENSE: Jjo)",
+   "source_kind": "extracted-archive",
+   "branch": null,
+   "commit": null,
+   "shallow_clone": null,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 36591,
+    "TypeScript": 25668,
+    "JavaScript": 12899,
+    "PowerShell": 2834,
+    "Python": 409,
+    "AutoLISP": 16
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "ts-modelcontextprotocol-sdk"
+   ],
+   "tool_registration_markers": 7,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoLISP",
+    "COM:comtypes",
+    "Civil3D",
+    "FileIPC(json/lisp polling)",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "screenshot/preview": 17,
+    "drawing audit/purge/validation": 16,
+    "plot/pdf": 27,
+    "dxf export/import": 49,
+    "plumbing/drainage": 41,
+    "quantity/BOQ/takeoff": 17,
+    "civil(alignment/profile/surface)": 108,
+    "survey/coordinates/parcels": 31,
+    "hatch": 18,
+    "dimensions": 12,
+    "walls/doors/windows": 4,
+    "undo/transaction": 58,
+    "title block/sheet": 12,
+    "leaders": 1,
+    "blocks/attributes": 5,
+    "xrefs": 4,
+    "selection sets/filters": 1,
+    "spline/ellipse/arc": 1,
+    "3D solids": 1,
+    "layouts/viewports": 23,
+    "drawing diff/compare": 4,
+    "semantic/NLP search": 1,
+    "P&ID symbols": 2,
+    "raw lisp/code execution": 5,
+    "tables/schedules": 1
+   },
+   "test_files": 37,
+   "readme_title": "new-acad",
+   "fork_family": null,
+   "inspection_depth": "skim",
+   "inspection_evidence": "README_EN.md, LICENSE, directory layout",
+   "not_autocad": false
+  },
+  {
+   "folder": "not-autocad-mcp/Floorplan-Dimractor",
+   "identity": "jasoncobra3/Floorplan-Dimractor",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "58090b42ccf879c7a9aee62ee773fac4af45166b",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 668
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "rooms/floorplan": 2,
+    "dimensions": 6,
+    "layouts/viewports": 1,
+    "plot/pdf": 5
+   },
+   "test_files": 1,
+   "readme_title": "🏠 Floorplan Dimension Extractor",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/LayerScape",
+   "identity": "splrad/LayerScape",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "19a3f8a9959e1a1d8b027d286b081fdf4bd89fb8",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 15900,
+    "PowerShell": 236
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "Multi-CAD(ZWCAD/BricsCAD/GstarCAD)"
+   ],
+   "domain_hit_files": {
+    "screenshot/preview": 2,
+    "semantic/NLP search": 1,
+    "layouts/viewports": 4,
+    "undo/transaction": 4,
+    "blocks/attributes": 1
+   },
+   "test_files": 0,
+   "readme_title": "功能",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/NX-Batch-Processing",
+   "identity": "MohanDulam/NX-Batch-Processing",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "fd2cd8d5dd1ae0fd4e7f97b5802caca8a7777432",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 670
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "plot/pdf": 2,
+    "dxf export/import": 2,
+    "dimensions": 1
+   },
+   "test_files": 0,
+   "readme_title": "",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/Siemens_NX_File_Renamer",
+   "identity": "nahidmubin/Siemens_NX_File_Renamer",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "e6ee7f3dc271c424ffdfaa42c86d7ce58badb239",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 408
+   },
+   "license": "GPL-3.0",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "COM:win32com/pywin32"
+   ],
+   "domain_hit_files": {},
+   "test_files": 0,
+   "readme_title": "Siemens NX File Renamer",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/SwpilotCLI",
+   "identity": "arthurle3210/SwpilotCLI",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "5824b367238e4615609aff1edb5253e2420e0333",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 9472,
+    "PowerShell": 309,
+    "JavaScript": 0
+   },
+   "license": "OTHER-custom",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "screenshot/preview": 2,
+    "dimensions": 11,
+    "layouts/viewports": 5,
+    "undo/transaction": 4,
+    "civil(alignment/profile/surface)": 3,
+    "raw lisp/code execution": 1,
+    "plot/pdf": 1,
+    "dxf export/import": 1
+   },
+   "test_files": 0,
+   "readme_title": "SwpilotCLI - An All-in-One AI-Powered SolidWorks Plugin",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/autoCAD-CSharp-templates",
+   "identity": "Minso-xyz/autoCAD-CSharp-templates",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "daaeb4ba25877ff0e926bc96a1f43cecd8524743",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 214
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)"
+   ],
+   "domain_hit_files": {
+    "undo/transaction": 1
+   },
+   "test_files": 0,
+   "readme_title": null,
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/freecad-mcp",
+   "identity": "contextform/freecad-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "de4fed2a7a4352fcb0de60d2b784063c54eeb812",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 8396,
+    "JavaScript": 540
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [
+    "python-mcp-lowlevel"
+   ],
+   "tool_registration_markers": 10,
+   "backend_markers": [
+    "NamedPipe",
+    "TCP/WebSocket/HTTP bridge",
+    "macOS AutoCAD"
+   ],
+   "domain_hit_files": {
+    "screenshot/preview": 5,
+    "undo/transaction": 6,
+    "layouts/viewports": 5,
+    "dimensions": 2,
+    "semantic/NLP search": 3,
+    "tables/schedules": 1,
+    "plumbing/drainage": 4,
+    "civil(alignment/profile/surface)": 1,
+    "raw lisp/code execution": 5,
+    "quantity/BOQ/takeoff": 1,
+    "dxf export/import": 1
+   },
+   "test_files": 3,
+   "readme_title": "FreeCAD MCP - AI-Powered CAD",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/ipt-mcp",
+   "identity": "bimwright/ipt-mcp",
+   "source_kind": "git-clone",
+   "branch": "master",
+   "commit": "5bbe3f945744aec8261f54ffd792c44cc1ef349e",
+   "shallow_clone": true,
+   "primary_language": "C#",
+   "lines_by_language": {
+    "C#": 12752,
+    "PowerShell": 491
+   },
+   "license": "Apache-2.0",
+   "mcp_sdk_markers": [
+    "csharp-ModelContextProtocol"
+   ],
+   "tool_registration_markers": 73,
+   "backend_markers": [
+    "NamedPipe",
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "plumbing/drainage": 15,
+    "dxf export/import": 3,
+    "civil(alignment/profile/surface)": 8,
+    "drawing audit/purge/validation": 2,
+    "hatch": 3,
+    "dimensions": 7,
+    "screenshot/preview": 1,
+    "drawing diff/compare": 1,
+    "walls/doors/windows": 1
+   },
+   "test_files": 26,
+   "readme_title": "Real-world example: a native Inventor drawing",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/mechanical-cad-skills",
+   "identity": "capwitf/mechanical-cad-skills",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "aa431596857b9afb8026aebf178a8f70f23fe698",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1322
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "DXF:ezdxf"
+   ],
+   "domain_hit_files": {
+    "dimensions": 2,
+    "layouts/viewports": 3,
+    "plot/pdf": 4,
+    "dxf export/import": 3,
+    "screenshot/preview": 1,
+    "drawing diff/compare": 2,
+    "walls/doors/windows": 1,
+    "hatch": 1,
+    "title block/sheet": 1
+   },
+   "test_files": 0,
+   "readme_title": "Mechanical CAD Skills",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/openAI-to-freeCAD-workflow",
+   "identity": "giuliano-t/openAI-to-freeCAD-workflow",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "9e131f2ec0888c38a93b1a47834ad32d9d71d1c9",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 303
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "dimensions": 1,
+    "civil(alignment/profile/surface)": 1
+   },
+   "test_files": 0,
+   "readme_title": "OpenAI to FreeCAD: A Text-to-CAD Generation Pipeline",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/sketchup-mcp-server",
+   "identity": "SidhNor/sketchup-mcp-server",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "75b851cbfb145fdfb444ed4c769216095c655c02",
+   "shallow_clone": true,
+   "primary_language": "Ruby",
+   "lines_by_language": {
+    "Ruby": 97756,
+    "JavaScript": 412
+   },
+   "license": "AGPL-3.0",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 38,
+   "backend_markers": [
+    "AutoCAD Electrical"
+   ],
+   "domain_hit_files": {
+    "civil(alignment/profile/surface)": 117,
+    "raw lisp/code execution": 2,
+    "semantic/NLP search": 122,
+    "walls/doors/windows": 1,
+    "hatch": 1,
+    "dimensions": 111,
+    "survey/coordinates/parcels": 45,
+    "quantity/BOQ/takeoff": 1,
+    "layouts/viewports": 6,
+    "drawing audit/purge/validation": 6,
+    "undo/transaction": 4,
+    "screenshot/preview": 14,
+    "P&ID symbols": 1
+   },
+   "test_files": 0,
+   "readme_title": "SketchUp MCP",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/solidworks-GPT-plugin",
+   "identity": "Erfouni/solidworks-GPT-plugin",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "14e1722a7491e548333488e2eba9d29d3c9f707e",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 1729
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 0,
+   "backend_markers": [
+    "TCP/WebSocket/HTTP bridge"
+   ],
+   "domain_hit_files": {
+    "layouts/viewports": 2
+   },
+   "test_files": 5,
+   "readme_title": "solidworks-GPT-plugin",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/solidworks-api-mcp",
+   "identity": "kilwizac/solidworks-api-mcp",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "7885946e1ee8783128f2d9a01d9a97349a2fddb0",
+   "shallow_clone": true,
+   "primary_language": "TypeScript",
+   "lines_by_language": {
+    "TypeScript": 4315
+   },
+   "license": "NONE",
+   "mcp_sdk_markers": [],
+   "tool_registration_markers": 8,
+   "backend_markers": [],
+   "domain_hit_files": {
+    "dimensions": 1,
+    "civil(alignment/profile/surface)": 1,
+    "dxf export/import": 3,
+    "raw lisp/code execution": 1,
+    "layouts/viewports": 1,
+    "plumbing/drainage": 1
+   },
+   "test_files": 4,
+   "readme_title": "SolidWorks API MCP Server",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "not-autocad-mcp/solidworks-automation-skill",
+   "identity": "wzyn20051216/solidworks-automation-skill",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "a3ddc5694161299b50b9e9f688fcd6f0bf815da2",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 61310,
+    "TypeScript": 6624,
+    "Rust": 3719,
+    "JavaScript": 2049,
+    "C#": 1311,
+    "PowerShell": 618,
+    "C++": 236
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 62,
+   "backend_markers": [
+    ".NET plugin (acmgd/AcCoreMgd)",
+    "AutoCAD Electrical",
+    "COM:.NET interop",
+    "COM:comtypes",
+    "COM:pyautocad",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "SendCommand",
+    "TCP/WebSocket/HTTP bridge",
+    "accoreconsole"
+   ],
+   "domain_hit_files": {
+    "screenshot/preview": 60,
+    "plumbing/drainage": 6,
+    "dimensions": 50,
+    "layouts/viewports": 13,
+    "dxf export/import": 47,
+    "raw lisp/code execution": 4,
+    "plot/pdf": 38,
+    "quantity/BOQ/takeoff": 10,
+    "civil(alignment/profile/surface)": 21,
+    "walls/doors/windows": 3,
+    "structural(grid/column/beam/rebar)": 2,
+    "drawing diff/compare": 2,
+    "survey/coordinates/parcels": 5,
+    "undo/transaction": 2,
+    "spline/ellipse/arc": 2,
+    "drawing audit/purge/validation": 7,
+    "semantic/NLP search": 13,
+    "xrefs": 1,
+    "electrical": 1,
+    "title block/sheet": 12,
+    "leaders": 3,
+    "selection sets/filters": 1,
+    "tables/schedules": 1
+   },
+   "test_files": 97,
+   "readme_title": "SolidWorks Automation Skill",
+   "fork_family": null,
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": true
+  },
+  {
+   "folder": "vn-autocad-claude",
+   "identity": "andyluu98/vn-autocad-claude",
+   "source_kind": "git-clone",
+   "branch": "main",
+   "commit": "5972d97ffeac73bd1aa5f2e6d8fd6e36def96d87",
+   "shallow_clone": true,
+   "primary_language": "Python",
+   "lines_by_language": {
+    "Python": 4199,
+    "AutoLISP": 1846
+   },
+   "license": "MIT",
+   "mcp_sdk_markers": [
+    "python-mcp-fastmcp"
+   ],
+   "tool_registration_markers": 8,
+   "backend_markers": [
+    "AutoLISP",
+    "COM:.NET interop",
+    "COM:win32com/pywin32",
+    "DXF:ezdxf",
+    "DXF:other(dxf-writer/netDxf/dxf-parser)",
+    "FileIPC(json/lisp polling)",
+    "Plant3D/P&ID",
+    "SendCommand"
+   ],
+   "domain_hit_files": {
+    "dxf export/import": 10,
+    "selection sets/filters": 2,
+    "electrical": 2,
+    "P&ID symbols": 11,
+    "hatch": 4,
+    "dimensions": 9,
+    "leaders": 6,
+    "plot/pdf": 5,
+    "undo/transaction": 6,
+    "drawing audit/purge/validation": 5,
+    "screenshot/preview": 10,
+    "layouts/viewports": 4,
+    "raw lisp/code execution": 4
+   },
+   "test_files": 3,
+   "readme_title": "AutoCAD MCP Server",
+   "fork_family": "F2 puran-water lineage: derivative (61% of files shared)",
+   "inspection_depth": "inventory-only",
+   "inspection_evidence": "automated scan only",
+   "not_autocad": false
+  }
+ ],
+ "fork_overlaps": [
+  {
+   "a": "Autocad-MCP-19",
+   "b": "Autocad-MCP-main",
+   "shared": 373,
+   "a_files": 373,
+   "b_files": 373,
+   "jaccard": 1.0,
+   "a_covered": 1.0,
+   "b_covered": 1.0
+  },
+  {
+   "a": "Autocad-MCP-19",
+   "b": "autocad_mcp_pro-1.6.0",
+   "shared": 373,
+   "a_files": 373,
+   "b_files": 373,
+   "jaccard": 1.0,
+   "a_covered": 1.0,
+   "b_covered": 1.0
+  },
+  {
+   "a": "Autocad-MCP-main",
+   "b": "autocad_mcp_pro-1.6.0",
+   "shared": 373,
+   "a_files": 373,
+   "b_files": 373,
+   "jaccard": 1.0,
+   "a_covered": 1.0,
+   "b_covered": 1.0
+  },
+  {
+   "a": "autocad-mcp-11",
+   "b": "autocad-mcp-main-2",
+   "shared": 18,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 1.0,
+   "a_covered": 1.0,
+   "b_covered": 1.0
+  },
+  {
+   "a": "autocad-mcp-11",
+   "b": "autocad-mcp-main4",
+   "shared": 18,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 1.0,
+   "a_covered": 1.0,
+   "b_covered": 1.0
+  },
+  {
+   "a": "autocad-mcp-main-2",
+   "b": "autocad-mcp-main4",
+   "shared": 18,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 1.0,
+   "a_covered": 1.0,
+   "b_covered": 1.0
+  },
+  {
+   "a": "multiCAD-mcp",
+   "b": "multiCAD-mcp-main",
+   "shared": 38,
+   "a_files": 60,
+   "b_files": 51,
+   "jaccard": 0.521,
+   "a_covered": 0.633,
+   "b_covered": 0.745
+  },
+  {
+   "a": "AutoCAD-MCP-1",
+   "b": "NXChieu-Autocad-MCP",
+   "shared": 35,
+   "a_files": 35,
+   "b_files": 70,
+   "jaccard": 0.5,
+   "a_covered": 1.0,
+   "b_covered": 0.5
+  },
+  {
+   "a": "Easy-MCP-AutoCad-main",
+   "b": "autocad-mcp-server1",
+   "shared": 4,
+   "a_files": 9,
+   "b_files": 4,
+   "jaccard": 0.444,
+   "a_covered": 0.444,
+   "b_covered": 1.0
+  },
+  {
+   "a": "autocad-mcp-11",
+   "b": "vn-autocad-claude",
+   "shared": 11,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 0.44,
+   "a_covered": 0.611,
+   "b_covered": 0.611
+  },
+  {
+   "a": "autocad-mcp-main-2",
+   "b": "vn-autocad-claude",
+   "shared": 11,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 0.44,
+   "a_covered": 0.611,
+   "b_covered": 0.611
+  },
+  {
+   "a": "autocad-mcp-main4",
+   "b": "vn-autocad-claude",
+   "shared": 11,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 0.44,
+   "a_covered": 0.611,
+   "b_covered": 0.611
+  },
+  {
+   "a": "AutoCAD-MCP-Server",
+   "b": "autocad-mcp-11",
+   "shared": 11,
+   "a_files": 23,
+   "b_files": 18,
+   "jaccard": 0.367,
+   "a_covered": 0.478,
+   "b_covered": 0.611
+  },
+  {
+   "a": "AutoCAD-MCP-Server",
+   "b": "autocad-mcp-main-2",
+   "shared": 11,
+   "a_files": 23,
+   "b_files": 18,
+   "jaccard": 0.367,
+   "a_covered": 0.478,
+   "b_covered": 0.611
+  },
+  {
+   "a": "AutoCAD-MCP-Server",
+   "b": "autocad-mcp-main4",
+   "shared": 11,
+   "a_files": 23,
+   "b_files": 18,
+   "jaccard": 0.367,
+   "a_covered": 0.478,
+   "b_covered": 0.611
+  },
+  {
+   "a": "AutoCAD-MCP-Server",
+   "b": "vn-autocad-claude",
+   "shared": 9,
+   "a_files": 23,
+   "b_files": 18,
+   "jaccard": 0.281,
+   "a_covered": 0.391,
+   "b_covered": 0.5
+  },
+  {
+   "a": "autocad-mcp",
+   "b": "autocad-mcp-11",
+   "shared": 10,
+   "a_files": 29,
+   "b_files": 18,
+   "jaccard": 0.27,
+   "a_covered": 0.345,
+   "b_covered": 0.556
+  },
+  {
+   "a": "autocad-mcp",
+   "b": "autocad-mcp-main-2",
+   "shared": 10,
+   "a_files": 29,
+   "b_files": 18,
+   "jaccard": 0.27,
+   "a_covered": 0.345,
+   "b_covered": 0.556
+  },
+  {
+   "a": "autocad-mcp",
+   "b": "autocad-mcp-main4",
+   "shared": 10,
+   "a_files": 29,
+   "b_files": 18,
+   "jaccard": 0.27,
+   "a_covered": 0.345,
+   "b_covered": 0.556
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "autocad-mcp-11",
+   "shared": 18,
+   "a_files": 70,
+   "b_files": 18,
+   "jaccard": 0.257,
+   "a_covered": 0.257,
+   "b_covered": 1.0
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "autocad-mcp-main-2",
+   "shared": 18,
+   "a_files": 70,
+   "b_files": 18,
+   "jaccard": 0.257,
+   "a_covered": 0.257,
+   "b_covered": 1.0
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "autocad-mcp-main4",
+   "shared": 18,
+   "a_files": 70,
+   "b_files": 18,
+   "jaccard": 0.257,
+   "a_covered": 0.257,
+   "b_covered": 1.0
+  },
+  {
+   "a": "autocad-mcp",
+   "b": "vn-autocad-claude",
+   "shared": 9,
+   "a_files": 29,
+   "b_files": 18,
+   "jaccard": 0.237,
+   "a_covered": 0.31,
+   "b_covered": 0.5
+  },
+  {
+   "a": "AutoCAD-MCP-Server",
+   "b": "autocad-mcp",
+   "shared": 9,
+   "a_files": 23,
+   "b_files": 29,
+   "jaccard": 0.209,
+   "a_covered": 0.391,
+   "b_covered": 0.31
+  },
+  {
+   "a": "autocad-mcp-11",
+   "b": "autocadplant3d-mcp",
+   "shared": 14,
+   "a_files": 18,
+   "b_files": 80,
+   "jaccard": 0.167,
+   "a_covered": 0.778,
+   "b_covered": 0.175
+  },
+  {
+   "a": "autocad-mcp-main-2",
+   "b": "autocadplant3d-mcp",
+   "shared": 14,
+   "a_files": 18,
+   "b_files": 80,
+   "jaccard": 0.167,
+   "a_covered": 0.778,
+   "b_covered": 0.175
+  },
+  {
+   "a": "autocad-mcp-main4",
+   "b": "autocadplant3d-mcp",
+   "shared": 14,
+   "a_files": 18,
+   "b_files": 80,
+   "jaccard": 0.167,
+   "a_covered": 0.778,
+   "b_covered": 0.175
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "vn-autocad-claude",
+   "shared": 11,
+   "a_files": 70,
+   "b_files": 18,
+   "jaccard": 0.143,
+   "a_covered": 0.157,
+   "b_covered": 0.611
+  },
+  {
+   "a": "AutoCAD-MCP-Server",
+   "b": "NXChieu-Autocad-MCP",
+   "shared": 11,
+   "a_files": 23,
+   "b_files": 70,
+   "jaccard": 0.134,
+   "a_covered": 0.478,
+   "b_covered": 0.157
+  },
+  {
+   "a": "autocad-mcp-11",
+   "b": "greenloom_CAD_MCP",
+   "shared": 4,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 0.125,
+   "a_covered": 0.222,
+   "b_covered": 0.222
+  },
+  {
+   "a": "autocad-mcp-main-2",
+   "b": "greenloom_CAD_MCP",
+   "shared": 4,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 0.125,
+   "a_covered": 0.222,
+   "b_covered": 0.222
+  },
+  {
+   "a": "autocad-mcp-main4",
+   "b": "greenloom_CAD_MCP",
+   "shared": 4,
+   "a_files": 18,
+   "b_files": 18,
+   "jaccard": 0.125,
+   "a_covered": 0.222,
+   "b_covered": 0.222
+  },
+  {
+   "a": "autocadplant3d-mcp",
+   "b": "vn-autocad-claude",
+   "shared": 10,
+   "a_files": 80,
+   "b_files": 18,
+   "jaccard": 0.114,
+   "a_covered": 0.125,
+   "b_covered": 0.556
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "autocad-mcp",
+   "shared": 10,
+   "a_files": 70,
+   "b_files": 29,
+   "jaccard": 0.112,
+   "a_covered": 0.143,
+   "b_covered": 0.345
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "autocadplant3d-mcp",
+   "shared": 14,
+   "a_files": 70,
+   "b_files": 80,
+   "jaccard": 0.103,
+   "a_covered": 0.2,
+   "b_covered": 0.175
+  },
+  {
+   "a": "autocad-mcp",
+   "b": "autocadplant3d-mcp",
+   "shared": 10,
+   "a_files": 29,
+   "b_files": 80,
+   "jaccard": 0.101,
+   "a_covered": 0.345,
+   "b_covered": 0.125
+  },
+  {
+   "a": "NXChieu-Autocad-MCP",
+   "b": "autocad-mcp-server-3",
+   "shared": 1,
+   "a_files": 70,
+   "b_files": 1,
+   "jaccard": 0.014,
+   "a_covered": 0.014,
+   "b_covered": 1.0
+  }
+ ]
+}
