@@ -73,9 +73,10 @@ def test_get_active_document_raises_when_no_documents_open():
 
 
 def test_get_active_document_returns_active_document():
-    # get_active_document calls clear_pending_command(doc) before returning
-    # it (cancels a pending command-line prompt), so the sentinel needs a
-    # SendCommand it can no-op through.
-    sentinel = SimpleNamespace(SendCommand=lambda *a, **k: None)
+    # get_active_document calls clear_pending_command(doc) and
+    # set_engineering_units(doc) before returning it (cancels a pending
+    # command-line prompt, forces LUNITS/LUPREC/INSUNITS/MEASUREMENT), so the
+    # sentinel needs a SendCommand and SetVariable it can no-op through.
+    sentinel = SimpleNamespace(SendCommand=lambda *a, **k: None, SetVariable=lambda *a, **k: None)
     app = SimpleNamespace(Documents=SimpleNamespace(Count=1), ActiveDocument=sentinel)
     assert get_active_document(app) is sentinel

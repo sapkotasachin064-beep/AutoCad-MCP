@@ -52,10 +52,17 @@ SUPPORTED_OBJECT_NAMES = frozenset(
 # tools/layers.ensure_layer. color_index is an AutoCAD ACI color (0-255);
 # linetype is left None (Continuous) unless noted -- callers passing their
 # own color_index/linetype to ensure_layer still override these.
+#
+# A-WALL-EXT/A-WALL-INT/A-TEXT and A-DIM's color were added/changed for the
+# generate_2d_floor_plan macro tool; A-WALL/A-ANNO predate it and are kept for
+# autocad_draw_wall and backward compatibility.
 ARCHITECTURAL_LAYERS = {
     "A-WALL": {"color_index": 7, "linetype": None},  # white/black, continuous
+    "A-WALL-EXT": {"color_index": 3, "linetype": None},  # green
+    "A-WALL-INT": {"color_index": 2, "linetype": None},  # yellow
     "A-DOOR": {"color_index": 1, "linetype": None},  # red
     "A-GLAZ": {"color_index": 4, "linetype": None},  # cyan
     "A-ANNO": {"color_index": 2, "linetype": None},  # yellow
-    "A-DIM": {"color_index": 3, "linetype": None},  # green
+    "A-TEXT": {"color_index": 7, "linetype": None},  # white
+    "A-DIM": {"color_index": 6, "linetype": None},  # magenta
 }

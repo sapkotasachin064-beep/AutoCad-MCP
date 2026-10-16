@@ -25,7 +25,7 @@ async def _discover_and_call_status():
             names = {t.name for t in tools.tools}
             assert "autocad_get_status" in names
             assert "autocad_execute_query" in names
-            assert len(names) == 21
+            assert len(names) == 22
 
             result = await session.call_tool("autocad_get_status", {})
             assert result.is_error is False
@@ -34,7 +34,7 @@ async def _discover_and_call_status():
 
 def test_real_mcp_client_discovers_and_invokes_tools():
     names, result = asyncio.run(_discover_and_call_status())
-    assert len(names) == 21
+    assert len(names) == 22
     # autocad_get_status returns a plain dict, so the SDK sends it as a JSON
     # text content block rather than a structured-output block.
     payload = json.loads(result.content[0].text)

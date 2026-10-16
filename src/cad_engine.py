@@ -283,7 +283,36 @@ def get_active_document(app):
         )
     doc = _retry_com(lambda: app.ActiveDocument)
     clear_pending_command(doc)
+    set_engineering_units(doc)
     return doc
+
+
+# ======= Mandatory Engineering units =======
+#
+# Civil/architectural tools (tools/architectural.py) assume feet-and-inches
+# Engineering units and draw in inches. AutoCAD's LUNITS=2 is Decimal, not
+# Engineering -- Engineering (feet'-decimal inches", e.g. 0'-0.00") is
+# LUNITS=3. Likewise MEASUREMENT=1 selects the Metric hatch/linetype library
+# (acadiso.*), not Imperial -- Imperial (acad.*) is MEASUREMENT=0. Forced here
+# with the real values, not the ones a mislabeled spec might suggest.
+
+_ENGINEERING_UNITS_VARS = (
+    ("LUNITS", 3),      # Engineering: feet and decimal inches, e.g. 0'-0.00"
+    ("LUPREC", 4),      # 4 decimal places of precision
+    ("INSUNITS", 1),    # Inches, for block/insert scaling
+    ("MEASUREMENT", 0),  # Imperial (acad.* hatch/linetype library)
+)
+
+
+def set_engineering_units(doc) -> None:
+    """Force Engineering units on doc via SetVariable, best-effort (same
+    never-fatal contract as clear_pending_command): a failed SetVariable must
+    not block the tool call that triggered it."""
+    for name, value in _ENGINEERING_UNITS_VARS:
+        try:
+            _retry_com(lambda name=name, value=value: doc.SetVariable(name, value))
+        except pywintypes.com_error:
+            pass
 
 
 def clear_pending_command(doc) -> None:

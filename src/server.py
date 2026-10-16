@@ -13,6 +13,12 @@ every matching handle).
 V0.2.2: pure-Python src/ layout (server.py, cad_engine.py, db.py, tools/,
 utils/ -- see README.md), plus autocad_ensure_layer (architectural layer
 standard) and autocad_draw_wall (the first architectural macro tool).
+
+V0.2.3: forces Engineering units (LUNITS=3, INSUNITS=1, MEASUREMENT=0) on
+every active document (cad_engine.set_engineering_units), and adds
+autocad_generate_2d_floor_plan, a macro that draws a complete residential
+floor plan (exterior/interior walls, doors, windows, room labels) in one
+COM session.
 """
 
 import dataclasses
@@ -251,6 +257,30 @@ def autocad_draw_wall(
     assumes inches/mm/feet -- see README's Units and coordinates). Creates
     the layer via autocad_ensure_layer if it doesn't already exist."""
     return architectural.draw_wall(start_point, end_point, thickness=thickness, layer=layer)
+
+
+# ======= V0.2.3: full floor-plan macro + forced Engineering units =======
+
+
+@server.tool()
+def autocad_generate_2d_floor_plan(
+    width_ft: float = 24.0,
+    length_ft: float = 30.0,
+    units: str = "INCHES",
+    rooms_config: list[dict] | None = None,
+) -> dict:
+    """Generate a complete residential floor plan in one COM session: 9"
+    exterior walls, 4.5" interior partitions splitting the footprint into a
+    fixed 2x3 room grid (Living Room, Kitchen, Bath, 2 Bedrooms by default --
+    override with rooms_config), a 36" main entry door and a 30" interior
+    door per room, a 48" window per room touching an exterior wall, and an
+    MTEXT room label per room. width_ft/length_ft is the footprint in feet;
+    drawing happens in inches, matching the Engineering units this server
+    now forces on every active document. units ("INCHES" or "FEET") only
+    controls how dimensions are reported back in the result."""
+    return architectural.generate_2d_floor_plan(
+        width_ft=width_ft, length_ft=length_ft, units=units, rooms_config=rooms_config
+    )
 
 
 if __name__ == "__main__":

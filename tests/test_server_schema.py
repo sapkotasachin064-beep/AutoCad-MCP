@@ -43,6 +43,10 @@ EXPECTED_V0_2_2_TOOLS = {
     "autocad_draw_wall",
 }
 
+EXPECTED_V0_2_3_TOOLS = {
+    "autocad_generate_2d_floor_plan",
+}
+
 
 def _list_tools():
     return asyncio.run(server.server.list_tools())
@@ -68,14 +72,21 @@ def test_v022_tools_all_registered():
     assert EXPECTED_V0_2_2_TOOLS <= names
 
 
+def test_v023_tools_all_registered():
+    names = {tool.name for tool in _list_tools()}
+    assert EXPECTED_V0_2_3_TOOLS <= names
+
+
 def test_no_duplicate_tool_names():
     names = [tool.name for tool in _list_tools()]
     assert len(names) == len(set(names))
 
 
-def test_exactly_21_tools_total():
+def test_exactly_22_tools_total():
     names = {tool.name for tool in _list_tools()}
-    assert names == EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS | EXPECTED_V0_2_2_TOOLS
+    assert names == (
+        EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS | EXPECTED_V0_2_2_TOOLS | EXPECTED_V0_2_3_TOOLS
+    )
 
 
 def test_draw_wall_schema_has_thickness_and_layer_defaults():
@@ -113,3 +124,10 @@ def test_move_entity_schema_requires_handle_and_displacement():
     tools = {tool.name: tool for tool in _list_tools()}
     schema = tools["autocad_move_entity"].input_schema
     assert set(schema["required"]) == {"handle", "displacement"}
+
+
+def test_generate_2d_floor_plan_schema_has_no_required_params():
+    tools = {tool.name: tool for tool in _list_tools()}
+    schema = tools["autocad_generate_2d_floor_plan"].input_schema
+    assert {"width_ft", "length_ft", "units", "rooms_config"} <= schema["properties"].keys()
+    assert not schema.get("required")

@@ -20,10 +20,18 @@ migration, it's a restructure (see "V0.2.2" below).
   defensive "clear a stuck command prompt" step before every tool touches the
   active document, and added the first architectural macro tool,
   `autocad_draw_wall`, plus `autocad_ensure_layer` (standardized A-WALL/A-DOOR/
-  A-GLAZ/A-ANNO/A-DIM layers). All 21 tools operate on real AutoCAD entities
-  through the COM backend in `src/cad_engine.py` -- there is no simulated/offline
-  mode and no new runtime dependency (`pyautocad`, `sqlalchemy`, `pydantic`,
-  `ezdxf`, ...) was introduced; see "Why no new dependencies" below.
+  A-GLAZ/A-ANNO/A-DIM layers).
+- **V0.2.3**: forces Engineering units (`LUNITS=3`, `LUPREC=4`, `INSUNITS=1`,
+  `MEASUREMENT=0`) on every active document before a tool touches it
+  (`cad_engine.set_engineering_units`), and adds `autocad_generate_2d_floor_plan`
+  -- a macro that draws a complete residential floor plan (exterior/interior
+  walls, doors, windows, room labels) in one COM session, plus the
+  `A-WALL-EXT`/`A-WALL-INT`/`A-TEXT` layers it uses and `A-DIM`'s new color.
+
+All 22 tools operate on real AutoCAD entities through the COM backend in
+`src/cad_engine.py` -- there is no simulated/offline mode and no new runtime
+dependency (`pyautocad`, `sqlalchemy`, `pydantic`, `ezdxf`, ...) was
+introduced; see "Why no new dependencies" below.
 
 ## Repository layout
 
@@ -37,7 +45,7 @@ src/
     editing.py              # move/rotate/copy/highlight_entity, highlight_text_matches, query_and_highlight
     layers.py               # create_layer, ensure_layer
     analysis.py             # scan_all_entities, count_text_patterns
-    architectural.py        # draw_wall
+    architectural.py        # draw_wall, add_door_symbol, add_window_symbol, generate_2d_floor_plan
   utils/
     geometry.py             # input validation + pure-math helpers (wall offset, etc.)
     constants.py            # AutoCAD release support, env-configurable paths, layer/entity-type constants
@@ -115,15 +123,25 @@ code path; `autocad_get_status` reports a best-effort `opencode` detection flag
 
 ## Units and coordinates
 
-Every point argument is `[x, y]` or `[x, y, z]` in the **active drawing's current
-drawing units** (whatever `INSUNITS`/the current UCS says they are) -- the server
-never assumes millimeters, inches, or any other unit, and never converts between
-units or forces `INSUNITS`. `autocad_draw_wall`'s `thickness` follows the same
-rule: it's a number in the drawing's current units, not assumed inches. `z`
-defaults to `0.0` when omitted. Angles for `rotate_entity` and `draw_text`'s
-`rotation_degrees` are in **degrees, counterclockwise-positive when viewed from
-+Z**, matching AutoCAD's own `Rotate()` COM method and `ROTATE` command
-convention; this is not reinterpreted for a rotated UCS.
+As of V0.2.3, `cad_engine.get_active_document()` -- the same choke point every
+tool goes through -- forces **Engineering units** on the active document before
+returning it (`cad_engine.set_engineering_units`): `LUNITS=3` (feet and decimal
+inches, displayed like `0'-0.00"`), `LUPREC=4`, `INSUNITS=1` (inches), and
+`MEASUREMENT=0` (Imperial hatch/linetype library). This is a deliberate change
+from V0.2.2 and earlier, which never forced `INSUNITS`; every tool now draws in
+inches regardless of what unit system the document had before. Setting these is
+best-effort (same never-fatal contract as `clear_pending_command`): a failed
+`SetVariable` does not block the tool call that triggered it.
+
+Every point argument is still `[x, y]` or `[x, y, z]`, now always in **inches**
+(the Engineering/`INSUNITS=1` system forced above). `autocad_draw_wall`'s
+`thickness`, and `autocad_generate_2d_floor_plan`'s `width_ft`/`length_ft`
+(converted to inches internally, `×12`), follow the same rule. `z` defaults to
+`0.0` when omitted. Angles for `rotate_entity`, `draw_text`'s `rotation_degrees`,
+and `add_door_symbol`/`add_window_symbol`'s `angle_deg` are in **degrees,
+counterclockwise-positive when viewed from +Z**, matching AutoCAD's own
+`Rotate()` COM method and `ROTATE` command convention; this is not reinterpreted
+for a rotated UCS.
 
 ## Stability: clearing a stuck command prompt
 
@@ -196,13 +214,26 @@ the tool call that follows it.
 | `autocad_ensure_layer` | Same as `autocad_create_layer`, except a name matching the architectural standard (`A-WALL`, `A-DOOR`, `A-GLAZ`, `A-ANNO`, `A-DIM`) falls back to that standard's `color_index`/`linetype` (`utils/constants.ARCHITECTURAL_LAYERS`) when not given explicitly. An explicit `color_index`/`linetype` always overrides the default. |
 | `autocad_draw_wall` | `start_point`, `end_point`, positive `thickness` (default `9.0`, in the drawing's current units), `layer` (default `A-WALL`, created via `autocad_ensure_layer` if missing). Draws the wall as one closed 4-point polyline -- the centerline offset by `thickness/2` on each side -- not two independent lines, so it's a single entity/handle per wall. |
 
-**Deferred** (from the same request, not built this version): `draw_building_outline`
-(full layout generation: units setup, exterior wall assembly, inner clearance
-lines, dimension annotation) and `insert_door`/`insert_window` (wall
-trim/break + block placeholder insertion). Each needs real design decisions
-(multiline style, what block to actually insert, how a break interacts with
-`autocad_scan_all_entities`) that weren't made yet -- `autocad_draw_wall` is the
-proven first slice they'd build on.
+### V0.2.3: forced Engineering units + full floor-plan macro
+
+| Tool | Notes |
+|---|---|
+| `autocad_generate_2d_floor_plan` | `width_ft`/`length_ft` (default `24`/`30`, feet), `units` (`"INCHES"` default or `"FEET"`, controls only how dimensions are reported back), `rooms_config` (default: Living Room + Kitchen + Bath + 2 Bedrooms on a fixed 2x3 grid). Draws 9" exterior walls (`A-WALL-EXT`), 4.5" interior partitions (`A-WALL-INT`), a 36" main entry door and a 30" interior door per room (`add_door_symbol`, layer `A-DOOR`), a 48" window per exterior-facing room (`add_window_symbol`, layer `A-GLAZ`), and an MTEXT label per room (`A-TEXT`) -- all in one COM session (one `get_active_document()`, not one per entity). |
+
+`add_door_symbol(doc, insert_point, width=36, angle_deg=0)` and
+`add_window_symbol(doc, start_point, length=48, wall_thickness=9, angle_deg=0)`
+(`tools/architectural.py`) are internal building blocks `generate_2d_floor_plan`
+calls directly against an already-open `doc`, not standalone MCP tools --
+they draw straight via `win32com` (`AddLine`/`Add3DPoly`/`AddArc`) instead of
+`tools/primitives.py`'s per-call tool wrappers, so a floor plan with dozens of
+entities doesn't pay a `get_connected_app`/`get_active_document` round trip per
+line.
+
+**Deferred** (from the same request, not built this version): wall
+trim/break where a door or window cuts the wall polyline itself (both are
+currently drawn as separate symbols overlaid on the solid wall, not a break in
+it), corner miter/join between adjacent walls, and multi-segment wall chains in
+one call.
 
 Tools not in this list (`get_all_tables`, `get_table_schema`,
 `draw_device_connection`) exist in the zh19980811/Easy-MCP-AutoCad reference repo
@@ -279,7 +310,7 @@ python -m pytest tests/ -v
   connection -- the reference's `>= 24.0` cutoff is exercised this way without
   needing every AutoCAD release installed).
 - **`test_server_schema.py`**: imports `server.py` directly (no subprocess, no
-  AutoCAD) and checks exactly the 21 expected tools are registered once each,
+  AutoCAD) and checks exactly the 22 expected tools are registered once each,
   with the expected required/optional argument schemas.
 - **`test_e2e_mcp.py`**: spawns `server.py` as a real subprocess and talks to it
   over stdio with the official `mcp` client SDK -- true end-to-end discovery
