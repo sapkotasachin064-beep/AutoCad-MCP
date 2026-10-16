@@ -277,6 +277,6 @@ def get_active_document(app):
     count = _retry_com(lambda: app.Documents.Count)
     if count == 0:
         raise RuntimeError(
-            "No document is open in AutoCAD. Call create_new_drawing or open a drawing first."
+            "No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first."
         )
     return _retry_com(lambda: app.ActiveDocument)
