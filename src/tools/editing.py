@@ -12,11 +12,10 @@ import re
 
 import pywintypes
 
-from . import config, db, geometry
-from .com_utils import point_variant
-from .connection import _retry_com, com_initialized, get_active_document, get_connected_app
-from .entity_types import TEXT_OBJECT_NAMES
-from .identity import get_drawing_identity
+import db
+from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity, point_variant
+from utils import geometry
+from utils.constants import TEXT_OBJECT_NAMES, get_db_path
 
 ORIGIN = (0.0, 0.0, 0.0)
 AC_ALL_VIEWPORTS = 1
@@ -203,7 +202,7 @@ def query_and_highlight(
     if method == "persistent":
         color = geometry.validate_color_index(color)
 
-    result = db.execute_readonly_query(config.get_db_path(), query, params=params)
+    result = db.execute_readonly_query(get_db_path(), query, params=params)
     if "handle" not in result.columns:
         raise geometry.ValidationError(
             f"query must select a 'handle' column to highlight; got columns {result.columns}"

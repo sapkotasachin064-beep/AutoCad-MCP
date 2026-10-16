@@ -3,9 +3,9 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "MCP"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from autocad import geometry
+from utils import geometry
 
 
 def test_validate_point_accepts_3_tuple():

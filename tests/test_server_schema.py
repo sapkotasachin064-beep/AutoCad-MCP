@@ -6,7 +6,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "MCP"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 import server
 
@@ -38,6 +38,11 @@ EXPECTED_V0_2_1_TOOLS = {
     "autocad_query_and_highlight",
 }
 
+EXPECTED_V0_2_2_TOOLS = {
+    "autocad_ensure_layer",
+    "autocad_draw_wall",
+}
+
 
 def _list_tools():
     return asyncio.run(server.server.list_tools())
@@ -58,14 +63,26 @@ def test_v021_tools_all_registered():
     assert EXPECTED_V0_2_1_TOOLS <= names
 
 
+def test_v022_tools_all_registered():
+    names = {tool.name for tool in _list_tools()}
+    assert EXPECTED_V0_2_2_TOOLS <= names
+
+
 def test_no_duplicate_tool_names():
     names = [tool.name for tool in _list_tools()]
     assert len(names) == len(set(names))
 
 
-def test_exactly_19_tools_total():
+def test_exactly_21_tools_total():
     names = {tool.name for tool in _list_tools()}
-    assert names == EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS
+    assert names == EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS | EXPECTED_V0_2_2_TOOLS
+
+
+def test_draw_wall_schema_has_thickness_and_layer_defaults():
+    tools = {tool.name: tool for tool in _list_tools()}
+    schema = tools["autocad_draw_wall"].input_schema
+    assert {"start_point", "end_point", "thickness", "layer"} <= schema["properties"].keys()
+    assert set(schema["required"]) == {"start_point", "end_point"}
 
 
 def test_draw_rectangle_schema_has_optional_corner_and_size_params():

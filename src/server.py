@@ -9,6 +9,10 @@ V0.2.0 drawing, editing, and analysis tools: see README.md for the full list.
 
 V0.2.1 adds autocad_query_and_highlight (run a read-only query, highlight
 every matching handle).
+
+V0.2.2: pure-Python src/ layout (server.py, cad_engine.py, db.py, tools/,
+utils/ -- see README.md), plus autocad_ensure_layer (architectural layer
+standard) and autocad_draw_wall (the first architectural macro tool).
 """
 
 import dataclasses
@@ -19,8 +23,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from mcp.server.mcpserver import MCPServer
 
-from autocad import config, connection, db, editing, entities, geometry, layers, opencode, scanning
-from autocad.drawing import create_test_drawing_with_line
+import cad_engine
+import db
+from tools import analysis, architectural, editing, layers, primitives
+from utils.constants import get_db_path
 
 server = MCPServer(name="autocad-mcp")
 
@@ -29,8 +35,8 @@ server = MCPServer(name="autocad-mcp")
 def autocad_get_status() -> dict:
     """Report whether AutoCAD 2021+ is installed, running, and reachable over COM,
     and whether this process appears to be running inside an OpenCode session."""
-    status = dataclasses.asdict(connection.get_status())
-    status["opencode"] = opencode.detect()
+    status = dataclasses.asdict(cad_engine.get_status())
+    status["opencode"] = cad_engine.detect_opencode()
     return status
 
 
@@ -38,7 +44,7 @@ def autocad_get_status() -> dict:
 def autocad_launch_application(timeout_seconds: float = 60) -> dict:
     """Launch AutoCAD if not already running, and wait until it answers COM calls.
     Does nothing destructive if AutoCAD is already running; just verifies it."""
-    return dataclasses.asdict(connection.launch_and_wait(timeout=timeout_seconds))
+    return dataclasses.asdict(cad_engine.launch_and_wait(timeout=timeout_seconds))
 
 
 @server.tool()
@@ -47,7 +53,7 @@ def autocad_create_test_drawing_with_line(output_dir: str | None = None) -> dict
     mcp_test_<timestamp>.dwg under output_dir (default: Documents/AutoCAD MCP Output),
     and verify the entity and file exist. Requires AutoCAD to already be connected;
     call autocad_get_status / autocad_launch_application first."""
-    return create_test_drawing_with_line(output_dir=output_dir)
+    return primitives.create_test_drawing_with_line(output_dir=output_dir)
 
 
 # ======= V0.2.0: drawing creation and geometry =======
@@ -58,21 +64,21 @@ def autocad_create_new_drawing(template: str | None = None) -> dict:
     """Create a new, unsaved AutoCAD drawing (Documents.Add). Never touches
     disk, so it cannot overwrite an existing file. template, if given, is a
     .dwt template path passed through to AutoCAD."""
-    return entities.create_new_drawing(template=template)
+    return primitives.create_new_drawing(template=template)
 
 
 @server.tool()
 def autocad_draw_line(start_point: list[float], end_point: list[float], layer: str | None = None) -> dict:
     """Draw a line between two validated points in the active drawing's
     ModelSpace. Points are [x, y] or [x, y, z]; z defaults to 0."""
-    return entities.draw_line(start_point, end_point, layer=layer)
+    return primitives.draw_line(start_point, end_point, layer=layer)
 
 
 @server.tool()
 def autocad_draw_polyline(points: list[list[float]], closed: bool = False, layer: str | None = None) -> dict:
     """Draw a polyline through an ordered list of >=2 points ([x, y] or
     [x, y, z], z defaults to 0), optionally closed, as an AcDb3dPolyline."""
-    return entities.draw_polyline(points, closed=closed, layer=layer)
+    return primitives.draw_polyline(points, closed=closed, layer=layer)
 
 
 @server.tool()
@@ -87,7 +93,7 @@ def autocad_draw_rectangle(
     """Draw an axis-aligned rectangle (as a closed polyline). Give exactly
     one of: corner1 and corner2 (opposite corners, same z-plane), or
     base_point with positive width and height."""
-    return entities.draw_rectangle(
+    return primitives.draw_rectangle(
         corner1=corner1, corner2=corner2, base_point=base_point, width=width, height=height, layer=layer
     )
 
@@ -95,7 +101,7 @@ def autocad_draw_rectangle(
 @server.tool()
 def autocad_draw_circle(center: list[float], radius: float, layer: str | None = None) -> dict:
     """Draw a circle at center ([x, y] or [x, y, z]) with a positive radius."""
-    return entities.draw_circle(center, radius, layer=layer)
+    return primitives.draw_circle(center, radius, layer=layer)
 
 
 @server.tool()
@@ -108,7 +114,7 @@ def autocad_draw_text(
 ) -> dict:
     """Add single-line text at insertion_point with a positive height and an
     optional rotation in degrees (counterclockwise, viewed from +Z)."""
-    return entities.draw_text(text, insertion_point, height, rotation_degrees=rotation_degrees, layer=layer)
+    return primitives.draw_text(text, insertion_point, height, rotation_degrees=rotation_degrees, layer=layer)
 
 
 # ======= V0.2.0: layers =======
@@ -120,6 +126,15 @@ def autocad_create_layer(name: str, color_index: int | None = None, linetype: st
     when given, update that property on an existing layer; every other
     layer property (locked, frozen, on/off, ...) is left untouched."""
     return layers.create_layer(name, color_index=color_index, linetype=linetype)
+
+
+@server.tool()
+def autocad_ensure_layer(name: str, color_index: int | None = None, linetype: str | None = None) -> dict:
+    """Same as autocad_create_layer, except a name matching the
+    architectural layer standard (A-WALL, A-DOOR, A-GLAZ, A-ANNO, A-DIM)
+    falls back to that standard's color_index/linetype when not given
+    explicitly. An explicit color_index/linetype always overrides it."""
+    return layers.ensure_layer(name, color_index=color_index, linetype=linetype)
 
 
 # ======= V0.2.0: entity editing =======
@@ -177,14 +192,14 @@ def autocad_scan_all_entities() -> dict:
     text/mtext -- not block references or PaperSpace) and replace this
     drawing's snapshot in the local SQLite database (other drawings'
     records are untouched; rescanning is idempotent)."""
-    return scanning.scan_all_entities()
+    return analysis.scan_all_entities()
 
 
 @server.tool()
 def autocad_count_text_patterns(pattern: str, use_regex: bool = False) -> dict:
     """Count TEXT/MTEXT entities in the active drawing whose text matches
     pattern: a literal substring by default, or a regex if use_regex=True."""
-    return scanning.count_text_patterns(pattern, use_regex=use_regex)
+    return analysis.count_text_patterns(pattern, use_regex=use_regex)
 
 
 @server.tool()
@@ -193,7 +208,7 @@ def autocad_execute_query(query: str, params: list | None = None) -> dict:
     scanned-entities database. Writes, DDL, PRAGMA, and multi-statement
     input are rejected; use params for a parameterized query (never string-
     format user values into the query text)."""
-    result = db.execute_readonly_query(config.get_db_path(), query, params=params)
+    result = db.execute_readonly_query(get_db_path(), query, params=params)
     return {
         "status": "ok",
         "columns": result.columns,
@@ -218,6 +233,24 @@ def autocad_query_and_highlight(
     entity the same way as autocad_highlight_entity. Stale handles (entity
     deleted since the last scan) are reported in not_found, not raised."""
     return editing.query_and_highlight(query, params=params, method=method, color=color, clear=clear)
+
+
+# ======= V0.2.2: architectural macro tools =======
+
+
+@server.tool()
+def autocad_draw_wall(
+    start_point: list[float],
+    end_point: list[float],
+    thickness: float = 9.0,
+    layer: str = "A-WALL",
+) -> dict:
+    """Draw a wall as a closed double-line outline (4-point polyline)
+    centered on start_point-end_point, offset by thickness/2 on each side.
+    thickness is in the active drawing's current units (this server never
+    assumes inches/mm/feet -- see README's Units and coordinates). Creates
+    the layer via autocad_ensure_layer if it doesn't already exist."""
+    return architectural.draw_wall(start_point, end_point, thickness=thickness, layer=layer)
 
 
 if __name__ == "__main__":

@@ -1,3 +1,9 @@
 __pycache__/
 *.pyc
 .pytest_cache/
+
+# AutoCAD drawing output/lock files, in case AUTOCAD_MCP_OUTPUT_DIR is ever
+# pointed inside the repo instead of its default (Documents/AutoCAD MCP Output).
+*.dwg
+*.dwl
+*.dwl2

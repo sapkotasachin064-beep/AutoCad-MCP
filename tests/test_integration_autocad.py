@@ -4,7 +4,7 @@ every call in this file is a genuine COM round trip.
 These are skipped (not faked as passing) when AutoCAD is not installed, not
 running, or not a supported release. Launch AutoCAD yourself first:
 
-    python -c "import sys; sys.path.insert(0,'src/MCP'); from autocad import connection; print(connection.launch_and_wait())"
+    python -c "import sys; sys.path.insert(0,'src'); import cad_engine; print(cad_engine.launch_and_wait())"
 
 then run:
 
@@ -16,9 +16,13 @@ from pathlib import Path
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "MCP"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from autocad import connection, db, editing, entities, layers, scanning
+import cad_engine as connection
+import db
+from tools import editing, layers
+from tools import analysis as scanning
+from tools import primitives as entities
 
 
 def _autocad_available() -> bool:

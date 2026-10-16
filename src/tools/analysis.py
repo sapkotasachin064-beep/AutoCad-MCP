@@ -11,10 +11,10 @@ from collections import Counter
 
 import pywintypes
 
-from . import config, db, geometry
-from .connection import _retry_com, com_initialized, get_active_document, get_connected_app
-from .entity_types import TEXT_OBJECT_NAMES
-from .identity import get_drawing_identity
+import db
+from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity
+from utils import geometry
+from utils.constants import TEXT_OBJECT_NAMES, get_db_path
 
 
 def _read_properties(entity, object_name: str) -> dict | None:
@@ -76,7 +76,7 @@ def scan_all_entities() -> dict:
             )
 
         identity = get_drawing_identity(doc)
-        db_path = config.get_db_path()
+        db_path = get_db_path()
         with db.connection(db_path) as conn:
             drawing_id = db.upsert_drawing(conn, identity.identity, identity.name, identity.path, identity.saved)
             db.replace_drawing_entities(conn, drawing_id, entities)

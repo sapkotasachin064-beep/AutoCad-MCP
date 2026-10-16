@@ -4,9 +4,9 @@ without silently changing what every other draw command targets)."""
 
 import pywintypes
 
-from . import geometry
-from .connection import _retry_com, com_initialized, get_active_document, get_connected_app
-from .identity import get_drawing_identity
+from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity
+from utils import geometry
+from utils.constants import ARCHITECTURAL_LAYERS
 
 
 def get_or_create_layer(doc, name: str):
@@ -73,3 +73,19 @@ def create_layer(name: str, color_index: int | None = None, linetype: str | None
             "drawing_identity": identity.identity,
             "message": f"Layer {name!r} {'created' if not existed else 'updated'}.",
         }
+
+
+def ensure_layer(name: str, color_index: int | None = None, linetype: str | None = None) -> dict:
+    """Same as create_layer, except a name matching the architectural layer
+    standard (A-WALL, A-DOOR, A-GLAZ, A-ANNO, A-DIM) falls back to that
+    standard's color_index/linetype when the caller doesn't give one, so
+    tools/architectural.py (and callers) get a sensible default without
+    having to know the convention themselves. An explicit color_index/
+    linetype argument always wins over the standard's default."""
+    standard = ARCHITECTURAL_LAYERS.get(name)
+    if standard is not None:
+        if color_index is None:
+            color_index = standard["color_index"]
+        if linetype is None:
+            linetype = standard["linetype"]
+    return create_layer(name, color_index=color_index, linetype=linetype)

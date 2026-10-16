@@ -1,4 +1,5 @@
-"""AutoCAD COM connection: install/running detection, launch, readiness.
+"""AutoCAD COM connection: install/running detection, launch, readiness,
+VARIANT conversion, and drawing identity.
 
 MCP tool handlers can run on a worker thread that never called CoInitialize,
 which makes every win32com call fail with
@@ -7,6 +8,7 @@ point here wraps its COM work in `com_initialized()` so the calling thread
 is always COM-initialized for that call, paired with CoUninitialize.
 """
 
+import os
 import random
 import re
 import subprocess
@@ -19,7 +21,7 @@ import pythoncom
 import pywintypes
 import win32com.client
 
-from .config import MIN_SUPPORTED_RELEASE, RELEASE_TO_YEAR
+from utils.constants import MIN_SUPPORTED_RELEASE, RELEASE_TO_YEAR
 
 PROG_ID = "AutoCAD.Application"
 PROCESS_NAME = "acad.exe"
@@ -279,4 +281,88 @@ def get_active_document(app):
         raise RuntimeError(
             "No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first."
         )
-    return _retry_com(lambda: app.ActiveDocument)
+    doc = _retry_com(lambda: app.ActiveDocument)
+    clear_pending_command(doc)
+    return doc
+
+
+def clear_pending_command(doc) -> None:
+    """Best-effort: cancel a command the user left pending at AutoCAD's
+    command line (e.g. a LINE command started interactively and never
+    finished) before a tool issues its own COM call. Two ESC characters
+    match the ESC ESC convention AutoCAD itself documents for SendCommand
+    to back out of a nested prompt. Never raises -- a failed cancel is not
+    fatal to the tool call that follows it, and there being nothing to
+    cancel is the common case, not an error."""
+    try:
+        _retry_com(lambda: doc.SendCommand("\x1b\x1b"))
+    except pywintypes.com_error:
+        pass
+
+
+# ======= VARIANT conversion (shared by entity creation and editing) =======
+
+
+def point_variant(point: tuple[float, float, float]):
+    return win32com.client.VARIANT(pythoncom.VT_ARRAY | pythoncom.VT_R8, tuple(point))
+
+
+def flat_variant(values: list[float]):
+    return win32com.client.VARIANT(pythoncom.VT_ARRAY | pythoncom.VT_R8, tuple(values))
+
+
+# ======= Drawing identity =======
+#
+# AutoCAD's COM Document object has no GUID. The best stable key available is
+# the saved file path -- but doc.Path is NOT a reliable "has this been saved"
+# signal: verified against a live AutoCAD 2024, a brand-new unsaved document's
+# Path is the process's current working directory (non-empty), not "". The
+# reliable signal is doc.FullName, which is "" until the document is saved at
+# least once. An unsaved drawing has no identity that survives past this
+# AutoCAD session, which every caller must treat as a real limitation, not an
+# edge case to paper over.
+
+
+@dataclass(frozen=True)
+class DrawingIdentity:
+    identity: str
+    name: str
+    path: str | None
+    saved: bool
+
+
+def get_drawing_identity(doc) -> DrawingIdentity:
+    name = doc.Name
+    full_name = (doc.FullName or "").strip()
+    if full_name:
+        identity = f"path:{full_name.lower()}"
+        return DrawingIdentity(identity=identity, name=name, path=full_name, saved=True)
+    identity = f"unsaved:{name.lower()}"
+    return DrawingIdentity(identity=identity, name=name, path=None, saved=False)
+
+
+# ======= Best-effort OpenCode host detection =======
+#
+# OpenCode exposes no documented API for an MCP server to confirm it is
+# running inside an active OpenCode session. This checks environment
+# variables OpenCode is known to set for child processes; absence does not
+# prove OpenCode is absent, only that it was not detected. This never starts
+# an OpenCode process itself.
+
+_OPENCODE_ENV_MARKERS = ("OPENCODE_SESSION_ID", "OPENCODE_SESSION", "OPENCODE")
+
+
+def detect_opencode() -> dict:
+    found = [name for name in _OPENCODE_ENV_MARKERS if os.environ.get(name)]
+    if found:
+        return {
+            "detected": True,
+            "confidence": "heuristic",
+            "message": f"OpenCode session markers present: {', '.join(found)}.",
+        }
+    return {
+        "detected": False,
+        "confidence": "heuristic",
+        "message": "No OpenCode session markers found in environment. This does not "
+        "confirm OpenCode is unavailable, only that no known marker was detected.",
+    }

@@ -3,10 +3,10 @@ import sys
 from pathlib import Path
 from types import SimpleNamespace
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "MCP"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from autocad.connection import _parse_release, get_active_document, is_installed, verify_connection
-from autocad.config import get_output_dir
+from cad_engine import _parse_release, get_active_document, is_installed, verify_connection
+from utils.constants import get_output_dir
 
 
 def test_parse_release_2021():
@@ -73,6 +73,9 @@ def test_get_active_document_raises_when_no_documents_open():
 
 
 def test_get_active_document_returns_active_document():
-    sentinel = object()
+    # get_active_document calls clear_pending_command(doc) before returning
+    # it (cancels a pending command-line prompt), so the sentinel needs a
+    # SendCommand it can no-op through.
+    sentinel = SimpleNamespace(SendCommand=lambda *a, **k: None)
     app = SimpleNamespace(Documents=SimpleNamespace(Count=1), ActiveDocument=sentinel)
     assert get_active_document(app) is sentinel

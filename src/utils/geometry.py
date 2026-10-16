@@ -1,7 +1,9 @@
-"""Input validation for geometry, handles, and text parameters.
+"""Input validation for geometry, handles, and text parameters, plus pure-math
+helpers (offsets, point conversions) used by tools/architectural.py.
 
-Every tool in entities.py/editing.py/scanning.py validates through here before
-touching AutoCAD, so COM calls never run with unchecked numbers.
+Every tool in tools/primitives.py, tools/editing.py, tools/analysis.py, and
+tools/architectural.py validates through here before touching AutoCAD, so
+COM calls never run with unchecked numbers.
 """
 
 import math
@@ -98,3 +100,30 @@ def validate_color_index(color, label: str = "color index") -> int:
 
 def degrees_to_radians(angle_degrees: float) -> float:
     return angle_degrees * math.pi / 180.0
+
+
+def wall_outline_points(
+    start: tuple[float, float, float],
+    end: tuple[float, float, float],
+    thickness: float,
+) -> list[tuple[float, float, float]]:
+    """4 corner points (centerline offset by +/- thickness/2) for a
+    double-line wall from start to end, both in the same z-plane. Winding
+    order: start-left, end-left, end-right, start-right, so the result is a
+    simple (non-self-intersecting) closed polygon."""
+    if start[2] != end[2]:
+        raise ValidationError(f"wall start and end must lie in the same z-plane, got z={start[2]} and z={end[2]}")
+    dx, dy = end[0] - start[0], end[1] - start[1]
+    length = math.hypot(dx, dy)
+    if length == 0:
+        raise ValidationError(f"wall start and end must not be the same point, got {start} and {end}")
+    half = thickness / 2.0
+    # Unit vector perpendicular to the centerline (rotate direction 90° CCW).
+    nx, ny = -dy / length * half, dx / length * half
+    z = start[2]
+    return [
+        (start[0] + nx, start[1] + ny, z),
+        (end[0] + nx, end[1] + ny, z),
+        (end[0] - nx, end[1] - ny, z),
+        (start[0] - nx, start[1] - ny, z),
+    ]

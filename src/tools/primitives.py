@@ -1,19 +1,22 @@
 """Drawing creation and geometry entity tools: create_new_drawing, draw_line,
-draw_polyline, draw_rectangle, draw_circle, draw_text.
+draw_polyline, draw_rectangle, draw_circle, draw_text, and the V0.1.0
+create_test_drawing_with_line fixture.
 
-Every draw_* function validates its input through geometry.py, creates the
-entity, verifies it actually landed in ModelSpace (count + ObjectName
+Every draw_* function validates its input through utils/geometry.py, creates
+the entity, verifies it actually landed in ModelSpace (count + ObjectName
 read-back, same pattern as the V0.1.0 test-drawing path), then applies the
 optional layer without touching doc.ActiveLayer.
 """
 
+import os
+from datetime import datetime
+
 import pywintypes
 
-from . import geometry
-from .com_utils import flat_variant, point_variant
-from .connection import _retry_com, com_initialized, get_active_document, get_connected_app
-from .identity import get_drawing_identity
-from .layers import apply_layer_to_entity
+from cad_engine import _retry_com, com_initialized, flat_variant, get_active_document, get_connected_app, get_drawing_identity, point_variant
+from tools.layers import apply_layer_to_entity
+from utils import geometry
+from utils.constants import get_output_dir
 
 
 def _model_space(doc):
@@ -247,4 +250,72 @@ def draw_text(
             "layer": _retry_com(lambda: text_obj.Layer),
             "drawing_identity": identity.identity,
             "message": f"Created text {text_obj.Handle} at {point}.",
+        }
+
+
+# ======= V0.1.0 test fixture =======
+
+_TEST_START_POINT = (0.0, 0.0, 0.0)
+_TEST_END_POINT = (100.0, 100.0, 0.0)
+
+
+def _unique_test_path(output_dir: str) -> str:
+    os.makedirs(output_dir, exist_ok=True)
+    while True:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        candidate = os.path.join(output_dir, f"mcp_test_{timestamp}.dwg")
+        if not os.path.exists(candidate):
+            return candidate
+
+
+def create_test_drawing_with_line(output_dir: str | None = None) -> dict:
+    with com_initialized():
+        app = get_connected_app()
+        output_dir = output_dir or get_output_dir()
+        file_path = _unique_test_path(output_dir)
+
+        try:
+            doc = _retry_com(lambda: app.Documents.Add())
+        except pywintypes.com_error as exc:
+            raise RuntimeError(f"Failed to create new drawing: {exc}") from exc
+
+        active = _retry_com(lambda: app.ActiveDocument)
+        if active.Name != doc.Name:
+            raise RuntimeError(
+                f"New drawing {doc.Name!r} was created but is not the active document "
+                f"(active is {active.Name!r}); refusing to draw into the wrong drawing."
+            )
+
+        model_space = _retry_com(lambda: doc.ModelSpace)
+        count_before = _retry_com(lambda: model_space.Count)
+
+        try:
+            line = _retry_com(
+                lambda: model_space.AddLine(point_variant(_TEST_START_POINT), point_variant(_TEST_END_POINT))
+            )
+        except pywintypes.com_error as exc:
+            raise RuntimeError(f"Failed to create line entity: {exc}") from exc
+
+        count_after = _retry_com(lambda: model_space.Count)
+        if count_after != count_before + 1 or line.ObjectName != "AcDbLine":
+            raise RuntimeError("Line entity was not created as expected in ModelSpace.")
+
+        if os.path.exists(file_path):
+            raise RuntimeError(f"Refusing to overwrite existing file: {file_path}")
+
+        try:
+            _retry_com(lambda: doc.SaveAs(file_path))
+        except pywintypes.com_error as exc:
+            raise RuntimeError(f"Failed to save drawing to {file_path}: {exc}") from exc
+
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+            raise RuntimeError(f"Save reported success but file is missing or empty: {file_path}")
+
+        return {
+            "status": "ok",
+            "file_path": file_path,
+            "line_handle": line.Handle,
+            "start_point": _TEST_START_POINT,
+            "end_point": _TEST_END_POINT,
+            "message": f"Drawing saved with 1 line entity at {file_path}",
         }

@@ -10,14 +10,26 @@ from unittest.mock import patch
 
 import pytest
 
-sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src" / "MCP"))
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from autocad import editing, entities, geometry, layers, scanning
+from tools import architectural, editing, layers
+from tools import analysis as scanning
+from tools import primitives as entities
+from utils import geometry
+
+# Old (pre-v0.2.2) module name -> real dotted module path, so call sites
+# below can keep using the short names entities/editing/layers/scanning.
+_MODULE_PATHS = {
+    "entities": "tools.primitives",
+    "editing": "tools.editing",
+    "layers": "tools.layers",
+    "scanning": "tools.analysis",
+}
 
 
 def _forbid_com_call(module: str):
     return patch(
-        f"autocad.{module}.get_connected_app",
+        f"{_MODULE_PATHS[module]}.get_connected_app",
         side_effect=AssertionError("validation should have failed before touching AutoCAD"),
     )
 
@@ -122,6 +134,26 @@ def test_create_layer_rejects_bad_color():
     with _forbid_com_call("layers"):
         with pytest.raises(geometry.ValidationError):
             layers.create_layer("Walls", color_index=1000)
+
+
+def test_ensure_layer_rejects_bad_color():
+    with _forbid_com_call("layers"):
+        with pytest.raises(geometry.ValidationError):
+            layers.ensure_layer("A-WALL", color_index=1000)
+
+
+def test_draw_wall_rejects_non_positive_thickness():
+    # draw_wall validates, then calls layers.ensure_layer before
+    # primitives.draw_polyline -- forbid COM in both.
+    with _forbid_com_call("layers"), _forbid_com_call("entities"):
+        with pytest.raises(geometry.ValidationError):
+            architectural.draw_wall([0, 0], [10, 0], thickness=-5)
+
+
+def test_draw_wall_rejects_zero_length():
+    with _forbid_com_call("layers"), _forbid_com_call("entities"):
+        with pytest.raises(geometry.ValidationError):
+            architectural.draw_wall([0, 0], [0, 0])
 
 
 def test_count_text_patterns_rejects_empty_pattern():

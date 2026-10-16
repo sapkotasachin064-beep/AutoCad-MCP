@@ -1,6 +1,8 @@
 # AutoCAD MCP Server
 
-MCP server that drives AutoCAD 2021+ over COM on Windows.
+MCP server that drives AutoCAD 2021+ over COM on Windows. Pure Python, no C#/.NET,
+no TCP socket bridge, no build pipeline -- it never has been; this isn't a
+migration, it's a restructure (see "V0.2.2" below).
 
 ## Scope
 
@@ -11,10 +13,63 @@ MCP server that drives AutoCAD 2021+ over COM on Windows.
 - **V0.2.0**: drawing creation and geometry, layers, entity editing,
   highlighting, and a local SQLite database of scanned entities with a read-only
   query tool.
-- **V0.2.1** (this version): adds `autocad_query_and_highlight`, combining the
-  read-only query tool with entity highlighting. All 16 V0.2.x tools operate on
-  real AutoCAD entities through the COM backend in `src/MCP/autocad/connection.py`
-  -- there is no simulated/offline mode.
+- **V0.2.1**: `autocad_query_and_highlight`, combining the read-only query tool
+  with entity highlighting.
+- **V0.2.2** (this version): moved the codebase from `src/MCP/autocad/*` into the
+  flat `src/` layout below (no behavior change from the move itself), added a
+  defensive "clear a stuck command prompt" step before every tool touches the
+  active document, and added the first architectural macro tool,
+  `autocad_draw_wall`, plus `autocad_ensure_layer` (standardized A-WALL/A-DOOR/
+  A-GLAZ/A-ANNO/A-DIM layers). All 21 tools operate on real AutoCAD entities
+  through the COM backend in `src/cad_engine.py` -- there is no simulated/offline
+  mode and no new runtime dependency (`pyautocad`, `sqlalchemy`, `pydantic`,
+  `ezdxf`, ...) was introduced; see "Why no new dependencies" below.
+
+## Repository layout
+
+```
+src/
+  server.py              # MCP tool registration (FastMCP-style decorators)
+  cad_engine.py           # COM connection/launch/retry, VARIANT helpers, drawing identity
+  db.py                   # SQLite schema, migration, read-only query enforcement
+  tools/
+    primitives.py          # create_new_drawing, draw_line/polyline/rectangle/circle/text
+    editing.py              # move/rotate/copy/highlight_entity, highlight_text_matches, query_and_highlight
+    layers.py               # create_layer, ensure_layer
+    analysis.py             # scan_all_entities, count_text_patterns
+    architectural.py        # draw_wall
+  utils/
+    geometry.py             # input validation + pure-math helpers (wall offset, etc.)
+    constants.py            # AutoCAD release support, env-configurable paths, layer/entity-type constants
+tests/
+  test_*.py                # see Testing below
+```
+
+## Why no new dependencies
+
+The task that produced this version asked to add `pyautocad`, `sqlalchemy`, and
+`pydantic` v2. They were deliberately left out:
+
+- **`pyautocad`** wraps the same `win32com.client` this server already calls
+  directly, with none of `cad_engine.py`'s busy-retry (`RPC_E_CALL_REJECTED`),
+  per-thread `CoInitialize`, or the AttributeError-during-dynamic-dispatch retry
+  documented in `cad_engine._retry_com`. Adding it would mean either routing
+  around it back to raw `win32com` (pointless dependency) or losing that
+  robustness.
+- **`sqlalchemy`** would replace `db.py`'s raw `sqlite3` schema/migration
+  (`PRAGMA user_version`-based, two tables, one read-only-enforced query path)
+  with an ORM layer that duplicates it for no new capability this milestone
+  needed.
+- **`pydantic` v2** would run alongside, not instead of, the validation already
+  in `utils/geometry.py` plus the MCP SDK's own type-hint-driven JSON schema
+  generation for every `@server.tool()` -- a second validation system with no
+  tool actually needing it yet.
+
+`ezdxf` (an offline/headless DXF fallback) was also not added: every tool here
+intentionally requires a live, connected AutoCAD (`cad_engine.get_connected_app`)
+and reports `drawing_identity` back from the real document; an offline DXF path
+is a genuinely separate mode, not a drop-in, and wasn't requested as a specific
+capability on its own.
 
 ## Requirements
 
@@ -25,10 +80,13 @@ MCP server that drives AutoCAD 2021+ over COM on Windows.
 pip install -r requirements.txt
 ```
 
+(or `pip install -e .`, using `pyproject.toml` -- same two dependencies, `mcp`
+and `pywin32`.)
+
 ## Run
 
 ```bash
-python src/MCP/server.py
+python src/server.py
 ```
 
 Runs over stdio, for use as an MCP server from a compatible client.
@@ -42,7 +100,7 @@ Add to your MCP config (`.mcp.json` or via `claude mcp add`):
   "mcpServers": {
     "autocad-mcp": {
       "command": "python",
-      "args": ["C:/path/to/project/src/MCP/server.py"]
+      "args": ["C:/path/to/project/src/server.py"]
     }
   }
 }
@@ -53,17 +111,30 @@ Add to your MCP config (`.mcp.json` or via `claude mcp add`):
 Add the same `command`/`args` pair under OpenCode's MCP server configuration
 (`opencode.json` `mcp` section, or equivalent). The server has no OpenCode-specific
 code path; `autocad_get_status` reports a best-effort `opencode` detection flag
-(`autocad/opencode.py`) based on environment variables, nothing more.
+(`cad_engine.detect_opencode`) based on environment variables, nothing more.
 
 ## Units and coordinates
 
 Every point argument is `[x, y]` or `[x, y, z]` in the **active drawing's current
 drawing units** (whatever `INSUNITS`/the current UCS says they are) -- the server
 never assumes millimeters, inches, or any other unit, and never converts between
-units. `z` defaults to `0.0` when omitted. Angles for `rotate_entity` and
-`draw_text`'s `rotation_degrees` are in **degrees, counterclockwise-positive when
-viewed from +Z**, matching AutoCAD's own `Rotate()` COM method and `ROTATE`
-command convention; this is not reinterpreted for a rotated UCS.
+units or forces `INSUNITS`. `autocad_draw_wall`'s `thickness` follows the same
+rule: it's a number in the drawing's current units, not assumed inches. `z`
+defaults to `0.0` when omitted. Angles for `rotate_entity` and `draw_text`'s
+`rotation_degrees` are in **degrees, counterclockwise-positive when viewed from
++Z**, matching AutoCAD's own `Rotate()` COM method and `ROTATE` command
+convention; this is not reinterpreted for a rotated UCS.
+
+## Stability: clearing a stuck command prompt
+
+`cad_engine.get_active_document()` -- the single choke point almost every tool
+goes through -- sends two ESC characters via `doc.SendCommand("\x1b\x1b")`
+before handing the document back, to cancel a command the user left pending at
+AutoCAD's own command line (e.g. a `LINE` command started interactively and
+never finished), which can otherwise interfere with a tool's own COM call. This
+is best-effort and silently ignored on failure (`cad_engine.clear_pending_command`):
+there usually is nothing pending to cancel, and a failed cancel is not fatal to
+the tool call that follows it.
 
 ## Tools
 
@@ -118,10 +189,26 @@ command convention; this is not reinterpreted for a rotated UCS.
 |---|---|---|
 | `autocad_query_and_highlight` | `query_and_highlight` | Runs the same read-only query as `autocad_execute_query`; the result must include a `handle` column. Every matching entity is then highlighted the same way as `autocad_highlight_entity` (`method="temporary"`/`"persistent"`, `color`, `clear`). A handle whose entity no longer exists (stale scan) is listed in `not_found` instead of failing the whole batch. |
 
+### V0.2.2: layer standard + architectural macro tools
+
+| Tool | Notes |
+|---|---|
+| `autocad_ensure_layer` | Same as `autocad_create_layer`, except a name matching the architectural standard (`A-WALL`, `A-DOOR`, `A-GLAZ`, `A-ANNO`, `A-DIM`) falls back to that standard's `color_index`/`linetype` (`utils/constants.ARCHITECTURAL_LAYERS`) when not given explicitly. An explicit `color_index`/`linetype` always overrides the default. |
+| `autocad_draw_wall` | `start_point`, `end_point`, positive `thickness` (default `9.0`, in the drawing's current units), `layer` (default `A-WALL`, created via `autocad_ensure_layer` if missing). Draws the wall as one closed 4-point polyline -- the centerline offset by `thickness/2` on each side -- not two independent lines, so it's a single entity/handle per wall. |
+
+**Deferred** (from the same request, not built this version): `draw_building_outline`
+(full layout generation: units setup, exterior wall assembly, inner clearance
+lines, dimension annotation) and `insert_door`/`insert_window` (wall
+trim/break + block placeholder insertion). Each needs real design decisions
+(multiline style, what block to actually insert, how a break interacts with
+`autocad_scan_all_entities`) that weren't made yet -- `autocad_draw_wall` is the
+proven first slice they'd build on.
+
 Tools not in this list (`get_all_tables`, `get_table_schema`,
-`draw_device_connection`) exist in the reference repo but are out of scope:
-`get_all_tables`/`get_table_schema` are already reachable through
-`autocad_execute_query` (e.g. `SELECT name FROM sqlite_master WHERE type='table'`,
+`draw_device_connection`) exist in the zh19980811/Easy-MCP-AutoCad reference repo
+but are out of scope here: `get_all_tables`/`get_table_schema` are already
+reachable through `autocad_execute_query` (e.g.
+`SELECT name FROM sqlite_master WHERE type='table'`,
 `SELECT * FROM pragma_table_info('entities')`), and `draw_device_connection` is a
 demo-specific feature tied to the reference's own `CustomDevice`/PMC labeling
 convention, which this server's entity model does not have.
@@ -129,10 +216,10 @@ convention, which this server's entity model does not have.
 ## Database
 
 - Location: `AUTOCAD_MCP_DB_PATH`, default `<output dir>/autocad_mcp.db`.
-- Schema (`src/MCP/autocad/db.py`): `drawings` (one row per drawing identity) and
+- Schema (`src/db.py`): `drawings` (one row per drawing identity) and
   `entities` (one row per scanned entity, `UNIQUE(drawing_id, handle)`), migrated
   via `PRAGMA user_version`.
-- **Drawing identity** (`src/MCP/autocad/identity.py`): AutoCAD's COM `Document`
+- **Drawing identity** (`src/cad_engine.py`): AutoCAD's COM `Document`
   has no GUID. A saved drawing is identified by its normalized full path
   (`doc.FullName`). An unsaved drawing has no identity that survives past the
   current AutoCAD session -- it's keyed as `unsaved:<name>` for that session only.
@@ -154,17 +241,19 @@ convention, which this server's entity model does not have.
 - Compatibility is only verified against AutoCAD 2024 in this milestone (the
   machine this was built and tested on). `autocad_get_status` detects the release
   via `ACADVER` and rejects anything below release 24.0 (AutoCAD 2021) at the
-  `connection.get_connected_app()` boundary every tool goes through, but 2021-2023
+  `cad_engine.get_connected_app()` boundary every tool goes through, but 2021-2023
   and 2025+ are not individually verified -- see "Compatibility detection" in
   Testing below for exactly what *is* and isn't claimed.
 - Under rapid, back-to-back automated calls, AutoCAD's own dynamic COM dispatch
   can transiently raise `AttributeError` for a property that genuinely exists
-  (observed live, see `connection._retry_com`'s docstring); this is retried the
+  (observed live, see `cad_engine._retry_com`'s docstring); this is retried the
   same way a busy `RPC_E_CALL_REJECTED` is. If AutoCAD's UI focus/active document
   shifts for reasons outside this server's control (another window, a modal, the
   user clicking around) between two tool calls, each tool still reports which
   `drawing_identity` it actually acted on in its result -- check that field if a
   multi-step workflow produces a surprising result.
+- `autocad_draw_wall` draws a straight single-segment wall only -- no corner
+  miter/join with another wall, no multi-segment wall chain in one call.
 
 ## Config
 
@@ -190,7 +279,7 @@ python -m pytest tests/ -v
   connection -- the reference's `>= 24.0` cutoff is exercised this way without
   needing every AutoCAD release installed).
 - **`test_server_schema.py`**: imports `server.py` directly (no subprocess, no
-  AutoCAD) and checks exactly the 18 expected tools are registered once each,
+  AutoCAD) and checks exactly the 21 expected tools are registered once each,
   with the expected required/optional argument schemas.
 - **`test_e2e_mcp.py`**: spawns `server.py` as a real subprocess and talks to it
   over stdio with the official `mcp` client SDK -- true end-to-end discovery
@@ -201,7 +290,7 @@ python -m pytest tests/ -v
   running/connected/a supported release. To run it for real:
 
   ```bash
-  python -c "import sys; sys.path.insert(0,'src/MCP'); from autocad import connection; print(connection.launch_and_wait())"
+  python -c "import sys; sys.path.insert(0,'src'); import cad_engine; print(cad_engine.launch_and_wait())"
   python -m pytest tests/test_integration_autocad.py -v
   ```
 

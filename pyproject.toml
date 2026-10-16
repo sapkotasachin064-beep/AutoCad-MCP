@@ -1,0 +1,19 @@
+[project]
+name = "autocad-mcp"
+version = "0.2.2"
+description = "MCP server that drives AutoCAD 2021+ over COM on Windows."
+requires-python = ">=3.10"
+dependencies = [
+    "mcp>=1.2.0",
+    "pywin32",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+packages = ["tools", "utils"]
+py-modules = ["cad_engine", "db", "server"]
