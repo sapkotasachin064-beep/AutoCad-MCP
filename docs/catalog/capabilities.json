@@ -9,9 +9,10 @@
  "summary": {
   "total": 647,
   "by_status": {
-   "tested": 220,
-   "implemented": 28,
-   "planned": 399
+   "tested": 160,
+   "implemented": 26,
+   "planned": 399,
+   "verified": 62
   },
   "by_category": {
    "A. MCP protocol and client interoperability": {
@@ -21,68 +22,78 @@
     "planned": 9
    },
    "B. Connection lifecycle and session management": {
-    "tested": 11,
+    "verified": 2,
     "total": 20,
+    "tested": 9,
     "implemented": 2,
     "planned": 7
    },
    "C. Backend discovery and capability negotiation": {
-    "tested": 8,
+    "tested": 7,
     "total": 16,
+    "verified": 1,
     "planned": 8
    },
    "D. Application launch and connection verification": {
-    "tested": 3,
+    "verified": 3,
     "total": 14,
-    "implemented": 6,
+    "implemented": 5,
+    "tested": 1,
     "planned": 5
    },
    "E. Document discovery, identity, ownership and lifecycle": {
-    "tested": 20,
+    "verified": 3,
     "total": 28,
     "implemented": 1,
+    "tested": 17,
     "planned": 7
    },
    "F. Drawing inspection and metadata": {
-    "tested": 10,
+    "verified": 3,
     "total": 17,
+    "tested": 7,
     "planned": 7
    },
    "G. Entity creation, selection, querying, editing and deletion": {
-    "tested": 15,
+    "verified": 15,
     "total": 28,
     "implemented": 1,
     "planned": 12
    },
    "H. Lines, polylines, arcs, circles, splines and curves": {
-    "tested": 7,
+    "verified": 5,
     "total": 31,
+    "tested": 2,
     "planned": 24
    },
    "I. Text, MTEXT, dimensions, leaders and annotation": {
-    "tested": 8,
+    "verified": 5,
     "total": 34,
+    "tested": 3,
     "implemented": 1,
     "planned": 25
    },
    "J. Layers, blocks, attributes and external references": {
-    "tested": 13,
+    "verified": 6,
     "total": 33,
+    "tested": 7,
     "planned": 20
    },
    "K. Hatch, regions, boundaries and fills": {
-    "tested": 7,
+    "verified": 3,
     "total": 17,
+    "tested": 4,
     "planned": 10
    },
    "L. Layouts, viewports, paper space and model space": {
-    "tested": 2,
+    "verified": 2,
     "total": 14,
     "planned": 12
    },
    "M. Units, coordinate systems, transformations and precision": {
-    "tested": 9,
+    "tested": 7,
     "total": 14,
+    "verified": 2,
     "planned": 5
    },
    "N. 3D geometry, solids, surfaces and visualization": {
@@ -91,13 +102,15 @@
     "planned": 15
    },
    "O. Selection filters, handles, spatial queries and indexing": {
-    "tested": 6,
+    "verified": 2,
     "total": 13,
+    "tested": 4,
     "planned": 7
    },
    "P. Undo, redo, transactions, rollback and recovery": {
-    "tested": 4,
+    "tested": 2,
     "total": 10,
+    "verified": 2,
     "planned": 5,
     "implemented": 1
    },
@@ -108,8 +121,9 @@
     "planned": 12
    },
    "R. DXF import/export and format conversion": {
-    "tested": 5,
+    "verified": 1,
     "total": 11,
+    "tested": 4,
     "planned": 6
    },
    "S. DWG interoperability": {
@@ -118,9 +132,10 @@
     "planned": 5
    },
    "T. PDF plotting, publishing and print configuration": {
-    "tested": 6,
+    "tested": 4,
     "total": 17,
     "implemented": 3,
+    "verified": 2,
     "planned": 8
    },
    "U. Screenshots, previews and evidence generation": {
@@ -135,14 +150,16 @@
     "planned": 20
    },
    "W. Residential building layouts and drafting automation": {
-    "tested": 9,
+    "verified": 2,
     "total": 20,
+    "tested": 7,
     "implemented": 1,
     "planned": 10
    },
    "X. Structural drafting: grids, columns, beams and reinforcement": {
-    "tested": 4,
+    "verified": 1,
     "total": 17,
+    "tested": 3,
     "planned": 13
    },
    "Y. Civil 3D surfaces, alignments, profiles, corridors and grading": {
@@ -180,8 +197,9 @@
     "planned": 7
    },
    "AG. Batch operations and reusable drawing workflows": {
-    "tested": 2,
+    "tested": 1,
     "total": 8,
+    "verified": 1,
     "planned": 6
    },
    "AH. Semantic search and drawing understanding": {
@@ -219,7 +237,7 @@
    "AN. Developer tooling, tests, fixtures and compatibility checks": {
     "tested": 6,
     "total": 14,
-    "implemented": 1,
+    "verified": 1,
     "planned": 7
    }
   },
@@ -863,7 +881,7 @@
    "category": "B. Connection lifecycle and session management",
    "description": "Run every COM call on one dedicated, COM-initialised thread",
    "user_problem": "Concurrent tool calls never drive AutoCAD from several threads",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -881,10 +899,16 @@
    "kind": "capability",
    "exposed_by": [],
    "test_evidence": [
-    "unit"
+    "unit",
+    "live_autocad"
    ],
    "reference": "core/com_executor.py; U-C4N/beiming183 ideas (MIT)",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_generators_live (server tools through ComBackend and the COM executor)",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "B-002",
@@ -1213,7 +1237,7 @@
    "category": "B. Connection lifecycle and session management",
    "description": "Keep a units preset chosen at run time for the rest of the session",
    "user_problem": "Metric work is not flipped back to inches by the next tool",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -1234,10 +1258,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_list_drawings_and_units",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "B-014",
@@ -1567,7 +1597,7 @@
    "category": "C. Backend discovery and capability negotiation",
    "description": "Detect the AutoCAD release and map it to a year (2021-2027)",
    "user_problem": "Know which AutoCAD is attached",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [],
@@ -1583,10 +1613,16 @@
     "autocad_get_status"
    ],
    "test_evidence": [
-    "unit"
+    "unit",
+    "live_autocad"
    ],
    "reference": "defect D2",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "launch_and_wait / get_status: 24.3 -> 2024",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "C-007",
@@ -1828,7 +1864,7 @@
    "category": "D. Application launch and connection verification",
    "description": "Report installed / running / connected / supported without starting AutoCAD",
    "user_problem": "Know the state before acting",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [],
@@ -1847,10 +1883,16 @@
    ],
    "test_evidence": [
     "unit",
-    "stdio_e2e"
+    "stdio_e2e",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "every live test's skip gate (get_status connected + supported)",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "D-002",
@@ -1858,7 +1900,7 @@
    "category": "D. Application launch and connection verification",
    "description": "Detect installation via the AutoCAD.Application ProgID",
    "user_problem": "Explain missing installs",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [],
@@ -1876,10 +1918,16 @@
     "autocad_get_status"
    ],
    "test_evidence": [
-    "unit"
+    "unit",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "get_status installed=True",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "D-003",
@@ -1914,7 +1962,7 @@
    "category": "D. Application launch and connection verification",
    "description": "Launch AutoCAD and wait until it answers COM",
    "user_problem": "Start the session from the assistant",
-   "status": "implemented",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [],
@@ -1931,9 +1979,16 @@
    "exposed_by": [
     "autocad_launch_application"
    ],
-   "test_evidence": [],
+   "test_evidence": [
+    "live_autocad"
+   ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "cad_engine.launch_and_wait from not running to connected",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "D-005",
@@ -2204,7 +2259,7 @@
    "category": "E. Document discovery, identity, ownership and lifecycle",
    "description": "Create a new unsaved drawing",
    "user_problem": "Start clean without risking an existing file",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -2228,10 +2283,16 @@
    "test_evidence": [
     "unit",
     "headless_dxf",
-    "stdio_e2e"
+    "stdio_e2e",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "fresh_drawing fixture, test_create_new_drawing_becomes_active",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "E-002",
@@ -2303,7 +2364,7 @@
    "category": "E. Document discovery, identity, ownership and lifecycle",
    "description": "List open drawings with identity, unsaved and read-only flags",
    "user_problem": "See what is open before acting",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -2326,10 +2387,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_list_drawings_and_units",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "E-005",
@@ -2842,7 +2909,7 @@
    "category": "E. Document discovery, identity, ownership and lifecycle",
    "description": "Identify drawings by full path (saved) or session name (unsaved)",
    "user_problem": "Stable keys for scans, pins and reports",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -2862,10 +2929,16 @@
    "kind": "capability",
    "exposed_by": [],
    "test_evidence": [
-    "unit"
+    "unit",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_list_drawings_and_units, test_v030_save_as_then_close",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "E-021",
@@ -3107,7 +3180,7 @@
    "category": "F. Drawing inspection and metadata",
    "description": "Summarise identity, units, extents, counts by type and layer, layers, blocks, layouts",
    "user_problem": "Understand an unfamiliar drawing in one call",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3126,10 +3199,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_summary_list_and_detail",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "F-002",
@@ -3287,7 +3366,7 @@
    "category": "F. Drawing inspection and metadata",
    "description": "Scan model-space entities into a per-drawing SQLite snapshot",
    "user_problem": "Query drawings with SQL",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3306,10 +3385,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_scan_all_entities_and_execute_query_round_trip",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "F-008",
@@ -3376,7 +3461,7 @@
    "category": "F. Drawing inspection and metadata",
    "description": "Count and list TEXT/MTEXT matching a substring or regex",
    "user_problem": "Find tags and notes",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3395,10 +3480,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_count_text_patterns_literal_and_regex",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "F-011",
@@ -3581,7 +3672,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Page through model-space entities with type, layer and window filters",
    "user_problem": "Find what to edit without dumping the drawing",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3604,10 +3695,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_summary_list_and_detail",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-002",
@@ -3615,7 +3712,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Full detail of one entity by handle",
    "user_problem": "Read exact geometry before changing it",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3638,10 +3735,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_summary_list_and_detail",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-003",
@@ -3649,7 +3752,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Move an entity by a vector, verified by its extents",
    "user_problem": "Reposition precisely",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3673,10 +3776,16 @@
    "test_evidence": [
     "unit",
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_move_rotate_copy_entity",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-004",
@@ -3684,7 +3793,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Rotate an entity about a point",
    "user_problem": "Orient elements",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3707,10 +3816,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_move_rotate_copy_entity",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-005",
@@ -3718,7 +3833,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Copy an entity by a vector and return the new handle",
    "user_problem": "Repeat elements",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3741,10 +3856,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_move_rotate_copy_entity",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-006",
@@ -3752,7 +3873,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Scale an entity about a point, verified by extents",
    "user_problem": "Resize symbols and details",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3775,10 +3896,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-007",
@@ -3786,7 +3913,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Mirror an entity, optionally deleting the original",
    "user_problem": "Symmetric layouts",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3809,10 +3936,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-008",
@@ -3820,7 +3953,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Offset curves by a distance",
    "user_problem": "Parallel walls, kerbs and edges",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3843,10 +3976,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-009",
@@ -3854,7 +3993,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Rectangular array with copy-count verification",
    "user_problem": "Repeat columns, piles or fixtures",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3877,10 +4016,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-010",
@@ -3888,7 +4033,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Delete by handle with a dry run by default",
    "user_problem": "See exactly what would go before deleting",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3911,10 +4056,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-011",
@@ -3922,7 +4073,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Verify deleted handles no longer resolve",
    "user_problem": "Proof the deletion happened",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3945,10 +4096,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-012",
@@ -3956,7 +4113,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Set layer, color, linetype and lineweight on many entities and read them back",
    "user_problem": "Fix drafting standards in bulk",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -3979,10 +4136,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-013",
@@ -3990,7 +4153,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Temporary visual highlight that is never saved and never changes color",
    "user_problem": "Show the user what was found",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -4013,10 +4176,16 @@
    ],
    "test_evidence": [
     "unit",
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_highlight_entity_temporary_preserves_color",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-014",
@@ -4024,7 +4193,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Persistent color highlight with read-back",
    "user_problem": "Mark entities for review",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -4047,10 +4216,16 @@
    ],
    "test_evidence": [
     "unit",
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_highlight_entity_persistent_changes_color",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-015",
@@ -4058,7 +4233,7 @@
    "category": "G. Entity creation, selection, querying, editing and deletion",
    "description": "Highlight every TEXT/MTEXT matching a pattern",
    "user_problem": "Locate notes and tags visually",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -4081,10 +4256,16 @@
    ],
    "test_evidence": [
     "unit",
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_highlight_text_matches_does_not_modify_text",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "G-016",
@@ -4471,7 +4652,7 @@
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a line between two points (2D or 3D)",
    "user_problem": "Basic linework",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -4495,10 +4676,16 @@
    "test_evidence": [
     "unit",
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_draw_line_creates_real_entity",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "H-002",
@@ -4506,7 +4693,7 @@
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a 3D polyline through points, optionally closed",
    "user_problem": "Outlines and paths",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -4529,10 +4716,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_draw_rectangle_and_polyline",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "H-003",
@@ -4540,7 +4733,7 @@
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw an axis-aligned rectangle by corners or by base point and size",
    "user_problem": "Rooms, plots, frames",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -4563,10 +4756,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_draw_rectangle_and_polyline",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "H-004",
@@ -4574,7 +4773,7 @@
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a circle by centre and radius",
    "user_problem": "Columns, manholes, bubbles",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -4599,10 +4798,16 @@
     "unit",
     "mock_com",
     "headless_dxf",
-    "stdio_e2e"
+    "stdio_e2e",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_draw_circle_and_create_layer",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "H-005",
@@ -4610,7 +4815,7 @@
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a counterclockwise arc by centre, radius and angles in degrees",
    "user_problem": "Door swings, curves",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -4633,10 +4838,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "H-006",
@@ -5402,7 +5613,7 @@
    "category": "I. Text, MTEXT, dimensions, leaders and annotation",
    "description": "Single-line TEXT with height and rotation",
    "user_problem": "Labels and notes",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -5426,10 +5637,16 @@
    "test_evidence": [
     "unit",
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_draw_text",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "I-002",
@@ -5437,7 +5654,7 @@
    "category": "I. Text, MTEXT, dimensions, leaders and annotation",
    "description": "MTEXT with wrapping width and paragraph breaks",
    "user_problem": "Multi-line notes",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -5460,10 +5677,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "I-003",
@@ -5502,7 +5725,7 @@
    "category": "I. Text, MTEXT, dimensions, leaders and annotation",
    "description": "Aligned dimension between two points",
    "user_problem": "Dimension sloping edges",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -5525,10 +5748,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "I-005",
@@ -5536,7 +5765,7 @@
    "category": "I. Text, MTEXT, dimensions, leaders and annotation",
    "description": "Horizontal, vertical or rotated linear dimension",
    "user_problem": "Plan dimensions",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -5559,10 +5788,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "I-006",
@@ -5570,7 +5805,7 @@
    "category": "I. Text, MTEXT, dimensions, leaders and annotation",
    "description": "Verify a dimension's measured value equals the given geometry",
    "user_problem": "Wrong-point dimensions are caught",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -5593,10 +5828,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "I-007",
@@ -6428,7 +6669,7 @@
    "category": "J. Layers, blocks, attributes and external references",
    "description": "Create a layer or update its color and linetype",
    "user_problem": "Organise drawings by layer",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -6451,10 +6692,16 @@
    "test_evidence": [
     "unit",
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_draw_circle_and_create_layer",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "J-002",
@@ -6626,7 +6873,7 @@
    "category": "J. Layers, blocks, attributes and external references",
    "description": "Create a missing layer when drawing on it",
    "user_problem": "No 'Key not found' when assigning layers",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -6646,10 +6893,16 @@
    "exposed_by": [],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_summary_list_and_detail, test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "J-008",
@@ -6657,7 +6910,7 @@
    "category": "J. Layers, blocks, attributes and external references",
    "description": "List block definitions with entity counts and attribute tags",
    "user_problem": "Know what can be inserted",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -6679,10 +6932,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_blocks_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "J-009",
@@ -6690,7 +6949,7 @@
    "category": "J. Layers, blocks, attributes and external references",
    "description": "Insert a defined block with scale and rotation",
    "user_problem": "Place symbols and furniture",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -6712,10 +6971,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_blocks_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "J-010",
@@ -6723,7 +6988,7 @@
    "category": "J. Layers, blocks, attributes and external references",
    "description": "Fill attributes on insert, rejecting unknown tags before inserting",
    "user_problem": "Tagged doors, windows, equipment",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -6745,10 +7010,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_blocks_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "J-011",
@@ -6789,7 +7060,7 @@
    "category": "J. Layers, blocks, attributes and external references",
    "description": "Update attribute values with read-back",
    "user_problem": "Renumber and correct tags",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -6811,10 +7082,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_blocks_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "J-013",
@@ -7415,7 +7692,7 @@
    "category": "K. Hatch, regions, boundaries and fills",
    "description": "Hatch a polygon given as points",
    "user_problem": "Fill areas quickly",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -7437,10 +7714,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "K-002",
@@ -7481,7 +7764,7 @@
    "category": "K. Hatch, regions, boundaries and fills",
    "description": "Verify the applied hatch pattern by reading it back",
    "user_problem": "Wrong pattern types are caught",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -7503,10 +7786,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live (ANSI31 reads back; settles the pattern-type constant)",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "K-004",
@@ -7580,7 +7869,7 @@
    "category": "K. Hatch, regions, boundaries and fills",
    "description": "Report the hatched area",
    "user_problem": "Quantities from hatches",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -7602,10 +7891,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "K-007",
@@ -7926,7 +8221,7 @@
    "category": "L. Layouts, viewports, paper space and model space",
    "description": "List layouts with plot device, paper, style and current flag",
    "user_problem": "Know the sheets in a drawing",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -7945,10 +8240,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_export_and_plot_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "L-002",
@@ -7956,7 +8257,7 @@
    "category": "L. Layouts, viewports, paper space and model space",
    "description": "Restore the active layout and its plot settings after plotting",
    "user_problem": "Plotting leaves the drawing as it was",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -7974,10 +8275,16 @@
     "autocad_plot_pdf"
    ],
    "test_evidence": [
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_export_and_plot_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "L-003",
@@ -8343,7 +8650,7 @@
    "category": "M. Units, coordinate systems, transformations and precision",
    "description": "Set a units preset explicitly for the session",
    "user_problem": "Switch to metric for a project",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -8363,10 +8670,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_list_drawings_and_units",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "M-004",
@@ -8519,7 +8832,7 @@
    "category": "M. Units, coordinate systems, transformations and precision",
    "description": "Convert degrees at the tool boundary to radians for ActiveX",
    "user_problem": "No radian mistakes",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -8537,10 +8850,16 @@
    "exposed_by": [],
    "test_evidence": [
     "unit",
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_annotation_live (arc end angle reads back as 90 degrees)",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "M-010",
@@ -9112,7 +9431,7 @@
    "category": "O. Selection filters, handles, spatial queries and indexing",
    "description": "Filter entities by DXF type names",
    "user_problem": "Work on one kind of object",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -9131,10 +9450,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_summary_list_and_detail",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "O-002",
@@ -9142,7 +9467,7 @@
    "category": "O. Selection filters, handles, spatial queries and indexing",
    "description": "Filter entities by layer (case-insensitive)",
    "user_problem": "Work on one discipline",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -9161,10 +9486,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_summary_list_and_detail",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "O-003",
@@ -9485,7 +9816,7 @@
    "category": "P. Undo, redo, transactions, rollback and recovery",
    "description": "Dry run for deletes",
    "user_problem": "Review before deleting",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [],
@@ -9500,10 +9831,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_modify_suite",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "P-003",
@@ -9535,7 +9872,7 @@
    "category": "P. Undo, redo, transactions, rollback and recovery",
    "description": "Verify generators by model-space count growth",
    "user_problem": "Partial drawing is detected",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [],
@@ -9549,10 +9886,16 @@
    "test_evidence": [
     "mock_com",
     "headless_dxf",
-    "golden_regression"
+    "golden_regression",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_generators_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "P-005",
@@ -10353,7 +10696,7 @@
    "category": "R. DXF import/export and format conversion",
    "description": "Export a DXF copy without renaming the open drawing",
    "user_problem": "Share DXF while keeping the DWG open",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -10374,10 +10717,16 @@
    ],
    "test_evidence": [
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_export_and_plot_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "R-002",
@@ -11004,7 +11353,7 @@
    "category": "T. PDF plotting, publishing and print configuration",
    "description": "Verify the PDF header and report the paper size from /MediaBox",
    "user_problem": "Proof of what was plotted",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -11024,10 +11373,16 @@
     "autocad_plot_pdf"
    ],
    "test_evidence": [
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_export_and_plot_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "T-007",
@@ -11066,7 +11421,7 @@
    "category": "T. PDF plotting, publishing and print configuration",
    "description": "Restore the layout's plot settings after plotting",
    "user_problem": "Plotting does not alter the drawing",
-   "status": "tested",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
@@ -11086,10 +11441,16 @@
     "autocad_plot_pdf"
    ],
    "test_evidence": [
-    "mock_com"
+    "mock_com",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_export_and_plot_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "T-009",
@@ -12443,7 +12804,7 @@
    "category": "W. Residential building layouts and drafting automation",
    "description": "The V0.2.3 2x3 grid floor plan, unchanged output",
    "user_problem": "Quick starter plan",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -12465,10 +12826,16 @@
    "test_evidence": [
     "golden_regression",
     "mock_com",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_generators_live (50 entities, as in V0.2.3)",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "W-002",
@@ -12476,7 +12843,7 @@
    "category": "W. Residential building layouts and drafting automation",
    "description": "Floor plan from explicit room rectangles forming any rectilinear footprint",
    "user_problem": "Draw a house from a room list",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -12497,10 +12864,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_generators_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "W-003",
@@ -13027,7 +13400,7 @@
    "category": "X. Structural drafting: grids, columns, beams and reinforcement",
    "description": "Column grid with numbered and lettered lines",
    "user_problem": "Set out a frame",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -13048,10 +13421,16 @@
    ],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "drafting only: no spans, loads or member sizes are designed or checked",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_generators_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "X-002",
@@ -16220,7 +16599,7 @@
    "category": "AG. Batch operations and reusable drawing workflows",
    "description": "One plan emitter for live and headless drawings",
    "user_problem": "Same output on both backends",
-   "status": "tested",
+   "status": "verified",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -16237,10 +16616,16 @@
    "exposed_by": [],
    "test_evidence": [
     "unit",
-    "headless_dxf"
+    "headless_dxf",
+    "live_autocad"
    ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "test_v030_generators_live",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "AG-003",
@@ -17934,7 +18319,7 @@
    "category": "AN. Developer tooling, tests, fixtures and compatibility checks",
    "description": "Live AutoCAD tests that skip, never fake, without AutoCAD",
    "user_problem": "Honest live verification",
-   "status": "implemented",
+   "status": "verified",
    "backend": "com",
    "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [],
@@ -17945,9 +18330,16 @@
    "safety": "read",
    "kind": "capability",
    "exposed_by": [],
-   "test_evidence": [],
+   "test_evidence": [
+    "live_autocad"
+   ],
    "reference": "",
-   "overlaps": []
+   "overlaps": [],
+   "live_evidence": {
+    "test": "this run",
+    "run": "2026-10-16",
+    "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
+   }
   },
   {
    "id": "AN-006",

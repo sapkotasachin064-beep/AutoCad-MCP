@@ -76,10 +76,14 @@ def create_new_drawing(template: str | None = None, pin: bool = False) -> dict:
             raise RuntimeError(f"Failed to create new drawing: {exc}") from exc
 
         active = _retry_com(lambda: app.ActiveDocument)
-        if active.Name != doc.Name:
+        # AutoCAD is often still busy right after Documents.Add; property reads
+        # need the same busy-retry (seen live on 2024: "Call was rejected by callee").
+        new_name = _retry_com(lambda: doc.Name)
+        active_name = _retry_com(lambda: active.Name)
+        if active_name != new_name:
             raise RuntimeError(
-                f"New drawing {doc.Name!r} was created but is not the active document "
-                f"(active is {active.Name!r}); refusing to proceed against the wrong drawing."
+                f"New drawing {new_name!r} was created but is not the active document "
+                f"(active is {active_name!r}); refusing to proceed against the wrong drawing."
             )
 
         identity = get_drawing_identity(doc)
@@ -87,14 +91,14 @@ def create_new_drawing(template: str | None = None, pin: bool = False) -> dict:
             session.pin_document(identity.identity)
         return {
             "status": "ok",
-            "drawing_name": doc.Name,
+            "drawing_name": new_name,
             "drawing_identity": identity.identity,
             "saved": identity.saved,
             "pinned": bool(pin),
             "previous_pin": previous_pin,
             "verified": True,
             "verification": "new_document_is_active",
-            "message": f"Created new drawing {doc.Name!r}." + (" Pinned." if pin else ""),
+            "message": f"Created new drawing {new_name!r}." + (" Pinned." if pin else ""),
         }
 
 

@@ -8,7 +8,7 @@
 | AutoCAD 2021 | 24.0 | accepted; not run in this project |
 | AutoCAD 2022 | 24.1 | accepted; not run |
 | AutoCAD 2023 | 24.2 | accepted; not run |
-| AutoCAD 2024 | 24.3 | V0.2.x tools run against it by the original author; V0.3.0 tools not yet |
+| AutoCAD 2024 | 24.3 | 19 live tests pass (2026-10-16, `24.3s (LMS Tech)`); 62 catalog entries live-verified |
 | AutoCAD 2025 | 25.0 | accepted; mapping from reference evidence; not run |
 | AutoCAD 2026 | 25.1 | accepted; mapping from reference evidence; not run |
 | AutoCAD 2027 | 26.0 | accepted; mapping from reference evidence; not run |

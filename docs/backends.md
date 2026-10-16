@@ -16,7 +16,7 @@ tool called on a backend that does not implement it returns
 | Highlighting | yes (display state) | no display -> refused |
 | Launch | `autocad_launch_application` | refused |
 | Verification | read-back over COM (counts, ObjectName, extents, properties) | re-reading the document/file |
-| Live-verified in V0.3.0 | V0.2.x tools: by the original author on AutoCAD 2024; new V0.3.0 tools: **not yet** (mock-tested) | yes, by automated tests writing real files |
+| Live-verified in V0.3.0 | 19 live tests pass on AutoCAD 2024 (R24.3); see `docs/testing.md` | yes, by automated tests writing real files |
 
 ## `com` -- live AutoCAD
 

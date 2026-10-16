@@ -10,17 +10,18 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
   capability count are therefore different numbers and are reported separately.
 - **planned**: not implemented. **implemented**: code exists, no automated test. **tested**: exercised by
   automated tests (unit, fake-COM, headless DXF, stdio end-to-end or golden regression).
-  **verified**: run against a live AutoCAD in this project with recorded evidence -- none yet, because
-  AutoCAD was not running during this rebuild.
+  **verified**: asserted by a live AutoCAD test in this project (AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11,
+  2026-10-16, 19 passed (two consecutive runs, after two fixes found by the first run)); see `docs/testing.md#live-autocad-results`. Calling a tool in a live
+  test is not enough: the test must assert that capability.
 - Planned entries are a roadmap, not a promise; aliases and parameter variations are not counted.
 
 ## Totals
 
 - Catalogued capabilities: **647**
 - planned: 399
-- implemented: 28
-- tested: 220
-- verified: 0
+- implemented: 26
+- tested: 160
+- verified: 62
 - Public MCP tools referenced: 64
 
 ## By category
@@ -28,29 +29,29 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | Category | Total | planned | implemented | tested | verified |
 |---|---|---|---|---|---|
 | A. MCP protocol and client interoperability | 23 | 9 | 1 | 13 | 0 |
-| B. Connection lifecycle and session management | 20 | 7 | 2 | 11 | 0 |
-| C. Backend discovery and capability negotiation | 16 | 8 | 0 | 8 | 0 |
-| D. Application launch and connection verification | 14 | 5 | 6 | 3 | 0 |
-| E. Document discovery, identity, ownership and lifecycle | 28 | 7 | 1 | 20 | 0 |
-| F. Drawing inspection and metadata | 17 | 7 | 0 | 10 | 0 |
-| G. Entity creation, selection, querying, editing and deletion | 28 | 12 | 1 | 15 | 0 |
-| H. Lines, polylines, arcs, circles, splines and curves | 31 | 24 | 0 | 7 | 0 |
-| I. Text, MTEXT, dimensions, leaders and annotation | 34 | 25 | 1 | 8 | 0 |
-| J. Layers, blocks, attributes and external references | 33 | 20 | 0 | 13 | 0 |
-| K. Hatch, regions, boundaries and fills | 17 | 10 | 0 | 7 | 0 |
-| L. Layouts, viewports, paper space and model space | 14 | 12 | 0 | 2 | 0 |
-| M. Units, coordinate systems, transformations and precision | 14 | 5 | 0 | 9 | 0 |
+| B. Connection lifecycle and session management | 20 | 7 | 2 | 9 | 2 |
+| C. Backend discovery and capability negotiation | 16 | 8 | 0 | 7 | 1 |
+| D. Application launch and connection verification | 14 | 5 | 5 | 1 | 3 |
+| E. Document discovery, identity, ownership and lifecycle | 28 | 7 | 1 | 17 | 3 |
+| F. Drawing inspection and metadata | 17 | 7 | 0 | 7 | 3 |
+| G. Entity creation, selection, querying, editing and deletion | 28 | 12 | 1 | 0 | 15 |
+| H. Lines, polylines, arcs, circles, splines and curves | 31 | 24 | 0 | 2 | 5 |
+| I. Text, MTEXT, dimensions, leaders and annotation | 34 | 25 | 1 | 3 | 5 |
+| J. Layers, blocks, attributes and external references | 33 | 20 | 0 | 7 | 6 |
+| K. Hatch, regions, boundaries and fills | 17 | 10 | 0 | 4 | 3 |
+| L. Layouts, viewports, paper space and model space | 14 | 12 | 0 | 0 | 2 |
+| M. Units, coordinate systems, transformations and precision | 14 | 5 | 0 | 7 | 2 |
 | N. 3D geometry, solids, surfaces and visualization | 16 | 15 | 0 | 1 | 0 |
-| O. Selection filters, handles, spatial queries and indexing | 13 | 7 | 0 | 6 | 0 |
-| P. Undo, redo, transactions, rollback and recovery | 10 | 5 | 1 | 4 | 0 |
+| O. Selection filters, handles, spatial queries and indexing | 13 | 7 | 0 | 4 | 2 |
+| P. Undo, redo, transactions, rollback and recovery | 10 | 5 | 1 | 2 | 2 |
 | Q. Drawing validation, audit, cleanup and diagnostics | 24 | 12 | 3 | 9 | 0 |
-| R. DXF import/export and format conversion | 11 | 6 | 0 | 5 | 0 |
+| R. DXF import/export and format conversion | 11 | 6 | 0 | 4 | 1 |
 | S. DWG interoperability | 7 | 5 | 0 | 2 | 0 |
-| T. PDF plotting, publishing and print configuration | 17 | 8 | 3 | 6 | 0 |
+| T. PDF plotting, publishing and print configuration | 17 | 8 | 3 | 4 | 2 |
 | U. Screenshots, previews and evidence generation | 8 | 5 | 1 | 2 | 0 |
 | V. Architectural plans: walls, doors, windows, stairs and rooms | 30 | 20 | 0 | 10 | 0 |
-| W. Residential building layouts and drafting automation | 20 | 10 | 1 | 9 | 0 |
-| X. Structural drafting: grids, columns, beams and reinforcement | 17 | 13 | 0 | 4 | 0 |
+| W. Residential building layouts and drafting automation | 20 | 10 | 1 | 7 | 2 |
+| X. Structural drafting: grids, columns, beams and reinforcement | 17 | 13 | 0 | 3 | 1 |
 | Y. Civil 3D surfaces, alignments, profiles, corridors and grading | 20 | 20 | 0 | 0 | 0 |
 | Z. Surveying, coordinates, parcels and earthwork | 15 | 15 | 0 | 0 | 0 |
 | AA. Water supply, drainage, sanitary systems and plumbing | 11 | 11 | 0 | 0 | 0 |
@@ -59,14 +60,14 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | AD. P&ID symbols, piping, valves, instruments and schedules | 9 | 9 | 0 | 0 | 0 |
 | AE. Bill of quantities, material takeoffs and quantity reports | 17 | 10 | 0 | 7 | 0 |
 | AF. Title blocks, sheet sets, revisions and drawing standards | 12 | 7 | 0 | 5 | 0 |
-| AG. Batch operations and reusable drawing workflows | 8 | 6 | 0 | 2 | 0 |
+| AG. Batch operations and reusable drawing workflows | 8 | 6 | 0 | 1 | 1 |
 | AH. Semantic search and drawing understanding | 10 | 9 | 0 | 1 | 0 |
 | AI. Diffing, change detection and revision reporting | 8 | 4 | 0 | 4 | 0 |
 | AJ. Template management and project standards | 9 | 8 | 0 | 1 | 0 |
 | AK. Export pipelines and deliverable packaging | 8 | 5 | 0 | 3 | 0 |
 | AL. Security, permissions, observability and diagnostics | 13 | 7 | 1 | 5 | 0 |
 | AM. Client setup, onboarding and integration verification | 11 | 4 | 5 | 2 | 0 |
-| AN. Developer tooling, tests, fixtures and compatibility checks | 14 | 7 | 1 | 6 | 0 |
+| AN. Developer tooling, tests, fixtures and compatibility checks | 14 | 7 | 0 | 6 | 1 |
 
 ## A. MCP protocol and client interoperability
 
@@ -100,7 +101,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| B-001 | Run every COM call on one dedicated, COM-initialised thread | tested | com | read | internal |
+| B-001 | Run every COM call on one dedicated, COM-initialised thread | verified | com | read | internal |
 | B-002 | Bound every COM call by AUTOCAD_MCP_COM_TIMEOUT | tested | com | read | internal |
 | B-003 | Abandon a stuck COM worker after a timeout and serve later calls on a fresh one | tested | com | read | internal |
 | B-004 | Cancel a call still queued behind a slow call and say nothing was sent | tested | com | read | internal |
@@ -112,7 +113,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | B-010 | Return unrequested side effects (units applied, command cancelled) as notices | tested | both | read | internal |
 | B-011 | Fix the backend for the process lifetime with no automatic fallback | tested | pure | read | internal |
 | B-012 | Report COM worker generation, abandoned workers and call count | tested | com | read | `autocad_get_capabilities` |
-| B-013 | Keep a units preset chosen at run time for the rest of the session | tested | both | session | `autocad_set_drawing_units` |
+| B-013 | Keep a units preset chosen at run time for the rest of the session | verified | both | session | `autocad_set_drawing_units` |
 | B-014 | Serialise COM across several server processes with a named mutex | planned | com | session |  |
 | B-015 | Detect an AutoCAD restart and drop stale document state | planned | com | read |  |
 | B-016 | Idempotency keys with a durable journal (replay, conflict, in-progress) | planned | both | session |  |
@@ -130,7 +131,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | C-003 | Refuse unsupported operations naming operation, backend and reason | tested | pure | read | internal |
 | C-004 | Refuse when an optional dependency is missing, naming the extra to install | tested | dxf | read | internal |
 | C-005 | Headless DXF backend selected with AUTOCAD_MCP_BACKEND=dxf | tested | dxf | read | internal |
-| C-006 | Detect the AutoCAD release and map it to a year (2021-2027) | tested | com | read | `autocad_get_status` |
+| C-006 | Detect the AutoCAD release and map it to a year (2021-2027) | verified | com | read | `autocad_get_status` |
 | C-007 | Refuse AutoCAD releases older than 2021 | tested | com | read | internal |
 | C-008 | Headless backend imports no pywin32 code | tested | dxf | read | internal |
 | C-009 | Detect AutoCAD LT installs and explain the supported alternatives | planned | pure | read |  |
@@ -146,10 +147,10 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| D-001 | Report installed / running / connected / supported without starting AutoCAD | tested | both | read | `autocad_get_status` |
-| D-002 | Detect installation via the AutoCAD.Application ProgID | tested | com | read | `autocad_get_status` |
+| D-001 | Report installed / running / connected / supported without starting AutoCAD | verified | both | read | `autocad_get_status` |
+| D-002 | Detect installation via the AutoCAD.Application ProgID | verified | com | read | `autocad_get_status` |
 | D-003 | Tell 'not running' apart from 'running but not answering COM' | implemented | com | read | `autocad_get_status` |
-| D-004 | Launch AutoCAD and wait until it answers COM | implemented | com | external | `autocad_launch_application` |
+| D-004 | Launch AutoCAD and wait until it answers COM | verified | com | external | `autocad_launch_application` |
 | D-005 | Make a launched AutoCAD window visible | implemented | com | external | `autocad_launch_application` |
 | D-006 | Bound launch waiting, with an executor deadline beyond it | implemented | com | external | `autocad_launch_application` |
 | D-007 | Refuse launching AutoCAD on the headless backend | tested | dxf | read | `autocad_launch_application` |
@@ -165,10 +166,10 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| E-001 | Create a new unsaved drawing | tested | both | write | `autocad_create_new_drawing` |
+| E-001 | Create a new unsaved drawing | verified | both | write | `autocad_create_new_drawing` |
 | E-002 | Create a drawing from a .dwt (live) or .dxf (headless) template | implemented | both | write | `autocad_create_new_drawing` |
 | E-003 | Validate template paths before use | tested | both | read | `autocad_create_new_drawing` |
-| E-004 | List open drawings with identity, unsaved and read-only flags | tested | both | read | `autocad_list_drawings` |
+| E-004 | List open drawings with identity, unsaved and read-only flags | verified | both | read | `autocad_list_drawings` |
 | E-005 | Open drawings read-only by default | tested | both | write | `autocad_open_drawing` |
 | E-006 | Activate an already-open drawing instead of opening a second copy | tested | com | write | `autocad_open_drawing` |
 | E-007 | Open DXF files in recover mode and report audit errors and fixes | tested | dxf | write | `autocad_open_drawing` |
@@ -184,7 +185,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | E-017 | Refuse any call against a different active drawing (E_DOCUMENT_CHANGED) | tested | both | read | internal |
 | E-018 | Refuse to create, open or activate another drawing while pinned unless pin=true | tested | both | session | internal |
 | E-019 | Remove the document pin | tested | both | session | `autocad_unpin_document` |
-| E-020 | Identify drawings by full path (saved) or session name (unsaved) | tested | both | read | internal |
+| E-020 | Identify drawings by full path (saved) or session name (unsaved) | verified | both | read | internal |
 | E-021 | Headless backend holds one drawing and refuses to replace unsaved work | tested | dxf | destructive | internal |
 | E-022 | Open a damaged DWG with RECOVER | planned | com | write |  |
 | E-023 | Partially open very large drawings (selected layers or views) | planned | com | write |  |
@@ -198,16 +199,16 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| F-001 | Summarise identity, units, extents, counts by type and layer, layers, blocks, layouts | tested | both | read | `autocad_drawing_summary` |
+| F-001 | Summarise identity, units, extents, counts by type and layer, layers, blocks, layouts | verified | both | read | `autocad_drawing_summary` |
 | F-002 | Cap entity iteration and say when a summary was truncated | tested | both | read | `autocad_drawing_summary` |
 | F-003 | Report INSUNITS, LUNITS and imperial/metric measurement | tested | both | read | `autocad_drawing_summary` |
 | F-004 | Report drawing extents | tested | both | read | `autocad_drawing_summary` |
 | F-005 | List layouts and the current layer in the summary | tested | both | read | `autocad_drawing_summary` |
 | F-006 | Report whether the drawing has unsaved changes | tested | both | read | `autocad_drawing_summary` |
-| F-007 | Scan model-space entities into a per-drawing SQLite snapshot | tested | both | read | `autocad_scan_all_entities` |
+| F-007 | Scan model-space entities into a per-drawing SQLite snapshot | verified | both | read | `autocad_scan_all_entities` |
 | F-008 | Run one read-only SELECT over scans with two independent write guards | tested | pure | read | `autocad_execute_query` |
 | F-009 | Cap SQL rows and report truncation | tested | pure | read | `autocad_execute_query` |
-| F-010 | Count and list TEXT/MTEXT matching a substring or regex | tested | both | read | `autocad_count_text_patterns` |
+| F-010 | Count and list TEXT/MTEXT matching a substring or regex | verified | both | read | `autocad_count_text_patterns` |
 | F-011 | Read a whitelisted set of system variables | planned | both | read |  |
 | F-012 | Scan paper-space entities and layouts | planned | both | read |  |
 | F-013 | Scan inside block definitions and nested references | planned | both | read |  |
@@ -220,21 +221,21 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| G-001 | Page through model-space entities with type, layer and window filters | tested | both | read | `autocad_list_entities` |
-| G-002 | Full detail of one entity by handle | tested | both | read | `autocad_get_entity` |
-| G-003 | Move an entity by a vector, verified by its extents | tested | both | write | `autocad_move_entity` |
-| G-004 | Rotate an entity about a point | tested | both | write | `autocad_rotate_entity` |
-| G-005 | Copy an entity by a vector and return the new handle | tested | both | write | `autocad_copy_entity` |
-| G-006 | Scale an entity about a point, verified by extents | tested | both | write | `autocad_scale_entity` |
-| G-007 | Mirror an entity, optionally deleting the original | tested | both | write | `autocad_mirror_entity` |
-| G-008 | Offset curves by a distance | tested | both | write | `autocad_offset_entity` |
-| G-009 | Rectangular array with copy-count verification | tested | both | write | `autocad_array_rectangular` |
-| G-010 | Delete by handle with a dry run by default | tested | both | destructive | `autocad_delete_entities` |
-| G-011 | Verify deleted handles no longer resolve | tested | both | destructive | `autocad_delete_entities` |
-| G-012 | Set layer, color, linetype and lineweight on many entities and read them back | tested | both | write | `autocad_set_entity_properties` |
-| G-013 | Temporary visual highlight that is never saved and never changes color | tested | com | read | `autocad_highlight_entity` |
-| G-014 | Persistent color highlight with read-back | tested | com | write | `autocad_highlight_entity` |
-| G-015 | Highlight every TEXT/MTEXT matching a pattern | tested | com | write | `autocad_highlight_text_matches` |
+| G-001 | Page through model-space entities with type, layer and window filters | verified | both | read | `autocad_list_entities` |
+| G-002 | Full detail of one entity by handle | verified | both | read | `autocad_get_entity` |
+| G-003 | Move an entity by a vector, verified by its extents | verified | both | write | `autocad_move_entity` |
+| G-004 | Rotate an entity about a point | verified | both | write | `autocad_rotate_entity` |
+| G-005 | Copy an entity by a vector and return the new handle | verified | both | write | `autocad_copy_entity` |
+| G-006 | Scale an entity about a point, verified by extents | verified | both | write | `autocad_scale_entity` |
+| G-007 | Mirror an entity, optionally deleting the original | verified | both | write | `autocad_mirror_entity` |
+| G-008 | Offset curves by a distance | verified | both | write | `autocad_offset_entity` |
+| G-009 | Rectangular array with copy-count verification | verified | both | write | `autocad_array_rectangular` |
+| G-010 | Delete by handle with a dry run by default | verified | both | destructive | `autocad_delete_entities` |
+| G-011 | Verify deleted handles no longer resolve | verified | both | destructive | `autocad_delete_entities` |
+| G-012 | Set layer, color, linetype and lineweight on many entities and read them back | verified | both | write | `autocad_set_entity_properties` |
+| G-013 | Temporary visual highlight that is never saved and never changes color | verified | com | read | `autocad_highlight_entity` |
+| G-014 | Persistent color highlight with read-back | verified | com | write | `autocad_highlight_entity` |
+| G-015 | Highlight every TEXT/MTEXT matching a pattern | verified | com | write | `autocad_highlight_text_matches` |
 | G-016 | Highlight entities returned by a read-only SQL query | implemented | com | write | `autocad_query_and_highlight` |
 | G-017 | Polar array around a centre | planned | both | write |  |
 | G-018 | Array along a path | planned | com | write |  |
@@ -253,11 +254,11 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| H-001 | Draw a line between two points (2D or 3D) | tested | both | write | `autocad_draw_line` |
-| H-002 | Draw a 3D polyline through points, optionally closed | tested | both | write | `autocad_draw_polyline` |
-| H-003 | Draw an axis-aligned rectangle by corners or by base point and size | tested | both | write | `autocad_draw_rectangle` |
-| H-004 | Draw a circle by centre and radius | tested | both | write | `autocad_draw_circle` |
-| H-005 | Draw a counterclockwise arc by centre, radius and angles in degrees | tested | both | write | `autocad_draw_arc` |
+| H-001 | Draw a line between two points (2D or 3D) | verified | both | write | `autocad_draw_line` |
+| H-002 | Draw a 3D polyline through points, optionally closed | verified | both | write | `autocad_draw_polyline` |
+| H-003 | Draw an axis-aligned rectangle by corners or by base point and size | verified | both | write | `autocad_draw_rectangle` |
+| H-004 | Draw a circle by centre and radius | verified | both | write | `autocad_draw_circle` |
+| H-005 | Draw a counterclockwise arc by centre, radius and angles in degrees | verified | both | write | `autocad_draw_arc` |
 | H-006 | Verify each created entity by model-space count and type | tested | com | read | internal |
 | H-007 | Exact length and area of lightweight polylines with arc (bulge) segments | tested | dxf | read | internal |
 | H-008 | Draw 2D lightweight polylines with bulges and widths | planned | both | write |  |
@@ -289,12 +290,12 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| I-001 | Single-line TEXT with height and rotation | tested | both | write | `autocad_draw_text` |
-| I-002 | MTEXT with wrapping width and paragraph breaks | tested | both | write | `autocad_draw_mtext` |
+| I-001 | Single-line TEXT with height and rotation | verified | both | write | `autocad_draw_text` |
+| I-002 | MTEXT with wrapping width and paragraph breaks | verified | both | write | `autocad_draw_mtext` |
 | I-003 | Middle-centre MTEXT labels (rooms, grid bubbles) | tested | both | write | internal |
-| I-004 | Aligned dimension between two points | tested | both | write | `autocad_add_dimension` |
-| I-005 | Horizontal, vertical or rotated linear dimension | tested | both | write | `autocad_add_dimension` |
-| I-006 | Verify a dimension's measured value equals the given geometry | tested | both | read | `autocad_add_dimension` |
+| I-004 | Aligned dimension between two points | verified | both | write | `autocad_add_dimension` |
+| I-005 | Horizontal, vertical or rotated linear dimension | verified | both | write | `autocad_add_dimension` |
+| I-006 | Verify a dimension's measured value equals the given geometry | verified | both | read | `autocad_add_dimension` |
 | I-007 | Dimension text override | implemented | both | write | `autocad_add_dimension` |
 | I-008 | Automatic overall dimensions on generated plans | tested | both | write | `autocad_generate_floor_plan` |
 | I-009 | Automatic bay and overall dimensions on structural grids | tested | both | write | `autocad_draw_structural_grid` |
@@ -328,18 +329,18 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| J-001 | Create a layer or update its color and linetype | tested | both | write | `autocad_create_layer` |
+| J-001 | Create a layer or update its color and linetype | verified | both | write | `autocad_create_layer` |
 | J-002 | Create standard architectural layers with their default colors | tested | both | write | `autocad_ensure_layer` |
 | J-003 | List layers with state, color, linetype, lineweight and plot flag | tested | both | read | `autocad_list_layers` |
 | J-004 | Change on/freeze/lock/color/linetype/lineweight/plot of a layer with read-back | tested | both | write | `autocad_set_layer_properties` |
 | J-005 | Load missing linetypes from acad.lin or acadiso.lin by measurement | tested | com | write | `autocad_set_layer_properties`, `autocad_create_layer` |
 | J-006 | Refuse to freeze the current layer | tested | both | read | `autocad_set_layer_properties` |
-| J-007 | Create a missing layer when drawing on it | tested | both | write | internal |
-| J-008 | List block definitions with entity counts and attribute tags | tested | both | read | `autocad_list_blocks` |
-| J-009 | Insert a defined block with scale and rotation | tested | both | write | `autocad_insert_block` |
-| J-010 | Fill attributes on insert, rejecting unknown tags before inserting | tested | both | write | `autocad_insert_block` |
+| J-007 | Create a missing layer when drawing on it | verified | both | write | internal |
+| J-008 | List block definitions with entity counts and attribute tags | verified | both | read | `autocad_list_blocks` |
+| J-009 | Insert a defined block with scale and rotation | verified | both | write | `autocad_insert_block` |
+| J-010 | Fill attributes on insert, rejecting unknown tags before inserting | verified | both | write | `autocad_insert_block` |
 | J-011 | Read a block reference's attributes | tested | both | read | `autocad_get_block_attributes` |
-| J-012 | Update attribute values with read-back | tested | both | write | `autocad_set_block_attributes` |
+| J-012 | Update attribute values with read-back | verified | both | write | `autocad_set_block_attributes` |
 | J-013 | Count block references by name and layer | tested | both | read | `autocad_quantity_takeoff` |
 | J-014 | Delete unused layers with a dry run | planned | both | destructive |  |
 | J-015 | Rename layers | planned | both | write |  |
@@ -366,12 +367,12 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| K-001 | Hatch a polygon given as points | tested | both | write | `autocad_add_hatch` |
+| K-001 | Hatch a polygon given as points | verified | both | write | `autocad_add_hatch` |
 | K-002 | Hatch an existing closed boundary entity | tested | both | write | `autocad_add_hatch` |
-| K-003 | Verify the applied hatch pattern by reading it back | tested | both | read | `autocad_add_hatch` |
+| K-003 | Verify the applied hatch pattern by reading it back | verified | both | read | `autocad_add_hatch` |
 | K-004 | Validate pattern names against the ISO/imperial pattern tables (headless) | tested | dxf | read | `autocad_add_hatch` |
 | K-005 | Solid fills | tested | both | write | `autocad_add_hatch`, `autocad_draw_structural_grid` |
-| K-006 | Report the hatched area | tested | both | read | `autocad_add_hatch` |
+| K-006 | Report the hatched area | verified | both | read | `autocad_add_hatch` |
 | K-007 | Hatch area totals by layer and pattern | tested | both | read | `autocad_quantity_takeoff` |
 | K-008 | Hatches with inner loops (islands) | planned | both | write |  |
 | K-009 | Hatch by an internal point with boundary detection | planned | com | write |  |
@@ -388,8 +389,8 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| L-001 | List layouts with plot device, paper, style and current flag | tested | both | read | `autocad_list_layouts` |
-| L-002 | Restore the active layout and its plot settings after plotting | tested | com | write | `autocad_plot_pdf` |
+| L-001 | List layouts with plot device, paper, style and current flag | verified | both | read | `autocad_list_layouts` |
+| L-002 | Restore the active layout and its plot settings after plotting | verified | com | write | `autocad_plot_pdf` |
 | L-003 | Create layouts | planned | both | write |  |
 | L-004 | Rename, delete and copy layouts | planned | both | write |  |
 | L-005 | Set the current layout | planned | com | write |  |
@@ -409,13 +410,13 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 |---|---|---|---|---|---|
 | M-001 | Apply a units preset (engineering, architectural, metric_mm, metric_m, preserve) only on writes | tested | both | write | internal |
 | M-002 | Skip unit variables that already match so the drawing is not marked modified | tested | both | write | internal |
-| M-003 | Set a units preset explicitly for the session | tested | both | write | `autocad_set_drawing_units` |
+| M-003 | Set a units preset explicitly for the session | verified | both | write | `autocad_set_drawing_units` |
 | M-004 | Convert lengths between in, ft, mm, cm, m and other INSUNITS units | tested | pure | read | internal |
 | M-005 | Per-unit-system drafting defaults (walls, doors, windows, text) | tested | pure | read | internal |
 | M-006 | Default wall thickness from the drawing's INSUNITS | tested | both | write | `autocad_draw_wall` |
 | M-007 | Draw the V0.2.3 floor plan in any drawing unit, identical in inches | tested | both | write | `autocad_generate_2d_floor_plan` |
 | M-008 | All coordinates are WCS; angles degrees counterclockwise | tested | both | read | internal |
-| M-009 | Convert degrees at the tool boundary to radians for ActiveX | tested | com | read | internal |
+| M-009 | Convert degrees at the tool boundary to radians for ActiveX | verified | com | read | internal |
 | M-010 | List, set and restore named UCS for the operator | planned | both | write |  |
 | M-011 | Translate points between WCS and a UCS | planned | com | read |  |
 | M-012 | Read geographic location / coordinate system assignment | planned | map3d | read |  |
@@ -447,8 +448,8 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| O-001 | Filter entities by DXF type names | tested | both | read | `autocad_list_entities` |
-| O-002 | Filter entities by layer (case-insensitive) | tested | both | read | `autocad_list_entities` |
+| O-001 | Filter entities by DXF type names | verified | both | read | `autocad_list_entities` |
+| O-002 | Filter entities by layer (case-insensitive) | verified | both | read | `autocad_list_entities` |
 | O-003 | Filter entities lying inside a window | tested | both | read | `autocad_list_entities` |
 | O-004 | Offset/limit pagination with total and next_offset | tested | both | read | `autocad_list_entities` |
 | O-005 | Validate hex handles before any COM call | tested | pure | read | internal |
@@ -466,9 +467,9 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
 | P-001 | Dry run for every generator: the exact plan, nothing drawn | tested | both | read | internal |
-| P-002 | Dry run for deletes | tested | both | read | `autocad_delete_entities` |
+| P-002 | Dry run for deletes | verified | both | read | `autocad_delete_entities` |
 | P-003 | Write outputs to a temporary name and replace the target only on success | tested | both | external | internal |
-| P-004 | Verify generators by model-space count growth | tested | both | read | internal |
+| P-004 | Verify generators by model-space count growth | verified | both | read | internal |
 | P-005 | Wrap each mutating tool call in one undo group | planned | com | write |  |
 | P-006 | Begin/commit/rollback using an UNDO mark plus group | planned | com | write |  |
 | P-007 | Undo the last N tool calls | planned | com | write |  |
@@ -509,7 +510,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| R-001 | Export a DXF copy without renaming the open drawing | tested | both | external | `autocad_export_dxf` |
+| R-001 | Export a DXF copy without renaming the open drawing | verified | both | external | `autocad_export_dxf` |
 | R-002 | Read DXF files headlessly | tested | dxf | read | `autocad_open_drawing` |
 | R-003 | Write DXF files headlessly in the document's DXF version | tested | dxf | destructive | `autocad_save_drawing` |
 | R-004 | Verify written DXF files by re-reading them | tested | dxf | read | internal |
@@ -542,9 +543,9 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | T-003 | Force foreground plotting and restore BACKGROUNDPLOT | tested | com | external | `autocad_plot_pdf` |
 | T-004 | Suppress plot error dialogs during the plot and restore the setting | implemented | com | external | `autocad_plot_pdf` |
 | T-005 | Match paper by canonical media name, rejecting ambiguous matches with candidates | tested | com | read | `autocad_plot_pdf` |
-| T-006 | Verify the PDF header and report the paper size from /MediaBox | tested | com | read | `autocad_plot_pdf` |
+| T-006 | Verify the PDF header and report the paper size from /MediaBox | verified | com | read | `autocad_plot_pdf` |
 | T-007 | Plot to a temporary file and replace the target only on success | tested | com | external | `autocad_plot_pdf` |
-| T-008 | Restore the layout's plot settings after plotting | tested | com | write | `autocad_plot_pdf` |
+| T-008 | Restore the layout's plot settings after plotting | verified | com | write | `autocad_plot_pdf` |
 | T-009 | Apply a plot style table for the plot | implemented | com | external | `autocad_plot_pdf` |
 | T-010 | Plot every layout to PDFs | planned | com | external |  |
 | T-011 | Publish a multi-sheet PDF | planned | com | external |  |
@@ -607,8 +608,8 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| W-001 | The V0.2.3 2x3 grid floor plan, unchanged output | tested | both | write | `autocad_generate_2d_floor_plan` |
-| W-002 | Floor plan from explicit room rectangles forming any rectilinear footprint | tested | both | write | `autocad_generate_floor_plan` |
+| W-001 | The V0.2.3 2x3 grid floor plan, unchanged output | verified | both | write | `autocad_generate_2d_floor_plan` |
+| W-002 | Floor plan from explicit room rectangles forming any rectilinear footprint | verified | both | write | `autocad_generate_floor_plan` |
 | W-003 | Connect every room to the entry room with doors through shared walls | tested | pure | write | `autocad_generate_floor_plan` |
 | W-004 | Report rooms that no door can reach | tested | pure | read | `autocad_generate_floor_plan` |
 | W-005 | One window per room on its longest outside wall, clear of the entry door | tested | pure | write | `autocad_generate_floor_plan` |
@@ -632,7 +633,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
-| X-001 | Column grid with numbered and lettered lines | tested | both | write | `autocad_draw_structural_grid` |
+| X-001 | Column grid with numbered and lettered lines | verified | both | write | `autocad_draw_structural_grid` |
 | X-002 | Grid bubbles and labels; I and O skipped by convention, AA after Z | tested | pure | write | `autocad_draw_structural_grid` |
 | X-003 | Filled column marks at every grid intersection | tested | both | write | `autocad_draw_structural_grid` |
 | X-004 | Column marks (A1, B2, ...) with centres and sizes | tested | pure | read | `autocad_draw_structural_grid` |
@@ -799,7 +800,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
 | AG-001 | Draw whole generated plans in one COM session | tested | both | write | internal |
-| AG-002 | One plan emitter for live and headless drawings | tested | both | write | internal |
+| AG-002 | One plan emitter for live and headless drawings | verified | both | write | internal |
 | AG-003 | Batch primitive drawing in one call | planned | both | write |  |
 | AG-004 | Run a workflow over many drawings | planned | both | write |  |
 | AG-005 | Record and replay tool sequences | planned | pure | session |  |
@@ -904,7 +905,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | AN-002 | Golden regression of the V0.2.3 floor plan from the git baseline | tested | pure | read | internal |
 | AN-003 | Headless integration tests writing and re-reading real DXF files | tested | dxf | read | internal |
 | AN-004 | stdio end-to-end tests with the official MCP client | tested | pure | read | internal |
-| AN-005 | Live AutoCAD tests that skip, never fake, without AutoCAD | implemented | com | read | internal |
+| AN-005 | Live AutoCAD tests that skip, never fake, without AutoCAD | verified | com | read | internal |
 | AN-006 | Catalog generator with a staleness check | tested | pure | read | internal |
 | AN-007 | Packaging checks: version, dependencies, modules | tested | pure | read | internal |
 | AN-008 | CI workflow on Windows | planned | pure | read |  |

@@ -73,10 +73,9 @@ Rules:
 `planned` for ideas, `implemented` when code exists without a test, `tested`
 when automated tests cover it, and `verified` only with recorded output from
 a live AutoCAD run. Tests reject unknown tools and statuses that contradict
-the evidence fields. No live evidence exists yet, so the validator rejects
-every `verified` entry; the pull request that records the first live run
-should add a live evidence kind and relax that rule for the entries it
-covers.
+the evidence fields. To promote an entry, add it to
+`scripts/catalog/data_live.py` with the live test that asserts it, and
+record the run's output in `docs/testing.md`.
 
 ## Licensing of borrowed ideas
 

@@ -448,8 +448,8 @@ class DrawingIdentity:
 
 
 def get_drawing_identity(doc) -> DrawingIdentity:
-    name = doc.Name
-    full_name = (doc.FullName or "").strip()
+    name = _retry_com(lambda: doc.Name)
+    full_name = (_retry_com(lambda: doc.FullName) or "").strip()
     if full_name:
         identity = f"path:{full_name.lower()}"
         return DrawingIdentity(identity=identity, name=name, path=full_name, saved=True)

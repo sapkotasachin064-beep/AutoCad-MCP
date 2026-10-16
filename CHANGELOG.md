@@ -8,9 +8,19 @@ checks it).
 
 A rebuild for reliability, a second (headless) backend and residential/civil
 drafting workflows. All 22 V0.2.x tool names and their required arguments
-still work. The V0.3.0 COM tools are **mock-tested, not yet live-verified**:
-AutoCAD was not running while they were built, and the live tests in
-`tests/test_integration_autocad.py` have not been run yet.
+still work. The 19 live tests pass on AutoCAD 2024 (R24.3); 62 catalogued
+capabilities are live-verified, the rest of the COM surface is fake-COM tested.
+
+### Fixed after the first live run (AutoCAD 2024)
+
+* `create_new_drawing` read `Name` / `FullName` right after `Documents.Add`
+  without the busy retry and could fail with "Call was rejected by callee"
+  (3 of 19 live tests on the first run). Those reads now retry.
+* `plot_pdf` reported `layout_settings_restored: false` on fresh drawings:
+  their model layout reports an empty paper name, which AutoCAD rejects as
+  input. The empty value is no longer written back; it is reported in
+  `layout_settings_left_at_device_default`, and any setting that does fail
+  is named in `layout_settings_not_restored`.
 
 ### Fixed
 
@@ -95,8 +105,8 @@ AutoCAD was not running while they were built, and the live tests in
 * **Plan engine**: generators build a list of primitives first, then draw it
   on either backend through one emitter and verify the entity count. Every
   generator supports `dry_run`.
-* **Tests**: 282 tests (263 pass, 19 need a running AutoCAD and are skipped
-  without one), including recorded-fake COM tests, a golden regression that
+* **Tests**: 283 tests, all passing with AutoCAD 2024 running (264 pass and
+  19 live tests skip without AutoCAD), including recorded-fake COM tests, a golden regression that
   proves the V0.2.3 floor plan is reproduced entity-for-entity, headless DXF
   integration tests and real stdio sessions on both backends.
 * **Documentation**: reference-repository analysis (`docs/analysis/`), a
@@ -132,7 +142,8 @@ Full migration notes: [docs/compatibility.md](docs/compatibility.md#migration-fr
 
 ### Not verified in this release
 
-* The 19 live AutoCAD tests (AutoCAD not running during development).
+* AutoCAD releases other than 2024, and COM tools no live test asserts
+  (see the catalog's `tested` entries).
 * Python 3.10-3.13, Linux and macOS (declared or designed for, not run).
 * Headless previews (matplotlib not installed on the development machine).
 * Codex CLI and Claude Desktop configurations (documented, not run).

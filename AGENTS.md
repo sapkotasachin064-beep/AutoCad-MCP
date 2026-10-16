@@ -93,8 +93,9 @@ python scripts\catalog\build_catalog.py --check
 
 * Status words mean exactly: `planned` (no code), `implemented` (code, no
   automated test), `tested` (automated tests: unit, mock_com, headless_dxf,
-  stdio_e2e, golden_regression), `verified` (run against a live AutoCAD in
-  this project, with the recorded output). Never promote without evidence.
+  stdio_e2e, golden_regression), `verified` (a live AutoCAD test asserts it;
+  listed in `scripts/catalog/data_live.py` with evidence kind `live_autocad`,
+  run output recorded in `docs/testing.md`). Never promote without evidence.
 * Fake-COM tests prove what this code sends; they prove nothing about
   AutoCAD. Never describe them as live tests.
 * Never skip, delete or loosen a failing test to get a green run; fix the

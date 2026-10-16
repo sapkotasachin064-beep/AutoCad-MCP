@@ -166,7 +166,8 @@ def plot_pdf(path: str, layout: str | None = None, paper: str | None = None, plo
         # Plot to a temporary name and replace the target only once a PDF exists,
         # so a failed plot never destroys a previous file (overwrite=True).
         temp = target.with_name(f".{target.stem}.{uuid.uuid4().hex[:8]}.pdf")
-        restored = True
+        not_restored = {}
+        left_at_default = []
         try:
             if old_background not in (None, 0):
                 _retry_com(lambda: doc.SetVariable("BACKGROUNDPLOT", 0))
@@ -201,6 +202,12 @@ def plot_pdf(path: str, layout: str | None = None, paper: str | None = None, plo
             for key, value in saved_settings.items():
                 if value is None:
                     continue
+                if key == "CanonicalMediaName" and value == "":
+                    # A layout that never had paper chosen reports ''. AutoCAD rejects ''
+                    # as input ("Invalid input", seen live on 2024), so the restored
+                    # device's default paper applies instead; say so rather than fail.
+                    left_at_default.append(key)
+                    continue
                 try:
                     if key == "ConfigName":
                         _retry_com(lambda value=value: setattr(plot_layout, "ConfigName", value))
@@ -209,16 +216,16 @@ def plot_pdf(path: str, layout: str | None = None, paper: str | None = None, plo
                         continue  # CenterPlot cannot be set while PlotType is acLayout
                     else:
                         _retry_com(lambda key=key, value=value: setattr(plot_layout, key, value))
-                except pywintypes.com_error:
-                    restored = False
+                except pywintypes.com_error as exc:
+                    not_restored[key] = str(exc)
             try:
                 if old_background not in (None, 0):
                     _retry_com(lambda: doc.SetVariable("BACKGROUNDPLOT", old_background))
                 if old_quiet is not None:
                     _retry_com(lambda: setattr(plot, "QuietErrorMode", old_quiet))
                 _retry_com(lambda: setattr(doc, "ActiveLayout", previous_layout))
-            except pywintypes.com_error:
-                restored = False
+            except pywintypes.com_error as exc:
+                not_restored["plot_session_state"] = str(exc)
 
         if not os.path.isfile(temp) or os.path.getsize(temp) == 0:
             if os.path.exists(temp):
@@ -237,7 +244,9 @@ def plot_pdf(path: str, layout: str | None = None, paper: str | None = None, plo
             "model_space": is_model,
             "device": PDF_DEVICE,
             "paper_mm": _pdf_mediabox_mm(target),
-            "layout_settings_restored": restored,
+            "layout_settings_restored": not not_restored,
+            "layout_settings_not_restored": not_restored,
+            "layout_settings_left_at_device_default": left_at_default,
             "drawing_identity": get_drawing_identity(doc).identity,
             "verified": is_pdf,
             "verification": "pdf_on_disk_with_pdf_header",

@@ -40,8 +40,13 @@ def test_every_public_tool_is_catalogued():
     assert not missing, f"tools with no catalog entry: {sorted(missing)}"
 
 
-def test_nothing_claims_live_verification_yet():
-    assert all(e["status"] != "verified" for e in CATALOG["capabilities"])
+def test_verified_entries_carry_recorded_live_evidence():
+    from data_live import LIVE_VERIFIED
+
+    verified = {f"{e['category'].split('.')[0]}:{e['slug']}" for e in CATALOG["capabilities"] if e["status"] == "verified"}
+    assert verified == set(LIVE_VERIFIED)
+    for entry in CATALOG["capabilities"]:
+        assert (entry["status"] == "verified") == ("live_autocad" in entry["test_evidence"]), entry["id"]
 
 
 def test_ids_are_stable_format_and_unique():

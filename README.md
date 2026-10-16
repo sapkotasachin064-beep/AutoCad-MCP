@@ -17,15 +17,13 @@ quantities.
 | Public MCP tools | **64**, in 10 toolsets ([tool reference](docs/tools.md)) |
 | MCP resources / prompts | 3 / 3 |
 | Backends | `com` (live AutoCAD 2021+, Windows) and `dxf` (headless ezdxf) |
-| Catalogued capabilities | **647**: 220 tested, 28 implemented without a dedicated test, 399 planned, **0 live-verified** ([catalog](docs/feature-catalog.md)) |
-| Tests | 282: 263 passed, 19 skipped (need a running AutoCAD) |
+| Catalogued capabilities | **647**: 62 live-verified, 160 tested, 26 implemented without a dedicated test, 399 planned ([catalog](docs/feature-catalog.md)) |
+| Tests | 283: all pass with AutoCAD 2024 running; without AutoCAD, 264 pass and the 19 live tests skip |
 
-"Tested" means automated tests (unit, recorded-fake COM, headless DXF files,
-stdio end-to-end, golden regression). The V0.3.0 COM tools have **not** yet
-been run against a live AutoCAD -- AutoCAD was not running while they were
-built; [the live tests](docs/testing.md#running-the-live-tests) are ready.
-The V0.2.3 README reports that its 22 tools were verified against AutoCAD
-2024; that was not re-run during V0.3.0.
+"Verified" means a live test asserted it on AutoCAD 2024 (R24.3) in this
+project ([results](docs/testing.md#live-autocad-results)). "Tested" means
+automated tests only (unit, recorded-fake COM, headless DXF files, stdio
+end-to-end, golden regression). Other AutoCAD releases have not been run.
 
 ## What it can do (implemented)
 
@@ -73,7 +71,7 @@ available yet.
 | | |
 |---|---|
 | OS | Windows 10/11 (tested on 11). Headless backend designed for any OS, tested on Windows only. |
-| AutoCAD | 2021 (R24.0) - 2027 (R26.0) accepted; 2024 used by V0.2.x; V0.3.0 not yet run live. Full AutoCAD only -- **LT has no COM** and is not supported. |
+| AutoCAD | 2021 (R24.0) - 2027 (R26.0) accepted; live tests pass on 2024 (R24.3); other releases not run. Full AutoCAD only -- **LT has no COM** and is not supported. |
 | Python | 3.10+ declared; tested on 3.14.7 |
 | MCP SDK | `mcp>=2.3,<3` (tested 2.3.0) |
 | Headless | `ezdxf>=1.3` (tested 1.4.4); previews need `matplotlib` (not tested) |
@@ -236,7 +234,9 @@ See [SECURITY.md](SECURITY.md).
 
 ## Limitations
 
-* V0.3.0 COM tools are mock-tested, not yet live-verified.
+* Live-verified on AutoCAD 2024 only, and only what the 19 live tests assert;
+  several COM tools (open/activate drawing, layer properties, stairs, sheets,
+  takeoff) are still fake-COM tested only.
 * No undo-group or transaction tool yet; use AutoCAD's Undo.
 * Doors and windows are drawn over walls, not cut into them; no wall junction
   clean-up.

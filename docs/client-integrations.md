@@ -15,8 +15,9 @@ Replace `C:\path\to\AutoCad-MCP` below with your clone, and use the venv's
 | Codex CLI | -- (not installed) | Format taken from OpenAI's Codex MCP documentation | Everything |
 | Claude Desktop | -- | Format from the MCP documentation | Everything (editing its config is your call) |
 
-"Verified" never means a client drove a live AutoCAD in this project:
-AutoCAD was not running during the V0.3.0 work.
+No client drove a live AutoCAD in this project. The live AutoCAD tests call
+the server's code directly (`tests/test_integration_autocad.py`), not
+through a client.
 
 ## Claude Code
 

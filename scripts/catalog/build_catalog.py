@@ -9,6 +9,7 @@ Entry statuses (never upgraded without evidence):
   implemented  -- code exists, no automated test exercises it
   tested       -- automated tests exercise it (unit / mock_com / headless_dxf / stdio_e2e)
   verified     -- executed against a live AutoCAD in this project, with recorded evidence
+                  (listed in data_live.py; evidence kind live_autocad)
 
 A capability is not a tool: one MCP tool can serve several capabilities, and
 internal capabilities (timeouts, error envelopes, pinning) have no tool of
@@ -29,11 +30,12 @@ from data_core import DOMAINS as CORE  # noqa: E402
 from data_drafting import DOMAINS as DRAFTING  # noqa: E402
 from data_disciplines import DOMAINS as DISCIPLINES  # noqa: E402
 from data_delivery import DOMAINS as DELIVERY  # noqa: E402
+from data_live import LIVE_RUN, LIVE_VERIFIED  # noqa: E402
 
 STATUSES = ("planned", "implemented", "tested", "verified")
 SAFETY = ("read", "session", "write", "destructive", "external")
 BACKENDS = ("com", "dxf", "both", "pure", "civil3d", "map3d", "plant3d", "electrical", "lt_ipc", "dotnet", "accore", "client")
-EVIDENCE = ("unit", "mock_com", "headless_dxf", "stdio_e2e", "golden_regression")
+EVIDENCE = ("unit", "mock_com", "headless_dxf", "stdio_e2e", "golden_regression", "live_autocad")
 
 
 def _letter_key(domain):
@@ -66,6 +68,12 @@ def entries():
                 "reference": extra.get("reference", defaults.get("reference", "")),
                 "overlaps": extra.get("overlaps", []),
             }
+            live = LIVE_VERIFIED.get(f"{letter}:{slug}")
+            if live is not None:
+                # Promotion only from recorded live evidence (data_live.py).
+                entry["status"] = "verified"
+                entry["test_evidence"].append("live_autocad")
+                entry["live_evidence"] = {"test": live, "run": LIVE_RUN["date"], "autocad": LIVE_RUN["autocad"]}
             out.append(entry)
     return out
 
@@ -108,8 +116,12 @@ def validate(items):
             problems.append(f"{e['id']}: tested without evidence")
         if e["status"] == "planned" and (e["test_evidence"] or e["exposed_by"]):
             problems.append(f"{e['id']}: planned entry claims tools or tests")
-        if e["status"] == "verified":
-            problems.append(f"{e['id']}: 'verified' needs recorded live evidence, none exists yet")
+        if (e["status"] == "verified") != ("live_autocad" in e["test_evidence"]):
+            problems.append(f"{e['id']}: 'verified' and live_autocad evidence must go together")
+        if e["status"] == "verified" and e["backend"] not in ("com", "both"):
+            problems.append(f"{e['id']}: verified live but backend is {e['backend']}")
+    known = {f"{e['category'].split('.')[0]}:{e['slug']}" for e in items}
+    problems += [f"data_live names unknown entry {k}" for k in LIVE_VERIFIED if k not in known]
     return problems
 
 
@@ -139,8 +151,9 @@ def markdown(items, stats):
         "  capability count are therefore different numbers and are reported separately.",
         "- **planned**: not implemented. **implemented**: code exists, no automated test. **tested**: exercised by",
         "  automated tests (unit, fake-COM, headless DXF, stdio end-to-end or golden regression).",
-        "  **verified**: run against a live AutoCAD in this project with recorded evidence -- none yet, because",
-        "  AutoCAD was not running during this rebuild.",
+        f"  **verified**: asserted by a live AutoCAD test in this project ({LIVE_RUN['autocad']},",
+        f"  {LIVE_RUN['date']}, {LIVE_RUN['result']}); see `{LIVE_RUN['record']}`. Calling a tool in a live",
+        "  test is not enough: the test must assert that capability.",
         "- Planned entries are a roadmap, not a promise; aliases and parameter variations are not counted.",
         "",
         "## Totals",

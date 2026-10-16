@@ -299,6 +299,18 @@ def test_plot_pdf_forces_foreground_and_restores_settings(app, tmp_path):
     assert result["layout_settings_restored"] is True
 
 
+def test_plot_leaves_empty_media_at_device_default(app, tmp_path):
+    # Live AutoCAD 2024: a fresh model layout reports CanonicalMediaName '' and
+    # rejects '' as input, so it must not be written back or counted as a failure.
+    layout = _doc(app).ModelSpace.Layout
+    layout.CanonicalMediaName = ""
+    result = output.plot_pdf(str(tmp_path / "sheet.pdf"), paper="ISO_full_bleed_A3")
+    assert result["layout_settings_restored"] is True
+    assert result["layout_settings_not_restored"] == {}
+    assert result["layout_settings_left_at_device_default"] == ["CanonicalMediaName"]
+    assert layout.ConfigName == "None"
+
+
 def test_plot_unknown_layout(app, tmp_path):
     with pytest.raises(CadError) as info:
         output.plot_pdf(str(tmp_path / "x.pdf"), layout="A1-Sheet")
