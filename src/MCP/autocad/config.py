@@ -21,3 +21,10 @@ def get_output_dir() -> str:
     if configured:
         return configured
     return os.path.join(os.path.expanduser("~"), "Documents", "AutoCAD MCP Output")
+
+
+def get_db_path() -> str:
+    configured = os.environ.get("AUTOCAD_MCP_DB_PATH")
+    if configured:
+        return configured
+    return os.path.join(get_output_dir(), "autocad_mcp.db")

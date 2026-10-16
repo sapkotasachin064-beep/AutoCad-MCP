@@ -51,7 +51,16 @@ def _is_busy_error(exc: pywintypes.com_error) -> bool:
 def _retry_com(func, attempts: int = RETRY_ATTEMPTS):
     """Retry a COM call while AutoCAD reports RPC_E_CALL_REJECTED (busy /
     still starting up). Any other com_error is not transient and raises
-    immediately."""
+    immediately.
+
+    Also retries AttributeError: verified live against AutoCAD 2024 under
+    rapid sequential calls, win32com's dynamic dispatch can raise
+    AttributeError (not pywintypes.com_error) for a real, existing COM
+    property when GetIDsOfNames transiently fails while AutoCAD is busy --
+    win32com/client/dynamic.py catches that internal pythoncom.ole_error
+    itself and re-raises it as a plain AttributeError, so it would otherwise
+    bypass the com_error retry below entirely.
+    """
     last_exc = None
     for _ in range(attempts):
         try:
@@ -60,7 +69,9 @@ def _retry_com(func, attempts: int = RETRY_ATTEMPTS):
             if not _is_busy_error(exc):
                 raise
             last_exc = exc
-            time.sleep(random.uniform(RETRY_MIN_DELAY, RETRY_MAX_DELAY))
+        except AttributeError as exc:
+            last_exc = exc
+        time.sleep(random.uniform(RETRY_MIN_DELAY, RETRY_MAX_DELAY))
     raise last_exc
 
 
@@ -258,3 +269,14 @@ def get_connected_app():
     if not status.supported:
         raise RuntimeError(status.message)
     return app
+
+
+def get_active_document(app):
+    """Return the ActiveDocument, or raise RuntimeError if none is open.
+    Caller must already be inside a com_initialized() context."""
+    count = _retry_com(lambda: app.Documents.Count)
+    if count == 0:
+        raise RuntimeError(
+            "No document is open in AutoCAD. Call create_new_drawing or open a drawing first."
+        )
+    return _retry_com(lambda: app.ActiveDocument)
