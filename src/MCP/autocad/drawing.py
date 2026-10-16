@@ -8,7 +8,7 @@ import pywintypes
 import win32com.client
 
 from .config import get_output_dir
-from .connection import get_connected_app
+from .connection import com_initialized, get_connected_app, _retry_com
 
 START_POINT = (0.0, 0.0, 0.0)
 END_POINT = (100.0, 100.0, 0.0)
@@ -28,50 +28,53 @@ def _unique_path(output_dir: str) -> str:
 
 
 def create_test_drawing_with_line(output_dir: str | None = None) -> dict:
-    app = get_connected_app()
-    output_dir = output_dir or get_output_dir()
-    file_path = _unique_path(output_dir)
+    with com_initialized():
+        app = get_connected_app()
+        output_dir = output_dir or get_output_dir()
+        file_path = _unique_path(output_dir)
 
-    try:
-        doc = app.Documents.Add()
-    except pywintypes.com_error as exc:
-        raise RuntimeError(f"Failed to create new drawing: {exc}") from exc
+        try:
+            doc = _retry_com(lambda: app.Documents.Add())
+        except pywintypes.com_error as exc:
+            raise RuntimeError(f"Failed to create new drawing: {exc}") from exc
 
-    active = app.ActiveDocument
-    if active.Name != doc.Name:
-        raise RuntimeError(
-            f"New drawing {doc.Name!r} was created but is not the active document "
-            f"(active is {active.Name!r}); refusing to draw into the wrong drawing."
-        )
+        active = _retry_com(lambda: app.ActiveDocument)
+        if active.Name != doc.Name:
+            raise RuntimeError(
+                f"New drawing {doc.Name!r} was created but is not the active document "
+                f"(active is {active.Name!r}); refusing to draw into the wrong drawing."
+            )
 
-    model_space = doc.ModelSpace
-    count_before = model_space.Count
+        model_space = _retry_com(lambda: doc.ModelSpace)
+        count_before = _retry_com(lambda: model_space.Count)
 
-    try:
-        line = model_space.AddLine(_point_variant(START_POINT), _point_variant(END_POINT))
-    except pywintypes.com_error as exc:
-        raise RuntimeError(f"Failed to create line entity: {exc}") from exc
+        try:
+            line = _retry_com(
+                lambda: model_space.AddLine(_point_variant(START_POINT), _point_variant(END_POINT))
+            )
+        except pywintypes.com_error as exc:
+            raise RuntimeError(f"Failed to create line entity: {exc}") from exc
 
-    count_after = model_space.Count
-    if count_after != count_before + 1 or line.ObjectName != "AcDbLine":
-        raise RuntimeError("Line entity was not created as expected in ModelSpace.")
+        count_after = _retry_com(lambda: model_space.Count)
+        if count_after != count_before + 1 or line.ObjectName != "AcDbLine":
+            raise RuntimeError("Line entity was not created as expected in ModelSpace.")
 
-    if os.path.exists(file_path):
-        raise RuntimeError(f"Refusing to overwrite existing file: {file_path}")
+        if os.path.exists(file_path):
+            raise RuntimeError(f"Refusing to overwrite existing file: {file_path}")
 
-    try:
-        doc.SaveAs(file_path)
-    except pywintypes.com_error as exc:
-        raise RuntimeError(f"Failed to save drawing to {file_path}: {exc}") from exc
+        try:
+            _retry_com(lambda: doc.SaveAs(file_path))
+        except pywintypes.com_error as exc:
+            raise RuntimeError(f"Failed to save drawing to {file_path}: {exc}") from exc
 
-    if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
-        raise RuntimeError(f"Save reported success but file is missing or empty: {file_path}")
+        if not os.path.exists(file_path) or os.path.getsize(file_path) == 0:
+            raise RuntimeError(f"Save reported success but file is missing or empty: {file_path}")
 
-    return {
-        "status": "ok",
-        "file_path": file_path,
-        "line_handle": line.Handle,
-        "start_point": START_POINT,
-        "end_point": END_POINT,
-        "message": f"Drawing saved with 1 line entity at {file_path}",
-    }
+        return {
+            "status": "ok",
+            "file_path": file_path,
+            "line_handle": line.Handle,
+            "start_point": START_POINT,
+            "end_point": END_POINT,
+            "message": f"Drawing saved with 1 line entity at {file_path}",
+        }
