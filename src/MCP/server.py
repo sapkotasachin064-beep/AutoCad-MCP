@@ -6,6 +6,9 @@ V0.1.0 foundation tools:
   autocad_create_test_drawing_with_line - new drawing, one line (0,0,0)-(100,100,0), saved
 
 V0.2.0 drawing, editing, and analysis tools: see README.md for the full list.
+
+V0.2.1 adds autocad_query_and_highlight (run a read-only query, highlight
+every matching handle).
 """
 
 import dataclasses
@@ -197,6 +200,24 @@ def autocad_execute_query(query: str, params: list | None = None) -> dict:
         "rows": result.rows,
         "row_count": result.row_count,
     }
+
+
+# ======= V0.2.1: query + highlight =======
+
+
+@server.tool()
+def autocad_query_and_highlight(
+    query: str,
+    params: list | None = None,
+    method: str = "temporary",
+    color: int = 1,
+    clear: bool = False,
+) -> dict:
+    """Run a read-only query (same rules as autocad_execute_query) whose
+    result set includes a 'handle' column, then highlight every matching
+    entity the same way as autocad_highlight_entity. Stale handles (entity
+    deleted since the last scan) are reported in not_found, not raised."""
+    return editing.query_and_highlight(query, params=params, method=method, color=color, clear=clear)
 
 
 if __name__ == "__main__":

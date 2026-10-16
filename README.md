@@ -8,10 +8,13 @@ MCP server that drives AutoCAD 2021+ over COM on Windows.
   no COM/ActiveX automation API).
 - **V0.1.0**: minimal end-to-end path -- check AutoCAD state, create a drawing, draw
   one line, save it.
-- **V0.2.0** (this version): drawing creation and geometry, layers, entity editing,
+- **V0.2.0**: drawing creation and geometry, layers, entity editing,
   highlighting, and a local SQLite database of scanned entities with a read-only
-  query tool. All 15 tools operate on real AutoCAD entities through the COM
-  backend in `src/MCP/autocad/connection.py` -- there is no simulated/offline mode.
+  query tool.
+- **V0.2.1** (this version): adds `autocad_query_and_highlight`, combining the
+  read-only query tool with entity highlighting. All 16 V0.2.x tools operate on
+  real AutoCAD entities through the COM backend in `src/MCP/autocad/connection.py`
+  -- there is no simulated/offline mode.
 
 ## Requirements
 
@@ -109,9 +112,19 @@ command convention; this is not reinterpreted for a rotated UCS.
 | `autocad_count_text_patterns` | `count_text_patterns` | Counts/lists `TEXT`/`MTEXT` entities matching `pattern` directly against the live drawing (literal substring by default, regex if `use_regex=true`). |
 | `autocad_execute_query` | `execute_query` | One read-only `SELECT` (optionally with a leading `WITH`) against the scanned-entities database. Rejects: multiple statements, any write/DDL keyword (`INSERT`/`UPDATE`/`DELETE`/`DROP`/`ALTER`/`CREATE`/`PRAGMA`/`ATTACH`/...), and anything not starting with `SELECT`/`WITH`. The connection itself is also opened `mode=ro`, so even a write that slipped past the keyword check (e.g. SQLite's `WITH ... DELETE` CTE form) is still refused by SQLite itself. Pass `params` for parameterized values -- never format user input into `query`. |
 
-Tools not in this list (`get_all_tables`, `get_table_schema`, `query_and_highlight`,
-`draw_device_connection`) exist in the reference repo but are out of this
-milestone's scope (see the request's section 9) and were not ported.
+### V0.2.1: query + highlight
+
+| Tool | Reference tool | Notes |
+|---|---|---|
+| `autocad_query_and_highlight` | `query_and_highlight` | Runs the same read-only query as `autocad_execute_query`; the result must include a `handle` column. Every matching entity is then highlighted the same way as `autocad_highlight_entity` (`method="temporary"`/`"persistent"`, `color`, `clear`). A handle whose entity no longer exists (stale scan) is listed in `not_found` instead of failing the whole batch. |
+
+Tools not in this list (`get_all_tables`, `get_table_schema`,
+`draw_device_connection`) exist in the reference repo but are out of scope:
+`get_all_tables`/`get_table_schema` are already reachable through
+`autocad_execute_query` (e.g. `SELECT name FROM sqlite_master WHERE type='table'`,
+`SELECT * FROM pragma_table_info('entities')`), and `draw_device_connection` is a
+demo-specific feature tied to the reference's own `CustomDevice`/PMC labeling
+convention, which this server's entity model does not have.
 
 ## Database
 

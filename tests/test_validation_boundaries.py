@@ -100,6 +100,18 @@ def test_highlight_text_matches_rejects_bad_regex():
             editing.highlight_text_matches("(unclosed", use_regex=True)
 
 
+def test_query_and_highlight_rejects_bad_method():
+    with _forbid_com_call("editing"):
+        with pytest.raises(geometry.ValidationError):
+            editing.query_and_highlight("SELECT handle FROM entities", method="sparkly")
+
+
+def test_query_and_highlight_rejects_missing_handle_column():
+    with _forbid_com_call("editing"):
+        with pytest.raises(geometry.ValidationError):
+            editing.query_and_highlight("SELECT 1 AS not_handle")
+
+
 def test_create_layer_rejects_bad_name():
     with _forbid_com_call("layers"):
         with pytest.raises(geometry.ValidationError):

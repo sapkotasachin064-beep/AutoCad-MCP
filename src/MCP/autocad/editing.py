@@ -12,7 +12,7 @@ import re
 
 import pywintypes
 
-from . import geometry
+from . import config, db, geometry
 from .com_utils import point_variant
 from .connection import _retry_com, com_initialized, get_active_document, get_connected_app
 from .entity_types import TEXT_OBJECT_NAMES
@@ -184,6 +184,84 @@ def highlight_entity(
             "color": color,
             "drawing_identity": identity.identity,
             "message": f"Entity {handle} color changed from {original_color} to {color} (persistent).",
+        }
+
+
+def query_and_highlight(
+    query: str,
+    params: list | None = None,
+    method: str = "temporary",
+    color: int = 1,
+    clear: bool = False,
+) -> dict:
+    """Run a read-only query (same rules as autocad_execute_query) whose
+    result set includes a 'handle' column, then highlight every matching
+    entity. Stale handles (entity deleted since the last scan) are reported
+    in not_found rather than aborting the batch."""
+    if method not in ("temporary", "persistent"):
+        raise geometry.ValidationError(f"method must be 'temporary' or 'persistent', got {method!r}")
+    if method == "persistent":
+        color = geometry.validate_color_index(color)
+
+    result = db.execute_readonly_query(config.get_db_path(), query, params=params)
+    if "handle" not in result.columns:
+        raise geometry.ValidationError(
+            f"query must select a 'handle' column to highlight; got columns {result.columns}"
+        )
+
+    handles = []
+    seen = set()
+    for row in result.rows:
+        handle = row["handle"]
+        if handle is None or handle in seen:
+            continue
+        seen.add(handle)
+        handles.append(handle)
+
+    if not handles:
+        return {
+            "status": "ok",
+            "method": method,
+            "row_count": result.row_count,
+            "highlighted_count": 0,
+            "highlighted_handles": [],
+            "not_found": [],
+            "message": "Query returned no handles to highlight.",
+        }
+
+    with com_initialized():
+        app = get_connected_app()
+        doc = get_active_document(app)
+
+        highlighted = []
+        not_found = []
+        for handle in handles:
+            try:
+                entity = _get_entity(doc, handle)
+            except RuntimeError:
+                not_found.append(handle)
+                continue
+            if method == "temporary":
+                want_on = not clear
+                _retry_com(lambda entity=entity, want_on=want_on: entity.Highlight(want_on))
+            else:
+                _retry_com(lambda entity=entity, color=color: setattr(entity, "Color", color))
+            highlighted.append(handle)
+
+        if method == "temporary":
+            _regen(doc)
+
+        identity = get_drawing_identity(doc)
+        return {
+            "status": "ok",
+            "method": method,
+            "color": color if method == "persistent" else None,
+            "row_count": result.row_count,
+            "highlighted_count": len(highlighted),
+            "highlighted_handles": highlighted,
+            "not_found": not_found,
+            "drawing_identity": identity.identity,
+            "message": f"Highlighted {len(highlighted)} of {len(handles)} entity(ies) from query result.",
         }
 
 

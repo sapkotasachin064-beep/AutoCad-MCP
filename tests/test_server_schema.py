@@ -34,6 +34,10 @@ EXPECTED_V0_2_TOOLS = {
     "autocad_execute_query",
 }
 
+EXPECTED_V0_2_1_TOOLS = {
+    "autocad_query_and_highlight",
+}
+
 
 def _list_tools():
     return asyncio.run(server.server.list_tools())
@@ -49,14 +53,19 @@ def test_v02_tools_all_registered():
     assert EXPECTED_V0_2_TOOLS <= names
 
 
+def test_v021_tools_all_registered():
+    names = {tool.name for tool in _list_tools()}
+    assert EXPECTED_V0_2_1_TOOLS <= names
+
+
 def test_no_duplicate_tool_names():
     names = [tool.name for tool in _list_tools()]
     assert len(names) == len(set(names))
 
 
-def test_exactly_18_tools_total():
+def test_exactly_19_tools_total():
     names = {tool.name for tool in _list_tools()}
-    assert names == EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS
+    assert names == EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS
 
 
 def test_draw_rectangle_schema_has_optional_corner_and_size_params():
@@ -72,6 +81,13 @@ def test_draw_rectangle_schema_has_optional_corner_and_size_params():
 def test_execute_query_schema_requires_query_string():
     tools = {tool.name: tool for tool in _list_tools()}
     schema = tools["autocad_execute_query"].input_schema
+    assert "query" in schema["required"]
+    assert schema["properties"]["query"]["type"] == "string"
+
+
+def test_query_and_highlight_schema_requires_query_string():
+    tools = {tool.name: tool for tool in _list_tools()}
+    schema = tools["autocad_query_and_highlight"].input_schema
     assert "query" in schema["required"]
     assert schema["properties"]["query"]["type"] == "string"
 
