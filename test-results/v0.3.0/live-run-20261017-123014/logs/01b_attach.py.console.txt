@@ -1,6 +1,0 @@
-RELEASE STRING: 24.3s (LMS Tech) | ACADVER: None
-documents already open (owner's / startup, never touched): []
-[PASS] LV20 autocad_get_status: status with AutoCAD running: connected, supported, release 2024, version equals the direct COM Application.Version
-[PASS] LV21 (autocad_launch_application): launch while AutoCAD already runs: only verifies it (same process, drawings untouched)
-[PASS] LV22 autocad_get_capabilities: capabilities on the live backend: 64 tools, 6 com-only, 120 s COM timeout
-[PASS] LV23 (autocad_list_drawings): list_drawings matches the drawings AutoCAD itself reports (direct COM)

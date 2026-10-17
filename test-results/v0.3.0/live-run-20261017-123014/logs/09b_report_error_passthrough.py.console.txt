@@ -1,4 +1,0 @@
-[PASS] RP08a autocad_quantity_takeoff: control: with no drawing open the takeoff itself says E_NO_ACTIVE_DOCUMENT
-[PASS] RP08b autocad_check_drawing: control: with no drawing open check_drawing itself says E_NO_ACTIVE_DOCUMENT
-[FAIL] RP08 save_report with no drawing open -> E_INTERNAL: ToolError: {"ok": false, "error": {"code": "E_NO_ACTIVE_DOCUMENT", "message": "No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first.", "recoverable": true, "recommen
-[OBSERVE:medium] OBS-save-report-error-wrap autocad_save_report: autocad_save_report calls the decorated autocad_check_drawing / autocad_quantity_takeoff functions; their ToolError is caught by its own wrapper and re-classified as E_INTERNAL (recoverable=false, 'report a bug'). Every typed error of the wrapped tools (E_NO_ACTIVE_DOCUMENT, E_DOCUMENT_CHANGED, E_AUTOCAD_NOT_RUNNING ...) is lost.

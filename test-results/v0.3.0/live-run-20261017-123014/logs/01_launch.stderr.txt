@@ -1,1 +1,0 @@
-tool autocad_list_drawings failed: CadStateError: AutoCAD is not running. Call autocad_launch_application first.

@@ -1,4 +1,0 @@
-tool autocad_quantity_takeoff failed: CadStateError: No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first.
-tool autocad_check_drawing failed: CadStateError: No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first.
-tool autocad_quantity_takeoff failed: CadStateError: No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first.
-tool autocad_save_report failed: ToolError: {"ok": false, "error": {"code": "E_NO_ACTIVE_DOCUMENT", "message": "No document is open in AutoCAD. Call autocad_create_new_drawing or open a drawing first.", "recoverable": true, "recommended_action": "call_autocad_create_new_drawing_or_autocad_open_drawing"}, "tool": "autocad_quantity_takeoff", "backend": "com"}

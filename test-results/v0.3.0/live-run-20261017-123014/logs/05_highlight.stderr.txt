@@ -1,9 +1,0 @@
-tool autocad_highlight_entity failed: CadStateError: No entity found with handle 'FFFFF': (-2147352567, 'Exception occurred.', (0, 'AutoCAD.Application', 'Unknown handle', 'C:\\Program Files\\Autodesk\\AutoCAD 2024\\HELP\\OLE_ERR.CHM', -2145386484, -2145386484), None)
-tool autocad_highlight_entity failed: ValidationError: handle must be a hex entity handle string, got 'not a handle!'
-tool autocad_highlight_entity failed: ValidationError: method must be 'temporary' or 'persistent', got 'blink'
-tool autocad_highlight_entity failed: ValidationError: color index must be between 0 and 255, got 999
-tool autocad_highlight_text_matches failed: ValidationError: pattern must not be empty
-tool autocad_highlight_text_matches failed: ValidationError: pattern is not a valid regex: missing ), unterminated subpattern at position 0
-tool autocad_query_and_highlight failed: ValidationError: query must select a 'handle' column to highlight; got columns ['object_name']
-tool autocad_query_and_highlight failed: QueryRejected: only read-only SELECT (optionally with a WITH clause) is allowed, got statement starting with 'DELETE'
-tool autocad_query_and_highlight failed: QueryRejected: multiple statements are not allowed; submit exactly one SELECT
