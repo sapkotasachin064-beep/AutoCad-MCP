@@ -15,7 +15,7 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 
-from core.errors import CadError
+from core.errors import CadError, InvalidInputError
 
 SCHEMA_VERSION = 1
 
@@ -172,6 +172,16 @@ def _validate_readonly_sql(sql: str) -> str:
     return body
 
 
+def _schema_hint(conn: sqlite3.Connection) -> dict:
+    """Table name -> column names, so a failed query can say what it may reference."""
+    try:
+        names = [row[0] for row in conn.execute(
+            "SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")]
+        return {name: [col[1] for col in conn.execute(f'PRAGMA table_info("{name}")')] for name in names}
+    except sqlite3.Error:
+        return {}
+
+
 def execute_readonly_query(
     db_path: str, sql: str, params: list | None = None, max_rows: int | None = None
 ) -> QueryResult:
@@ -206,6 +216,10 @@ def execute_readonly_query(
     except sqlite3.OperationalError as exc:
         if "readonly" in str(exc).lower() or "read-only" in str(exc).lower():
             raise QueryRejected(f"query attempted a write and was rejected by the read-only connection: {exc}") from exc
-        raise
+        # A typo in the caller's own SELECT (unknown column or table, bad syntax) is theirs to fix: say so, and
+        # show the schema, instead of letting it surface as an internal error.
+        raise InvalidInputError(f"the query could not be run: {exc}", details={"tables": _schema_hint(conn)}) from exc
+    except sqlite3.ProgrammingError as exc:  # e.g. wrong number of ? parameters
+        raise InvalidInputError(f"the query could not be run: {exc}", details={"tables": _schema_hint(conn)}) from exc
     finally:
         conn.close()

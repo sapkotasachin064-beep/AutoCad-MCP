@@ -172,6 +172,10 @@ def classify(exc: BaseException) -> CadError:
         return CadError(str(exc), code="E_INVALID_INPUT")
     if isinstance(exc, FileNotFoundError):
         return CadError(str(exc), code="E_FILE_NOT_FOUND")
+    if isinstance(exc, OSError) and not isinstance(exc, RuntimeError) and getattr(exc, "filename", None):
+        # A filesystem error that names a path (access denied, invalid or over-long file name, ...) is a path
+        # the caller can change, not a server bug. COM-related OSErrors name no file and keep the mapping below.
+        return CadError(str(exc), code="E_OUTPUT_PATH_REJECTED", details={"path": str(exc.filename)})
     if isinstance(exc, (RuntimeError, OSError)):
         lowered = str(exc).lower()
         for needle, code in _LEGACY_PATTERNS:

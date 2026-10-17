@@ -78,6 +78,31 @@ def test_unexpected_exception_is_internal_and_named():
     assert "KeyError" in classified.message
 
 
+@pytest.mark.parametrize(
+    "exc",
+    [
+        PermissionError(13, "Access is denied", r"C:\out\locked.dxf"),
+        OSError(22, "Invalid argument", "C:\\out\\" + "a" * 300 + ".dxf"),
+    ],
+)
+def test_filesystem_error_naming_a_path_is_a_path_error_not_an_internal_error(exc):
+    # Found by the V0.3.0 headless test campaign: exporting onto a read-only file, or to an over-long file
+    # name, came back as E_INTERNAL ("report a bug").
+    classified = errors.classify(exc)
+    assert classified.code == "E_OUTPUT_PATH_REJECTED"
+    assert classified.details["path"] == exc.filename
+    assert classified.recoverable is False
+
+
+def test_oserror_without_a_filename_keeps_the_internal_mapping():
+    # COM start-up failures are OSErrors that name no file; they must not become path errors.
+    assert errors.classify(OSError("[WinError -2147221005] Invalid class string")).code == "E_INTERNAL"
+
+
+def test_missing_file_is_still_file_not_found_not_a_path_error():
+    assert errors.classify(FileNotFoundError(2, "No such file or directory", "x.dxf")).code == "E_FILE_NOT_FOUND"
+
+
 def test_envelope_shape_is_parseable_json():
     text = errors.error_text(geometry.ValidationError("bad"), tool="autocad_draw_line", backend="com")
     envelope = json.loads(text)

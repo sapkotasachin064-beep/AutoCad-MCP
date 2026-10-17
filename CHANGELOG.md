@@ -22,6 +22,27 @@ capabilities are live-verified, the rest of the COM surface is fake-COM tested.
   `layout_settings_left_at_device_default`, and any setting that does fail
   is named in `layout_settings_not_restored`.
 
+### Fixed after the headless test campaign (2026-10-17)
+
+A scripted audit of all 64 tools on the headless backend (results under
+`test-results/v0.3.0/`) found two gaps where the caller's own mistake reached
+the client as `E_INTERNAL` ("report a bug in the server"):
+
+* `autocad_execute_query`: an error in the caller's SELECT (unknown column or
+  table, syntax error, wrong number of `?` parameters) is now
+  `E_INVALID_INPUT`, and `error.details.tables` lists the tables and columns
+  that exist.
+* A file-system error that names a path (access denied when exporting onto a
+  read-only file, an invalid or over-long file name) is now
+  `E_OUTPUT_PATH_REJECTED`. OS errors that name no file (COM start-up
+  failures) keep their old mapping.
+
+Eight regression tests were added (`tests/test_db.py`, `tests/test_errors.py`);
+six of them fail on the previous code. Not changed: a failed export onto a
+read-only file leaves its hidden temporary file in the output folder, and
+`autocad_compare_dxf` does not compare rotation, colour, linetype or
+lineweight (see `test-results/v0.3.0/*/failures-and-blockers.md`).
+
 ### Fixed
 
 * **D1** Tool errors reached clients as the bare text

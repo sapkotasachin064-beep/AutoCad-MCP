@@ -14,3 +14,4 @@ dist/
 *.dwg
 *.dwl
 *.dwl2
+test-results/

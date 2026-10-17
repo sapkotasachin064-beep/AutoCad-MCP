@@ -132,6 +132,31 @@ def test_execute_readonly_query_rejects_cte_write_trick(tmp_path):
         db.execute_readonly_query(db_path, sql)
 
 
+@pytest.mark.parametrize(
+    "sql,params,expected_text",
+    [
+        ("SELECT type FROM entities", None, "no such column: type"),
+        ("SELECT handle FROM no_such_table", None, "no such table"),
+        ("SELECT handle FROM entities WHERE handle = ?", [], "bindings"),
+        ("SELECT FROM entities", None, "syntax error"),
+    ],
+)
+def test_sql_mistakes_are_invalid_input_with_the_schema_not_an_internal_error(tmp_path, sql, params, expected_text):
+    # Found by the V0.3.0 headless test campaign: a wrong column name came back as E_INTERNAL
+    # ("report a bug"), although the caller's own query was at fault.
+    from core import errors
+
+    db_path = str(tmp_path / "test.db")
+    _seed(db_path, ["A1"])
+    with pytest.raises(errors.InvalidInputError) as caught:
+        db.execute_readonly_query(db_path, sql, params)
+    classified = errors.classify(caught.value)
+    assert classified.code == "E_INVALID_INPUT"
+    assert expected_text in classified.message
+    assert "object_name" in classified.details["tables"]["entities"]
+    assert "identity" in classified.details["tables"]["drawings"]
+
+
 def test_execute_readonly_query_allows_with_select(tmp_path):
     db_path = str(tmp_path / "test.db")
     _seed(db_path, ["A1", "A2"])
