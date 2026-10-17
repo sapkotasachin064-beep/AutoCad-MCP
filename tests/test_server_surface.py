@@ -93,12 +93,12 @@ def test_headless_backend_imports_no_pywin32_code():
         f"sys.path.insert(0, {str(ROOT / 'src')!r})\n"
         "real = builtins.__import__\n"
         "def guard(name, *a, **k):\n"
-        "    if name.split('.')[0] in ('pywintypes', 'pythoncom', 'win32com', 'cad_engine', 'winreg'):\n"
+        "    if name.split('.')[0] in ('pywintypes', 'pythoncom', 'win32com', 'cad_engine', 'com_engine', 'winreg'):\n"
         "        raise ImportError('blocked: ' + name)\n"
         "    return real(name, *a, **k)\n"
         "builtins.__import__ = guard\n"
-        "import backends.dxf, backends.targets, domain.floorplan, domain.grids, domain.stairs, domain.sheets\n"
-        "import domain.qc, domain.takeoff, domain.diff, core.reports, utils.validation\n"
+        "import backends.dxf, backends.targets, domain.architecture\n"
+        "import domain.analysis, core.reports, utils.validation\n"
         "print('ok')\n"
     )
     result = subprocess.run([sys.executable, "-I", "-c", probe], capture_output=True, text=True, timeout=60)

@@ -1083,7 +1083,7 @@ class DxfBackend(Backend):
 
     def add_dimension(self, kind, first_point, second_point, dimension_line_point, rotation_degrees=0.0,
                       text_override=None, layer=None):
-        from domain.plan import Primitive
+        from domain.architecture import Primitive
         from utils.validation import DIMENSION_KINDS
 
         if kind not in DIMENSION_KINDS:
@@ -1352,8 +1352,8 @@ class DxfBackend(Backend):
 
     def generate_2d_floor_plan(self, width_ft=24.0, length_ft=30.0, units="INCHES", rooms_config=None,
                                dry_run=False):
-        from domain.floorplan import VALID_UNITS as _VALID_UNITS
-        from domain.floorplan import build_grid_plan, grid_plan_result
+        from domain.architecture import VALID_UNITS as _VALID_UNITS
+        from domain.architecture import build_grid_plan, grid_plan_result
 
         units_label = units
         if not isinstance(units_label, str) or units_label.upper() not in _VALID_UNITS:

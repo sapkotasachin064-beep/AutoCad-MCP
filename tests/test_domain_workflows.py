@@ -11,7 +11,10 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 from backends.targets import RecordingTarget, emit
 from core.errors import CadError
-from domain import diff, floorplan, grids, qc, sheets, stairs, takeoff, units
+from domain import analysis, architecture, units
+
+floorplan = grids = stairs = sheets = architecture
+qc = takeoff = diff = analysis
 
 FT, IN, MM, M = (units.unit_code(u) for u in ("ft", "in", "mm", "m"))
 

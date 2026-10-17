@@ -20,7 +20,7 @@ from cad_engine import (
     read_insunits,
 )
 from domain import floorplan, units
-from domain.plan import Plan
+from domain.architecture import Plan
 from tools.layers import ensure_layer
 from tools.primitives import draw_polyline
 from utils import geometry

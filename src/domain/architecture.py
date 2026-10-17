@@ -1,34 +1,122 @@
-"""Residential floor-plan planners (pure; see domain/plan.py).
-
-Two planners:
-
-* plan_grid_floor_plan -- the V0.2.3 generate_2d_floor_plan algorithm,
-  ported unchanged: a width x length footprint split into a fixed 2x3 room
-  grid, 9" exterior / 4.5" interior double-line walls, a 36" entry door, a
-  30" door per room, a 48" window per exterior room, MTEXT labels. Geometry
-  is computed in inches exactly as before and then scaled into the drawing's
-  units, so an inch drawing gets the identical entities V0.2.3 drew.
-
-* plan_room_floor_plan -- rooms given explicitly as rectangles (any number,
-  any arrangement that does not overlap). Exterior walls follow the outline
-  of the union of the rooms, interior walls the edges two rooms share; doors
-  connect the rooms (a spanning tree from the entry room unless given),
-  windows go on exterior walls, labels carry the clear (net) area, and
-  overall dimensions are added. Returns room/door/window schedules.
-
-Walls are closed outline polylines centred on the wall line; doors and windows
-are symbols drawn over the wall, not cut into it (the same documented
-limitation as V0.2.3). Sizes are drafting defaults (domain/units.py), not
-building-code requirements; every one can be overridden.
+"""Pure architecture logic: plan primitives, residential floor plans, structural
+grids, stairs and sheets. No pywin32, no ezdxf.
 """
 
 import math
-from collections import deque
+from collections import Counter, deque
+from dataclasses import dataclass, field
 
-from core.errors import CadError
 from domain import units
-from domain.plan import Plan, Primitive, rect_points
 from utils import geometry
+
+
+# ======= plan.py =======
+
+PRIMITIVE_KINDS = ("line", "polyline", "arc", "circle", "text", "mtext", "dim_aligned", "dim_linear", "hatch")
+
+
+@dataclass
+class Primitive:
+    kind: str
+    layer: str
+    tag: str
+    points: tuple = ()  # line: (p1, p2); polyline: vertices; hatch: boundary; dims: (p1, p2)
+    closed: bool = False
+    polyline_kind: str = "3d"  # "3d" = AcDb3dPolyline / POLYLINE (V0.2.x walls) or "2d" = LWPOLYLINE
+    center: tuple | None = None
+    radius: float | None = None
+    start_angle: float | None = None  # degrees, counterclockwise from +X
+    end_angle: float | None = None
+    text: str | None = None
+    height: float | None = None
+    width: float = 0.0
+    rotation: float = 0.0  # degrees
+    location: tuple | None = None  # text insertion / dimension-line point
+    attach: str = "top_left"  # mtext attachment: top_left | middle_center
+    pattern: str | None = None
+    scale: float = 1.0
+
+    def __post_init__(self):
+        if self.kind not in PRIMITIVE_KINDS:
+            raise ValueError(f"unknown primitive kind {self.kind!r}")
+
+    def extent_points(self) -> list:
+        if self.kind in ("arc", "circle"):
+            cx, cy = self.center[0], self.center[1]
+            r = self.radius
+            return [(cx - r, cy - r), (cx + r, cy + r)]
+        if self.kind in ("text", "mtext"):
+            return [self.location[:2]]
+        pts = [p[:2] for p in self.points]
+        if self.location is not None:
+            pts.append(self.location[:2])
+        return pts
+
+    def describe(self) -> dict:
+        out = {"kind": self.kind, "layer": self.layer, "tag": self.tag}
+        if self.points:
+            out["points"] = [list(map(lambda v: round(v, 6), p)) for p in self.points]
+        if self.closed:
+            out["closed"] = True
+        if self.center is not None:
+            out.update(center=list(self.center), radius=self.radius)
+        if self.start_angle is not None:
+            out.update(start_angle=self.start_angle, end_angle=self.end_angle)
+        if self.text is not None:
+            out.update(text=self.text, height=self.height)
+        if self.location is not None:
+            out["location"] = list(self.location)
+        if self.pattern:
+            out["pattern"] = self.pattern
+        return out
+
+
+@dataclass
+class Plan:
+    """layers: name -> {"color": ACI or None, "linetype": name or None,
+    "force": True to overwrite an existing layer's color (V0.2.3 floor plan
+    behaviour), False to leave an existing layer's settings alone}."""
+
+    layers: dict = field(default_factory=dict)
+    primitives: list = field(default_factory=list)
+    meta: dict = field(default_factory=dict)
+
+    def add(self, primitive: Primitive) -> Primitive:
+        self.primitives.append(primitive)
+        return primitive
+
+    def layer(self, name: str, color: int | None = None, linetype: str | None = None, force: bool = False):
+        self.layers.setdefault(name, {"color": color, "linetype": linetype, "force": force})
+
+    def bbox(self):
+        pts = [p for prim in self.primitives for p in prim.extent_points()]
+        if not pts:
+            return None
+        return [[min(p[0] for p in pts), min(p[1] for p in pts)], [max(p[0] for p in pts), max(p[1] for p in pts)]]
+
+    def summary(self, max_primitives: int = 200) -> dict:
+        return {
+            "primitive_count": len(self.primitives),
+            "counts_by_kind": dict(Counter(p.kind for p in self.primitives)),
+            "counts_by_layer": dict(Counter(p.layer for p in self.primitives)),
+            "layers": self.layers,
+            "bbox": self.bbox(),
+            "primitives": [p.describe() for p in self.primitives[:max_primitives]],
+            "primitives_truncated": len(self.primitives) > max_primitives,
+        }
+
+
+def rect_points(x0, y0, x1, y1, z=0.0):
+    return ((x0, y0, z), (x1, y0, z), (x1, y1, z), (x0, y1, z))
+
+
+def polar(origin, angle_deg, distance):
+    a = math.radians(angle_deg)
+    return (origin[0] + distance * math.cos(a), origin[1] + distance * math.sin(a), origin[2] if len(origin) > 2 else 0.0)
+
+
+# ======= floorplan.py =======
+
 
 # ======= shared symbols =======
 
@@ -640,5 +728,329 @@ def plan_room_floor_plan(rooms, unit_code: int, drawing_code: int, *, exterior_w
         "unreachable_rooms": unreachable,
         "drawing_unit": units.describe(drawing_code),
         "input_unit": units.describe(unit_code),
+    }
+    return plan
+
+
+# ======= grids.py =======
+import string
+
+
+LAYERS = {"S-GRID": (8, "CENTER"), "S-GRID-IDEN": (2, None), "S-COLS": (4, None), "S-ANNO-DIMS": (6, None)}
+
+
+def _spacings(values, label):
+    if not isinstance(values, list) or not values:
+        raise geometry.ValidationError(f"{label} must be a non-empty list of bay widths")
+    if len(values) > 100:
+        raise geometry.ValidationError(f"{label} has more than 100 bays")
+    return [geometry.validate_positive(v, f"{label}[{i}]") for i, v in enumerate(values)]
+
+
+def letters(count: int, skip=("I", "O")) -> list[str]:
+    alphabet = [c for c in string.ascii_uppercase if c not in set(skip or ())]
+    out = []
+    n = 0
+    while len(out) < count:
+        label, k = "", n
+        while True:
+            label = alphabet[k % len(alphabet)] + label
+            k = k // len(alphabet) - 1
+            if k < 0:
+                break
+        out.append(label)
+        n += 1
+    return out
+
+
+def plan_grid(x_spacings, y_spacings, unit_code: int, drawing_code: int, *, origin=(0.0, 0.0),
+              extension=None, bubble_diameter=None, text_height=None, column_size=None,
+              skip_letters=True, dimensions=True) -> Plan:
+    xs_in = _spacings(x_spacings, "x_spacings")
+    ys_in = _spacings(y_spacings, "y_spacings")
+    f = units.convert(1.0, unit_code, drawing_code)
+    ox = geometry.validate_number(origin[0], "origin.x")
+    oy = geometry.validate_number(origin[1], "origin.y")
+    # paper-based defaults: 10 mm bubbles / 3.5 mm text at 1:100, as drawing units
+    mm = units.convert(1.0, units.unit_code("mm"), drawing_code)
+    ext = (geometry.validate_positive(extension, "extension") * f) if extension is not None else 1500 * mm
+    bubble = (geometry.validate_positive(bubble_diameter, "bubble_diameter") * f) if bubble_diameter is not None else 1000 * mm
+    th = (geometry.validate_positive(text_height, "text_height") * f) if text_height is not None else 350 * mm
+    col = None
+    if column_size is not None:
+        if not isinstance(column_size, list) or len(column_size) != 2:
+            raise geometry.ValidationError("column_size must be [width, depth]")
+        col = (geometry.validate_positive(column_size[0], "column_size[0]") * f,
+               geometry.validate_positive(column_size[1], "column_size[1]") * f)
+
+    xs = [ox]
+    for s in xs_in:
+        xs.append(xs[-1] + s * f)
+    ys = [oy]
+    for s in ys_in:
+        ys.append(ys[-1] + s * f)
+    x0, x1, y0, y1 = xs[0], xs[-1], ys[0], ys[-1]
+    r = bubble / 2.0
+
+    plan = Plan()
+    for name, (color, linetype) in LAYERS.items():
+        plan.layer(name, color, linetype)
+
+    numbers = [str(i + 1) for i in range(len(xs))]
+    row_labels = letters(len(ys), skip=("I", "O") if skip_letters else ())
+    for i, x in enumerate(xs):
+        top = y1 + ext
+        plan.add(Primitive("line", "S-GRID", f"grid:x:{numbers[i]}", points=((x, y0 - ext, 0.0), (x, top, 0.0))))
+        center = (x, top + r, 0.0)
+        plan.add(Primitive("circle", "S-GRID-IDEN", f"bubble:x:{numbers[i]}", center=center, radius=r))
+        plan.add(Primitive("mtext", "S-GRID-IDEN", f"label:x:{numbers[i]}", text=numbers[i], location=center,
+                           height=th, width=0.0, attach="middle_center"))
+    for j, y in enumerate(ys):
+        left = x0 - ext
+        plan.add(Primitive("line", "S-GRID", f"grid:y:{row_labels[j]}", points=((left, y, 0.0), (x1 + ext, y, 0.0))))
+        center = (left - r, y, 0.0)
+        plan.add(Primitive("circle", "S-GRID-IDEN", f"bubble:y:{row_labels[j]}", center=center, radius=r))
+        plan.add(Primitive("mtext", "S-GRID-IDEN", f"label:y:{row_labels[j]}", text=row_labels[j], location=center,
+                           height=th, width=0.0, attach="middle_center"))
+
+    columns = []
+    if col is not None:
+        for i, x in enumerate(xs):
+            for j, y in enumerate(ys):
+                mark = f"{row_labels[j]}{numbers[i]}"
+                pts = rect_points(x - col[0] / 2, y - col[1] / 2, x + col[0] / 2, y + col[1] / 2)
+                plan.add(Primitive("polyline", "S-COLS", f"column:{mark}", points=pts, closed=True,
+                                   polyline_kind="2d"))
+                plan.add(Primitive("hatch", "S-COLS", f"column_fill:{mark}", points=pts, pattern="SOLID"))
+                columns.append({"mark": mark, "center": [x, y], "size": list(col)})
+
+    if dimensions:
+        gap1, gap2 = ext * 0.5, ext * 0.8
+        for i in range(len(xs) - 1):
+            plan.add(Primitive("dim_linear", "S-ANNO-DIMS", f"dim:x:{i}", points=((xs[i], y0, 0.0), (xs[i + 1], y0, 0.0)),
+                               location=(xs[i], y0 - gap1, 0.0), rotation=0.0))
+        if len(xs) > 2:
+            plan.add(Primitive("dim_linear", "S-ANNO-DIMS", "dim:x:overall", points=((x0, y0, 0.0), (x1, y0, 0.0)),
+                               location=(x0, y0 - gap2, 0.0), rotation=0.0))
+        for j in range(len(ys) - 1):
+            plan.add(Primitive("dim_linear", "S-ANNO-DIMS", f"dim:y:{j}", points=((x1, ys[j], 0.0), (x1, ys[j + 1], 0.0)),
+                               location=(x1 + gap1, ys[j], 0.0), rotation=90.0))
+        if len(ys) > 2:
+            plan.add(Primitive("dim_linear", "S-ANNO-DIMS", "dim:y:overall", points=((x1, y0, 0.0), (x1, y1, 0.0)),
+                               location=(x1 + gap2, y0, 0.0), rotation=90.0))
+
+    plan.meta = {
+        "x_lines": [{"label": n, "x": x} for n, x in zip(numbers, xs)],
+        "y_lines": [{"label": lab, "y": y} for lab, y in zip(row_labels, ys)],
+        "columns": columns,
+        "overall": {"x": x1 - x0, "y": y1 - y0},
+        "drawing_unit": units.describe(drawing_code),
+    }
+    return plan
+
+
+# ======= stairs.py =======
+
+
+DEFAULT_LIMITS_MM = {
+    "max_riser": 190.0,
+    "min_tread": 250.0,
+    "step_relation_min": 550.0,  # 2R + G
+    "step_relation_max": 700.0,
+    "max_pitch_degrees": 42.0,
+}
+
+
+def design_stair(floor_to_floor, unit_code: int, *, max_riser=None, min_tread=None, tread=None,
+                 width=None, step_relation_min=None, step_relation_max=None, max_pitch_degrees=None) -> dict:
+    """All lengths in and out are in unit_code units."""
+    rise = geometry.validate_positive(floor_to_floor, "floor_to_floor")
+    mm = units.unit_code("mm")
+    to_mm = units.convert(1.0, unit_code, mm)
+    from_mm = 1.0 / to_mm
+
+    def limit(value, key):
+        return geometry.validate_positive(value, key) * to_mm if value is not None else DEFAULT_LIMITS_MM[key]
+
+    lim = {k: limit(v, k) for k, v in (("max_riser", max_riser), ("min_tread", min_tread),
+                                       ("step_relation_min", step_relation_min),
+                                       ("step_relation_max", step_relation_max))}
+    lim["max_pitch_degrees"] = (geometry.validate_positive(max_pitch_degrees, "max_pitch_degrees")
+                                if max_pitch_degrees is not None else DEFAULT_LIMITS_MM["max_pitch_degrees"])
+    if lim["step_relation_min"] >= lim["step_relation_max"]:
+        raise geometry.ValidationError("step_relation_min must be below step_relation_max")
+
+    rise_mm = rise * to_mm
+    risers = max(2, math.ceil(rise_mm / lim["max_riser"] - 1e-9))
+    riser = rise_mm / risers
+    if tread is not None:
+        going = geometry.validate_positive(tread, "tread") * to_mm
+    else:
+        # Aim for the middle of the comfort band, never below min_tread.
+        target = (lim["step_relation_min"] + lim["step_relation_max"]) / 2.0
+        going = max(lim["min_tread"], target - 2 * riser)
+    treads = risers - 1
+    relation = 2 * riser + going
+    pitch = math.degrees(math.atan2(riser, going))
+    checks = [
+        {"rule": "riser <= max_riser", "value": round(riser, 2), "limit": lim["max_riser"], "ok": riser <= lim["max_riser"] + 1e-9},
+        {"rule": "going >= min_tread", "value": round(going, 2), "limit": lim["min_tread"], "ok": going >= lim["min_tread"] - 1e-9},
+        {"rule": "2R + G within band", "value": round(relation, 2),
+         "limit": [lim["step_relation_min"], lim["step_relation_max"]],
+         "ok": lim["step_relation_min"] - 1e-9 <= relation <= lim["step_relation_max"] + 1e-9},
+        {"rule": "pitch <= max_pitch_degrees", "value": round(pitch, 2), "limit": lim["max_pitch_degrees"],
+         "ok": pitch <= lim["max_pitch_degrees"] + 1e-9},
+    ]
+    w = geometry.validate_positive(width, "width") if width is not None else 900.0 * from_mm
+    return {
+        "unit": units.describe(unit_code),
+        "floor_to_floor": rise,
+        "risers": risers,
+        "riser_height": riser * from_mm,
+        "treads": treads,
+        "tread_depth": going * from_mm,
+        "run_length": treads * going * from_mm,
+        "width": w,
+        "step_relation_2R_plus_G": relation * from_mm,
+        "pitch_degrees": pitch,
+        "checks": checks,
+        "all_checks_pass": all(c["ok"] for c in checks),
+        "limits_used_mm": lim,
+        "limits_source": "caller" if any(v is not None for v in (max_riser, min_tread, step_relation_min,
+                                                                   step_relation_max, max_pitch_degrees))
+        else "rule_of_thumb_defaults_not_a_building_code",
+        "not_checked": ["headroom", "handrails and guards", "landing lengths", "fire and egress rules",
+                        "local building code"],
+    }
+
+
+def plan_stair(design: dict, unit_code: int, drawing_code: int, *, origin=(0.0, 0.0), direction_degrees=90.0,
+               text_height=None) -> Plan:
+    """Plan view of a straight flight: outline, tread nosings, walking line
+    with arrow and 'UP n R' note. direction_degrees is the climbing direction
+    (90 = +Y). Only 0/90/180/270 are supported."""
+    direction = geometry.validate_number(direction_degrees, "direction_degrees") % 360
+    if direction not in (0, 90, 180, 270):
+        raise geometry.ValidationError("direction_degrees must be 0, 90, 180 or 270")
+    f = units.convert(1.0, unit_code, drawing_code)
+    ox = geometry.validate_number(origin[0], "origin.x")
+    oy = geometry.validate_number(origin[1], "origin.y")
+    run = design["run_length"] * f
+    width = design["width"] * f
+    going = design["tread_depth"] * f
+    th = (geometry.validate_positive(text_height, "text_height") * f) if text_height is not None \
+        else units.convert(150.0, units.unit_code("mm"), drawing_code)
+
+    # Build along +Y from (0,0), then rotate about the origin into direction.
+    def place(x, y):
+        if direction == 90:
+            return (ox + x, oy + y, 0.0)
+        if direction == 0:
+            return (ox + y, oy - x, 0.0)
+        if direction == 270:
+            return (ox - x, oy - y, 0.0)
+        return (ox - y, oy + x, 0.0)
+
+    plan = Plan()
+    plan.layer("A-FLOR-STRS", 2)
+    plan.layer("A-ANNO-NOTE", 7)
+    outline = tuple(place(*p[:2]) for p in rect_points(0.0, 0.0, width, run))
+    plan.add(Primitive("polyline", "A-FLOR-STRS", "stair:outline", points=outline, closed=True, polyline_kind="2d"))
+    for k in range(1, design["treads"]):
+        y = k * going
+        plan.add(Primitive("line", "A-FLOR-STRS", f"stair:nosing:{k}", points=(place(0.0, y), place(width, y))))
+    cx = width / 2.0
+    plan.add(Primitive("polyline", "A-FLOR-STRS", "stair:walkline", polyline_kind="2d",
+                       points=(place(cx, going * 0.5), place(cx, run - going * 0.5))))
+    head = min(width * 0.15, going * 0.8)
+    tip = place(cx, run - going * 0.5)
+    plan.add(Primitive("polyline", "A-FLOR-STRS", "stair:arrow", polyline_kind="2d",
+                       points=(place(cx - head / 2, run - going * 0.5 - head), tip,
+                               place(cx + head / 2, run - going * 0.5 - head))))
+    plan.add(Primitive("mtext", "A-ANNO-NOTE", "stair:note", text=f"UP {design['risers']}R",
+                       location=place(cx, going * 0.5 - th * 1.5), height=th, width=0.0,
+                       attach="middle_center"))
+    plan.meta = {"design": design, "footprint": {"width": width, "run": run},
+                 "drawing_unit": units.describe(drawing_code)}
+    return plan
+
+
+# ======= sheets.py =======
+
+# (width, height) in millimetres, landscape.
+PAPER_SIZES_MM = {
+    "A0": (1189.0, 841.0), "A1": (841.0, 594.0), "A2": (594.0, 420.0), "A3": (420.0, 297.0), "A4": (297.0, 210.0),
+    "ANSI_A": (279.4, 215.9), "ANSI_B": (431.8, 279.4), "ANSI_C": (558.8, 431.8), "ANSI_D": (863.6, 558.8),
+    "ANSI_E": (1117.6, 863.6),
+    "ARCH_A": (304.8, 228.6), "ARCH_B": (457.2, 304.8), "ARCH_C": (609.6, 457.2), "ARCH_D": (914.4, 609.6),
+    "ARCH_E": (1219.2, 914.4),
+}
+TITLE_FIELDS = ("project", "title", "drawing_number", "scale", "date", "drawn_by", "checked_by", "sheet", "revision")
+
+
+def plan_sheet(paper: str, scale: float, drawing_code: int, *, orientation="landscape", origin=(0.0, 0.0),
+               fields: dict | None = None, binding_margin_mm=20.0, margin_mm=10.0) -> Plan:
+    key = (paper or "").strip().upper().replace("-", "_").replace(" ", "_")
+    if key not in PAPER_SIZES_MM:
+        raise geometry.ValidationError(f"paper must be one of {sorted(PAPER_SIZES_MM)}, got {paper!r}")
+    scale = geometry.validate_positive(scale, "scale")
+    if orientation not in ("landscape", "portrait"):
+        raise geometry.ValidationError("orientation must be 'landscape' or 'portrait'")
+    fields = dict(fields or {})
+    unknown = sorted(set(fields) - set(TITLE_FIELDS))
+    if unknown:
+        raise geometry.ValidationError(f"unknown title block fields {unknown}; allowed: {list(TITLE_FIELDS)}")
+    for k, v in fields.items():
+        if not isinstance(v, str):
+            raise geometry.ValidationError(f"title block field {k!r} must be text")
+    fields.setdefault("scale", f"1:{scale:g}")
+    ox = geometry.validate_number(origin[0], "origin.x")
+    oy = geometry.validate_number(origin[1], "origin.y")
+
+    w_mm, h_mm = PAPER_SIZES_MM[key]
+    if orientation == "portrait":
+        w_mm, h_mm = h_mm, w_mm
+    k = units.convert(1.0, units.unit_code("mm"), drawing_code) * scale  # paper mm -> drawing units
+
+    def p(x_mm, y_mm):
+        return (ox + x_mm * k, oy + y_mm * k, 0.0)
+
+    plan = Plan()
+    plan.layer("G-ANNO-TTLB", 7)
+    plan.layer("G-ANNO-TTLB-TEXT", 7)
+    plan.add(Primitive("polyline", "G-ANNO-TTLB", "sheet:edge", closed=True, polyline_kind="2d",
+                       points=tuple(p(*q[:2]) for q in rect_points(0, 0, w_mm, h_mm))))
+    left, right, bottom, top = binding_margin_mm, w_mm - margin_mm, margin_mm, h_mm - margin_mm
+    plan.add(Primitive("polyline", "G-ANNO-TTLB", "sheet:frame", closed=True, polyline_kind="2d",
+                       points=tuple(p(*q[:2]) for q in rect_points(left, bottom, right, top))))
+
+    # Title block 180 x 63 mm, three columns of three fields, lower right inside the frame.
+    tb_w, tb_h = min(180.0, right - left), 63.0
+    tx0, ty0 = right - tb_w, bottom
+    plan.add(Primitive("polyline", "G-ANNO-TTLB", "title:box", closed=True, polyline_kind="2d",
+                       points=tuple(p(*q[:2]) for q in rect_points(tx0, ty0, right, ty0 + tb_h))))
+    rows, cols = 3, 3
+    cell_w, cell_h = tb_w / cols, tb_h / rows
+    for r in range(1, rows):
+        plan.add(Primitive("line", "G-ANNO-TTLB", f"title:row:{r}", points=(p(tx0, ty0 + r * cell_h), p(right, ty0 + r * cell_h))))
+    for c in range(1, cols):
+        plan.add(Primitive("line", "G-ANNO-TTLB", f"title:col:{c}", points=(p(tx0 + c * cell_w, ty0), p(tx0 + c * cell_w, ty0 + tb_h))))
+    label_h, value_h = 2.5, 3.5
+    order = ("project", "title", "drawing_number", "scale", "date", "sheet", "drawn_by", "checked_by", "revision")
+    for index, name in enumerate(order):
+        r, c = 2 - index // cols, index % cols
+        x, y = tx0 + c * cell_w + 2.0, ty0 + (r + 1) * cell_h - 2.0
+        plan.add(Primitive("mtext", "G-ANNO-TTLB-TEXT", f"title:label:{name}", text=name.replace("_", " ").upper(),
+                           location=p(x, y), height=label_h * k, width=0.0))
+        value = fields.get(name, "")
+        if value:
+            plan.add(Primitive("mtext", "G-ANNO-TTLB-TEXT", f"title:value:{name}", text=value,
+                               location=p(x, y - label_h - 3.0), height=value_h * k, width=(cell_w - 4.0) * k))
+    plan.meta = {
+        "paper": key, "orientation": orientation, "paper_mm": [w_mm, h_mm], "scale": scale,
+        "sheet_size_drawing_units": [w_mm * k, h_mm * k],
+        "drawing_area": {"min": list(p(left, bottom)[:2]), "max": list(p(right, top)[:2]),
+                         "title_block_min": list(p(tx0, ty0)[:2])},
+        "fields": fields, "drawing_unit": units.describe(drawing_code),
     }
     return plan
