@@ -180,7 +180,7 @@ def autocad_get_capabilities() -> dict:
         "backend": session.backend_name(),
         "toolsets": {name: {"description": desc, "enabled": name in _ENABLED_TOOLSETS}
                      for name, desc in registry.TOOLSETS.items()},
-        "tools": caps["tools"],
+        "tools": registry.tools_list(),
         "operations": caps["operations"],
         "config": {
             "units_preset": units.preset_name(),
@@ -1173,7 +1173,7 @@ def autocad_render_preview(path: Annotated[str, Field(description='Destination i
 def resource_capabilities() -> str:
     import json
 
-    return json.dumps(registry.capability_map(), indent=1)
+    return json.dumps({"tools": registry.tools_list(), "operations": registry.capability_map()["operations"]}, indent=1)
 
 
 @server.resource("autocad://units", name="units", mime_type="application/json",

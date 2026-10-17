@@ -130,5 +130,10 @@ def capability_map() -> dict:
     return {"tools": tools, "operations": {b: sorted(ops) for b, ops in per_backend.items()}}
 
 
+def tools_list() -> list:
+    """Tool info as a JSON array (each entry carries its name)."""
+    return [{"name": name, **info} for name, info in capability_map()["tools"].items()]
+
+
 def describe_spec(spec: ToolSpec) -> dict:
     return asdict(spec)

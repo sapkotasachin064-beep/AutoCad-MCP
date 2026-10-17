@@ -84,5 +84,5 @@ def test_capabilities_tool_reports_config_and_backend():
     result = server.autocad_get_capabilities()
     assert result["backend"] == "com"
     assert result["server_version"]
-    assert "autocad_get_capabilities" in result["tools"]
+    assert "autocad_get_capabilities" in {t["name"] for t in result["tools"]}
     assert result["config"]["units_preset"] == "engineering"

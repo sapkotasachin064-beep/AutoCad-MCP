@@ -81,7 +81,7 @@ def summary_block(items) -> str:
 def tools_block() -> str:
     tools = _tools_list()
     specs = registry.specs()
-    caps = registry.capability_map()["tools"]
+    caps = {t["name"]: t for t in registry.tools_list()}
     by_set = {}
     for name, spec in specs.items():
         by_set.setdefault(spec.toolset, []).append(name)

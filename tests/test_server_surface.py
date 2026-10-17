@@ -26,7 +26,7 @@ def _read(uri):
 
 def test_capabilities_resource_matches_registry():
     data = _read("autocad://capabilities")
-    assert set(data["tools"]) == set(registry.capability_map()["tools"])
+    assert {t["name"] for t in data["tools"]} == {t["name"] for t in registry.tools_list()}
 
 
 def test_units_resource_lists_presets_and_defaults():
