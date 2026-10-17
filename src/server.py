@@ -783,13 +783,13 @@ def autocad_generate_floor_plan(
     room's outside wall. windows="auto" puts one per room on its longest outside wall, "none" skips
     them. Labels show the clear (net) area. Returns room, door and window schedules. dry_run=true
     shows the plan without drawing. Drafting aid, not a design check."""
-    from domain import floorplan
+    from domain import architecture
 
     unit_code = units.unit_code(unit)
     point = _origin(origin)
 
     def build(code):
-        return floorplan.plan_room_floor_plan(
+        return architecture.plan_room_floor_plan(
             rooms, unit_code, code, exterior_wall=exterior_wall, interior_wall=interior_wall, doors=doors,
             windows=windows, entry_room=entry_room, door_width=door_width, main_door_width=main_door_width,
             window_width=window_width, label_height=label_height, dimensions=dimensions, origin=point)
@@ -822,13 +822,13 @@ def autocad_draw_structural_grid(
     skip_letters=false), in `unit`. Lines (layer S-GRID, CENTER linetype) end in labelled bubbles;
     column_size [width, depth] adds a filled column mark at every intersection; bay and overall
     dimensions are added. Drafting of a chosen grid, not structural design."""
-    from domain import grids
+    from domain import architecture
 
     unit_code = units.unit_code(unit)
     point = _origin(origin)
 
     def build(code):
-        return grids.plan_grid(x_spacings, y_spacings, unit_code, code, origin=point, extension=extension,
+        return architecture.plan_grid(x_spacings, y_spacings, unit_code, code, origin=point, extension=extension,
                                bubble_diameter=bubble_diameter, text_height=text_height, column_size=column_size,
                                skip_letters=skip_letters, dimensions=dimensions)
 
@@ -856,9 +856,9 @@ def autocad_design_stair(
     rules of thumb (max riser 190 mm, min tread 250 mm, 2R+G 550-700 mm, pitch <= 42 deg), NOT a
     building code -- pass your code's limits. Headroom, handrails and landings are not checked.
     Pure calculation; draws nothing."""
-    from domain import stairs
+    from domain import architecture
 
-    design = stairs.design_stair(floor_to_floor, units.unit_code(unit), max_riser=max_riser, min_tread=min_tread,
+    design = architecture.design_stair(floor_to_floor, units.unit_code(unit), max_riser=max_riser, min_tread=min_tread,
                                  tread=tread, width=width, step_relation_min=step_relation_min,
                                  step_relation_max=step_relation_max, max_pitch_degrees=max_pitch_degrees)
     return {"status": "ok", **design}
@@ -880,15 +880,15 @@ def autocad_draw_stair_plan(
     """Design a straight flight (same rules and defaults as autocad_design_stair) and draw it in
     plan: outline, tread nosings, walking line with arrow and an "UP nR" note, starting at origin
     and climbing towards direction_degrees (0, 90, 180 or 270)."""
-    from domain import stairs
+    from domain import architecture
 
     unit_code = units.unit_code(unit)
-    design = stairs.design_stair(floor_to_floor, unit_code, max_riser=max_riser, min_tread=min_tread, tread=tread,
+    design = architecture.design_stair(floor_to_floor, unit_code, max_riser=max_riser, min_tread=min_tread, tread=tread,
                                  width=width)
     point = _origin(origin)
 
     def build(code):
-        return stairs.plan_stair(design, unit_code, code, origin=point, direction_degrees=direction_degrees,
+        return architecture.plan_stair(design, unit_code, code, origin=point, direction_degrees=direction_degrees,
                                  text_height=text_height)
 
     build(unit_code)
@@ -909,12 +909,12 @@ def autocad_draw_sheet(
     (paper: A0-A4, ANSI_A-ANSI_E, ARCH_A-ARCH_E). fields fills the title block: project, title,
     drawing_number, scale (defaults to "1:scale"), date, drawn_by, checked_by, sheet, revision.
     Text sizes are paper sizes times the scale. Returns the usable drawing area."""
-    from domain import sheets
+    from domain import architecture
 
     point = _origin(origin)
 
     def build(code):
-        return sheets.plan_sheet(paper, scale, code, orientation=orientation, origin=point, fields=fields)
+        return architecture.plan_sheet(paper, scale, code, orientation=orientation, origin=point, fields=fields)
 
     build(1)
     outcome = backend().emit_plan(build, dry_run=dry_run)
@@ -1058,10 +1058,10 @@ def autocad_check_drawing(
     handles and severities; changes nothing. Hygiene checks, not code compliance."""
     import re
 
-    from domain import qc
+    from domain import analysis
 
-    if rules is not None and (not isinstance(rules, list) or not set(rules) <= set(qc.RULES)):
-        raise CadError(f"rules must be a list drawn from {sorted(qc.RULES)}", code="E_INVALID_INPUT")
+    if rules is not None and (not isinstance(rules, list) or not set(rules) <= set(analysis.RULES)):
+        raise CadError(f"rules must be a list drawn from {sorted(analysis.RULES)}", code="E_INVALID_INPUT")
     if layer_pattern is not None:
         try:
             re.compile(layer_pattern)
@@ -1069,7 +1069,7 @@ def autocad_check_drawing(
             raise CadError(f"layer_pattern is not a valid regex: {exc}", code="E_INVALID_INPUT") from exc
     max_issues = validate_limit(max_issues, default=200, maximum=5000, label="max_issues")
     snap = backend().snapshot_entities(max_entities=max_entities)
-    result = qc.check(snap["entities"], rules=rules, layer_pattern=layer_pattern, max_issues=max_issues)
+    result = analysis.check(snap["entities"], rules=rules, layer_pattern=layer_pattern, max_issues=max_issues)
     return {"status": "ok", "drawing_identity": snap["drawing_identity"], "scan_truncated": snap["truncated"],
             **result, "message": f"{result['issue_count']} finding(s) in {result['entity_count']} entities."}
 
@@ -1084,14 +1084,14 @@ def autocad_quantity_takeoff(
     areas and perimeters, circle and hatch areas, block counts, and wall length (plus face area
     and volume when wall_height, in drawing units, is given) from A-WALL* outlines. Converted to
     metres when the drawing's units are known. A measurement aid, not a bill of quantities."""
-    from domain import takeoff
+    from domain import analysis
 
     snap = backend().snapshot_entities(max_entities=max_entities)
     if wall_height is not None:
         from utils import geometry
 
         wall_height = geometry.validate_positive(wall_height, "wall_height")
-    result = takeoff.takeoff(snap["entities"], snap["units"]["insunits"], layers=layers, wall_height=wall_height)
+    result = analysis.takeoff(snap["entities"], snap["units"]["insunits"], layers=layers, wall_height=wall_height)
     return {"status": "ok", "drawing_identity": snap["drawing_identity"], "scan_truncated": snap["truncated"],
             **result, "message": f"Measured {result['totals'].get('entities', 0)} entities on {len(result['layers'])} layer(s)."}
 
@@ -1137,10 +1137,10 @@ def autocad_compare_dxf(path_a: str, path_b: str, max_items: int = 200) -> dict:
     reports changed (with the fields that changed), added, removed, and same-geometry-new-handle.
     Reads files only; needs ezdxf (pip install -e ".[dxf]") on either backend."""
     from backends.dxf import snapshot_file
-    from domain import diff
+    from domain import analysis
 
     a, b = snapshot_file(path_a), snapshot_file(path_b)
-    result = diff.compare(a["entities"], b["entities"], max_items=validate_limit(max_items, default=200, maximum=5000))
+    result = analysis.compare(a["entities"], b["entities"], max_items=validate_limit(max_items, default=200, maximum=5000))
     return {"status": "ok", "old": {k: a[k] for k in ("path", "total", "dxf_version", "insunits", "audit")},
             "new": {k: b[k] for k in ("path", "total", "dxf_version", "insunits", "audit")}, **result,
             "message": "Identical." if result["identical"] else f"{result['summary']}"}
@@ -1193,15 +1193,15 @@ def resource_units() -> str:
 def resource_layer_standard() -> str:
     import json
 
-    from domain import grids, sheets
+    from domain import architecture
     from utils.constants import ARCHITECTURAL_LAYERS
 
     return json.dumps({
         "architectural": ARCHITECTURAL_LAYERS,
-        "structural": {name: {"color_index": c, "linetype": lt} for name, (c, lt) in grids.LAYERS.items()},
+        "structural": {name: {"color_index": c, "linetype": lt} for name, (c, lt) in architecture.LAYERS.items()},
         "sheet": ["G-ANNO-TTLB", "G-ANNO-TTLB-TEXT"],
         "stairs": ["A-FLOR-STRS", "A-ANNO-NOTE"],
-        "paper_sizes_mm": sheets.PAPER_SIZES_MM,
+        "paper_sizes_mm": architecture.PAPER_SIZES_MM,
     }, indent=1)
 
 

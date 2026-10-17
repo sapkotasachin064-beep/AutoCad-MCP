@@ -19,7 +19,7 @@ from cad_engine import (
     get_drawing_identity,
     read_insunits,
 )
-from domain import floorplan, units
+from domain import architecture, units
 from domain.architecture import Plan
 from tools.layers import ensure_layer
 from tools.primitives import draw_polyline
@@ -90,7 +90,7 @@ def add_door_symbol(doc, insert_point, width: float = 36.0, angle_deg: float = 0
     angle_deg = geometry.validate_angle_degrees(angle_deg, "angle_deg")
     plan = Plan()
     plan.layer("A-DOOR")
-    info = floorplan.door_symbol(plan, hinge, width, angle_deg, "door")
+    info = architecture.door_symbol(plan, hinge, width, angle_deg, "door")
     handles = emit(plan, ComTarget(doc))
     return {
         "status": "ok",
@@ -110,7 +110,7 @@ def add_window_symbol(doc, start_point, length: float = 48.0, wall_thickness: fl
     angle_deg = geometry.validate_angle_degrees(angle_deg, "angle_deg")
     plan = Plan()
     plan.layer("A-GLAZ")
-    info = floorplan.window_symbol(plan, start, length, wall_thickness, angle_deg, "window")
+    info = architecture.window_symbol(plan, start, length, wall_thickness, angle_deg, "window")
     handles = emit(plan, ComTarget(doc))
     return {"status": "ok", **info, "line_handles": [handles[f"window:line{i}"] for i in range(3)]}
 
@@ -138,9 +138,9 @@ def run_plan_com(build, *, dry_run: bool):
 
 # ======= generate_2d_floor_plan (V0.2.3) =======
 
-_VALID_UNITS = floorplan.VALID_UNITS
-build_grid_plan = floorplan.build_grid_plan
-grid_plan_result = floorplan.grid_plan_result
+_VALID_UNITS = architecture.VALID_UNITS
+build_grid_plan = architecture.build_grid_plan
+grid_plan_result = architecture.grid_plan_result
 
 
 def generate_2d_floor_plan(
@@ -170,8 +170,8 @@ def generate_2d_floor_plan(
 
 
 # Kept for callers of the V0.2.3 module attributes.
-_DEFAULT_ROOMS_CONFIG = floorplan.DEFAULT_ROOMS_CONFIG
-GRID_COLS = floorplan.GRID_COLS
-GRID_ROWS = floorplan.GRID_ROWS
-EXTERIOR_WALL_THICKNESS = floorplan.EXTERIOR_WALL_THICKNESS
-INTERIOR_WALL_THICKNESS = floorplan.INTERIOR_WALL_THICKNESS
+_DEFAULT_ROOMS_CONFIG = architecture.DEFAULT_ROOMS_CONFIG
+GRID_COLS = architecture.GRID_COLS
+GRID_ROWS = architecture.GRID_ROWS
+EXTERIOR_WALL_THICKNESS = architecture.EXTERIOR_WALL_THICKNESS
+INTERIOR_WALL_THICKNESS = architecture.INTERIOR_WALL_THICKNESS

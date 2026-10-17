@@ -8,21 +8,20 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "scripts" / "catalog"))
 
-import build_catalog  # noqa: E402
-from core import registry  # noqa: E402
+from core import catalog, registry  # noqa: E402
+from core.catalog.data_live import LIVE_VERIFIED  # noqa: E402
 import server  # noqa: E402,F401  (registers every tool)
 
-CATALOG = json.loads((ROOT / "docs" / "catalog" / "capabilities.json").read_text(encoding="utf-8"))
+CATALOG = json.loads((ROOT / "docs" / "capabilities.json").read_text(encoding="utf-8"))
 
 
 def test_catalog_validates():
-    assert build_catalog.validate(build_catalog.entries()) == []
+    assert catalog.validate(catalog.entries()) == []
 
 
 def test_catalog_files_are_current():
-    result = subprocess.run([sys.executable, str(ROOT / "scripts" / "catalog" / "build_catalog.py"), "--check"],
+    result = subprocess.run([sys.executable, str(ROOT / "scripts" / "build_capabilities.py"), "--check"],
                             capture_output=True, text=True, timeout=120)
     assert result.returncode == 0, result.stdout + result.stderr
 
@@ -41,8 +40,6 @@ def test_every_public_tool_is_catalogued():
 
 
 def test_verified_entries_carry_recorded_live_evidence():
-    from data_live import LIVE_VERIFIED
-
     verified = {f"{e['category'].split('.')[0]}:{e['slug']}" for e in CATALOG["capabilities"] if e["status"] == "verified"}
     assert verified == set(LIVE_VERIFIED)
     for entry in CATALOG["capabilities"]:
