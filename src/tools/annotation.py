@@ -13,12 +13,23 @@ pattern name is read back and a mismatch fails verification instead of
 being reported as success. Not yet verified against a live AutoCAD.
 """
 
+import contextlib
 import math
 
 import pywintypes
 
-from backends.com_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity
+from backends.com_engine import (
+    _retry_com,
+    com_initialized,
+    get_active_document,
+    get_connected_app,
+    get_drawing_identity,
+    read_insunits,
+)
+from backends.targets import dimension_scale_scope, read_dimscale, size_com_dimension
+from core import session
 from core.errors import CadError, VerificationError
+from domain import units
 from tools.common import (
     as_list,
     deg_to_rad,
@@ -35,6 +46,7 @@ from tools.drawing import apply_layer_to_entity
 from utils import geometry
 
 AC_HATCH_PATTERN_PREDEFINED = 1
+INCH = 1  # INSUNITS code
 from utils.validation import DIMENSION_KINDS  # noqa: E402,F401  (re-exported)
 _ANGLE_TOLERANCE_DEG = 1e-6
 
@@ -87,7 +99,8 @@ def draw_arc(center, radius, start_angle_degrees: float, end_angle_degrees: floa
 def draw_mtext(text: str, insertion_point, height: float, width: float = 0.0,
                rotation_degrees: float = 0.0, layer: str | None = None) -> dict:
     """Multiline text; width 0 means no wrapping. `\\P` in text is a paragraph break."""
-    text = geometry.validate_text(text)
+    requested = geometry.validate_text(text)
+    text = geometry.clean_label_text(requested, multiline=True)
     if not text:
         raise geometry.ValidationError("text must not be empty")
     p = geometry.validate_point_2d_or_3d(insertion_point, "insertion_point")
@@ -112,16 +125,23 @@ def draw_mtext(text: str, insertion_point, height: float, width: float = 0.0,
         if layer is not None:
             apply_layer_to_entity(doc, mtext, layer)
         return _result(mtext, doc, text=text, insertion_point=p, height=read(mtext, "Height"), width=width,
-                       rotation_degrees=rotation, message="Created MTEXT.")
+                       rotation_degrees=rotation, message="Created MTEXT.", **geometry.cleaned_note(requested, text))
 
 
 def add_dimension(kind: str, first_point, second_point, dimension_line_point,
                   rotation_degrees: float = 0.0, text_override: str | None = None,
-                  layer: str | None = None) -> dict:
+                  layer: str | None = None, drawing_scale: float | None = None) -> dict:
     """kind="aligned": measured along the two points. kind="linear": measured
     along rotation_degrees (0 = horizontal, 90 = vertical). The dimension
-    line passes through dimension_line_point. Uses the drawing's current
-    dimension style."""
+    line passes through dimension_line_point.
+
+    The dimension is sized for the plot scale: DIMSCALE is drawing_scale (50
+    for a 1:50 drawing), else the DIMSCALE the drawing already has (above 1),
+    else 50. Text, arrows and extension lines are their size on paper times
+    that scale (150 mm / 6 in text at 1:50), so the numbers and arrowheads are
+    readable without touching the dimension style. The scale is left in the
+    drawing's DIMSCALE, so the next dimension agrees. A drawing whose units
+    have no fixed length keeps the current dimension style."""
     if kind not in DIMENSION_KINDS:
         raise geometry.ValidationError(f"kind must be one of {list(DIMENSION_KINDS)}, got {kind!r}")
     p1 = geometry.validate_point_2d_or_3d(first_point, "first_point")
@@ -130,20 +150,39 @@ def add_dimension(kind: str, first_point, second_point, dimension_line_point,
     if p1[:2] == p2[:2]:
         raise geometry.ValidationError("first_point and second_point must differ")
     rotation = geometry.validate_angle_degrees(rotation_degrees, "rotation_degrees")
+    requested_text = text_override
     if text_override is not None:
-        text_override = geometry.validate_text(text_override, "text_override")
+        text_override = geometry.clean_label_text(geometry.validate_text(text_override, "text_override"),
+                                                  "text_override")
+    if drawing_scale is not None:
+        units.validate_plot_scale(drawing_scale)
     layer = _layer(layer)
     with com_initialized():
         doc = get_active_document(get_connected_app())
         space = model_space(doc)
+        scale, source = units.resolve_plot_scale(drawing_scale, read_dimscale(doc))
+        code = read_insunits(doc)
+        if code is None:
+            code = INCH  # unreadable INSUNITS: V0.2.x behaviour (inches)
+        try:
+            sizing = units.plot_scale_dimension(code, scale)
+        except CadError as exc:  # units without a fixed length: nothing to size the text from
+            sizing = None
+            session.add_notice("dimension_style_unchanged", error=str(exc),
+                               message="The drawing's units have no fixed length, so the dimension keeps the "
+                                       "style's text size; set the units with autocad_set_drawing_units.")
         count_before = _retry_com(lambda: space.Count)
         try:
-            if kind == "aligned":
-                dim = _retry_com(lambda: space.AddDimAligned(point(p1), point(p2), point(loc)))
-                expected = "AcDbAlignedDimension"
-            else:
-                dim = _retry_com(lambda: space.AddDimRotated(point(p1), point(p2), point(loc), deg_to_rad(rotation)))
-                expected = "AcDbRotatedDimension"
+            with dimension_scale_scope(doc, scale, keep=True) if sizing else contextlib.nullcontext():
+                if kind == "aligned":
+                    dim = _retry_com(lambda: space.AddDimAligned(point(p1), point(p2), point(loc)))
+                    expected = "AcDbAlignedDimension"
+                else:
+                    dim = _retry_com(lambda: space.AddDimRotated(point(p1), point(p2), point(loc),
+                                                                 deg_to_rad(rotation)))
+                    expected = "AcDbRotatedDimension"
+                if sizing:
+                    size_com_dimension(dim, code, sizing["text_height"], scale, tag="add_dimension")
             if text_override is not None:
                 _retry_com(lambda: setattr(dim, "TextOverride", text_override))
         except pywintypes.com_error as exc:
@@ -160,10 +199,26 @@ def add_dimension(kind: str, first_point, second_point, dimension_line_point,
         if measurement is not None and not math.isclose(measurement, expected_length, rel_tol=1e-6, abs_tol=1e-9):
             raise VerificationError(
                 f"Dimension measures {measurement}, expected {expected_length} from the given points.")
+        scaled = {"drawing_scale": None}
+        if sizing:
+            read_back = {"dimscale": read(dim, "ScaleFactor"), "text_height": read(dim, "TextHeight")}
+            confirmed = all(isinstance(read_back[key], (int, float))
+                            and math.isclose(read_back[key], want, rel_tol=1e-6)
+                            for key, want in (("dimscale", scale), ("text_height", sizing["text_height"])))
+            if not confirmed:
+                session.add_notice("dimension_scale_not_confirmed", expected_dimscale=scale,
+                                   expected_text_height=sizing["text_height"], read_back=read_back,
+                                   message="AutoCAD did not report the dimension's DIMSCALE and text height as set; "
+                                           "check the dimension in AutoCAD.")
+            scaled = {"drawing_scale": scale, "drawing_scale_source": source, "dimscale": scale,
+                      "text_height": sizing["drawn_text_height"], "arrow_size": sizing["arrow"] * scale,
+                      "scale_confirmed": confirmed, "read_back": read_back}
         return _result(dim, doc, kind=kind, measurement=measurement, expected_measurement=expected_length,
-                       text_override=text_override,
+                       text_override=text_override, drawing_unit=units.describe(code), **scaled,
+                       **geometry.cleaned_note(requested_text, text_override),
                        verification="modelspace_count_object_name_and_measurement",
-                       message=f"Created {kind} dimension measuring {measurement}.")
+                       message=f"Created {kind} dimension measuring {measurement}"
+                               + (f" at drawing scale 1:{scale:g}." if sizing else "."))
 
 
 def add_hatch(boundary_handles=None, boundary_points=None, pattern: str = "ANSI31", scale: float = 1.0,

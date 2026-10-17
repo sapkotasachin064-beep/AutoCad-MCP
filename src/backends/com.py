@@ -144,10 +144,10 @@ class ComBackend(Backend):
     # ======= annotation =======
 
     def add_dimension(self, kind, first_point, second_point, dimension_line_point, rotation_degrees=0.0,
-                      text_override=None, layer=None):
+                      text_override=None, layer=None, drawing_scale=None):
         return self._call("add_dimension", annotation.add_dimension, kind, first_point, second_point,
                           dimension_line_point, rotation_degrees=rotation_degrees, text_override=text_override,
-                          layer=layer)
+                          layer=layer, drawing_scale=drawing_scale)
 
     def add_hatch(self, boundary_handles=None, boundary_points=None, pattern="ANSI31", scale=1.0,
                   angle_degrees=0.0, layer=None, keep_boundary=True):

@@ -84,6 +84,32 @@ def validate_text(text, label: str = "text") -> str:
     return text
 
 
+_ESCAPED_QUOTE = re.compile(r"\\([\\\"'])")  # a backslash pair, or a backslash in front of " or '
+_LINE_BREAK = re.compile(r"\r\n|\r|\n")
+
+
+def clean_label_text(text, label: str = "text", *, multiline: bool = False) -> str:
+    """Text for something that is drawn: TEXT, MTEXT, dimension text, room names, title-block fields.
+
+    Inch and foot marks (" and ') are plain characters in AutoCAD text. Callers that build their arguments
+    through a shell or through a second layer of JSON often send them as \\" and \\' instead, and the stray
+    backslash would be drawn. A backslash in front of a quote mark is therefore dropped. A pair of backslashes
+    (MTEXT's literal backslash) and every MTEXT code (\\P, \\S, \\F ...) stay as they are, so
+    'LIVING\\P12\\'-6\\" x 10\\'-0\\"' becomes 'LIVING\\P12'-6" x 10'-0"'. multiline=True also turns real
+    line breaks into MTEXT's \\P paragraph break."""
+    text = validate_text(text, label)
+    text = _ESCAPED_QUOTE.sub(lambda m: m.group(0) if m.group(1) == "\\" else m.group(1), text)
+    if multiline:
+        text = _LINE_BREAK.sub(lambda _m: "\\P", text)
+    return text
+
+
+def cleaned_note(requested: str, drawn: str) -> dict:
+    """{'text_requested': ...} when clean_label_text changed the text, so a result shows both what was sent
+    and what was drawn; nothing when they are the same."""
+    return {} if requested == drawn else {"text_requested": requested}
+
+
 def validate_layer_name(name, label: str = "layer name") -> str:
     if not isinstance(name, str) or not name.strip():
         raise ValidationError(f"{label} must be a non-empty string, got {name!r}")

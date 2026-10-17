@@ -82,6 +82,8 @@ I_ = ("I", "Text, MTEXT, dimensions, leaders and annotation", {"inputs": ["text"
     ("level_markers", "Level and spot-elevation markers", "Floor and site levels", "planned", "both", "write", [], N),
     ("annotation_unit_scale", "Text, dimension arrows and dimension precision sized from the drawing's units (150 mm or 6 in text)", "Annotation as readable in millimetres as in inches", "tested", "both", "write", ["autocad_draw_staircase", "autocad_draw_column_grid", "autocad_draw_wall_window", "autocad_place_architectural_block", "autocad_generate_floor_plan", "autocad_draw_structural_grid"], TMH),
     ("dim_text_value", "Headless dimension text shows the measured value, not ezdxf's default times-100 linear factor", "Dimensions read correctly in DXF files", "tested", "dxf", "write", ["autocad_add_dimension", "autocad_draw_column_grid", "autocad_generate_floor_plan", "autocad_draw_structural_grid"], TH),
+    ("dim_plot_scale", "Dimension tool sets DIMSCALE from the drawing's plot scale (given, already in the drawing, or 1:50) and sizes text and arrows at their paper size", "Dimension numbers and arrows readable without editing the dimension style", "tested", "both", "write", ["autocad_add_dimension"], TMH),
+    ("label_quote_marks", "Inch and foot marks in text, MTEXT, dimension text, room names and title-block fields are drawn as typed; a backslash in front of one is dropped and real line breaks become MTEXT paragraph breaks", "Labels like 12'-6\" x 10'-0\" without stray backslashes", "tested", "both", "write", ["autocad_draw_text", "autocad_draw_mtext", "autocad_add_dimension", "autocad_generate_floor_plan", "autocad_generate_2d_floor_plan", "autocad_draw_sheet"], TMH),
 ])
 
 J_ = ("J", "Layers, blocks, attributes and external references", {"inputs": ["names", "properties"], "outputs": ["read-back"],
@@ -140,6 +142,7 @@ K_ = ("K", "Hatch, regions, boundaries and fills", {"inputs": ["boundary", "patt
     ("material_map", "Material-to-hatch map (concrete, brick, earth, insulation)", "Consistent section hatching", "planned", "pure", "read", [], N, {"reference": "U-C4N materials idea (MIT); patterns per ISO 128-50 where applicable"}),
     ("hatch_associative", "Associative hatches that follow boundary edits", "Hatches stay correct after edits", "planned", "com", "write", [], N),
     ("hatch_separate", "Separate multi-area hatches into individual hatches", "Per-room areas", "planned", "com", "write", [], N),
+    ("plan_layer_read_back", "Plan generators create each entity on its own layer (live: the layer is made current first) and read the layer back, so a column fill never lands on layer 0", "Column fills and other plan entities on the layer you asked for", "tested", "both", "write", ["autocad_draw_column_grid", "autocad_draw_structural_grid", "autocad_generate_floor_plan"], TMH),
 ])
 
 L_ = ("L", "Layouts, viewports, paper space and model space", {"inputs": ["layout name"], "outputs": ["layout data"], "failure_modes": ["E_LAYOUT_NOT_FOUND"]}, [

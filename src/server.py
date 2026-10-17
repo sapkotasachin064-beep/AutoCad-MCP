@@ -336,14 +336,16 @@ def autocad_draw_circle(center: Point, radius: Annotated[float, Field(descriptio
 
 @cad_tool(toolset="drawing", kind="write", title="Draw text", operation="draw_text")
 def autocad_draw_text(
-    text: Annotated[str, Field(description='Text string to draw.')],
+    text: Annotated[str, Field(description='Text string to draw. Inch and foot marks may be written \\" and \\\'; the backslash is dropped.')],
     insertion_point: Point,
     height: Annotated[float, Field(description='Text height in drawing units; must be positive.')],
     rotation_degrees: Annotated[float, Field(description='Rotation in degrees counterclockwise (AutoCAD convention).')] = 0.0,
     layer: Layer = None,
 ) -> dict:
     """Add single-line text at insertion_point with a positive height and an
-    optional rotation in degrees (counterclockwise, viewed from +Z)."""
+    optional rotation in degrees (counterclockwise, viewed from +Z). Inch (") and foot (')
+    marks are drawn as typed; a backslash in front of one (\\" or \\') is dropped, and the
+    result then also reports text_requested."""
     return backend().draw_text(
         text=text, insertion_point=insertion_point, height=height, rotation_degrees=rotation_degrees, layer=layer
     )
@@ -359,10 +361,12 @@ def autocad_draw_arc(center: Point, radius: Annotated[float, Field(description='
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw MTEXT", operation="draw_mtext")
-def autocad_draw_mtext(text: Annotated[str, Field(description="Text string; '\\P' starts a new paragraph.")], insertion_point: Point, height: Annotated[float, Field(description='Text height in drawing units; must be positive.')], width: Annotated[float, Field(description='Wrapping width in drawing units; 0 means no wrapping.')] = 0.0,
+def autocad_draw_mtext(text: Annotated[str, Field(description="Text string; '\\P' (or a real line break) starts a new paragraph. Inch and foot marks may be written \\\" and \\'; the backslash is dropped.")], insertion_point: Point, height: Annotated[float, Field(description='Text height in drawing units; must be positive.')], width: Annotated[float, Field(description='Wrapping width in drawing units; 0 means no wrapping.')] = 0.0,
                        rotation_degrees: Annotated[float, Field(description='Rotation in degrees counterclockwise.')] = 0.0, layer: Layer = None) -> dict:
-    """Add multiline text (top-left at insertion_point). width 0 = no wrapping; \\P in text starts a
-    new paragraph."""
+    """Add multiline text (top-left at insertion_point). width 0 = no wrapping; \\P (or a real line
+    break) in text starts a new paragraph. Inch (") and foot (') marks are drawn as typed; a
+    backslash in front of one (\\" or \\') is dropped, and the result then also reports
+    text_requested."""
     return backend().draw_mtext(text=text, insertion_point=insertion_point, height=height, width=width,
                                 rotation_degrees=rotation_degrees, layer=layer)
 
@@ -544,14 +548,19 @@ def autocad_get_entity(handle: Handle) -> dict:
 @cad_tool(toolset="annotation", kind="write", title="Add dimension", operation="add_dimension")
 def autocad_add_dimension(kind: Annotated[str, Field(description="'aligned' measures along the line through the two points; 'linear' measures horizontally/vertically along rotation_degrees.")], first_point: Point, second_point: Point,
                           dimension_line_point: Point, rotation_degrees: Annotated[float, Field(description="Degrees counterclockwise; used with kind='linear'.")] = 0.0,
-                          text_override: Annotated[str | None, Field(description='Custom dimension text; null uses the measured value.')] = None, layer: Layer = None) -> dict:
-    """Add a dimension between two points using the current dimension style. kind="aligned"
-    measures along the points; kind="linear" measures along rotation_degrees (0 horizontal, 90
-    vertical). The dimension line passes through dimension_line_point. Verifies the measurement
-    AutoCAD reports equals the geometry."""
+                          text_override: Annotated[str | None, Field(description='Custom dimension text; null uses the measured value. Inch and foot marks may be written \\" and \\\'; the backslash is dropped.')] = None, layer: Layer = None,
+                          drawing_scale: Annotated[float | None, Field(description='Plot scale of the drawing as the denominator of 1:n (50 means 1:50); becomes the dimension\'s DIMSCALE. null = the DIMSCALE the drawing already has (above 1), else 50.')] = None) -> dict:
+    """Add a dimension between two points, sized so its numbers and arrowheads are readable without
+    editing the dimension style. kind="aligned" measures along the points; kind="linear" measures
+    along rotation_degrees (0 horizontal, 90 vertical). The dimension line passes through
+    dimension_line_point. DIMSCALE is set to drawing_scale (null = the drawing's own DIMSCALE when it
+    is above 1, else 50) and left in the drawing, so the next dimension agrees. Text, arrows and
+    extension lines are their size on paper times that scale: 150 mm (6 in) text at 1:50, 105 mm at
+    1:35, in any drawing unit. A drawing whose units have no fixed length keeps its current dimension
+    style. Verifies the measurement AutoCAD reports equals the geometry."""
     return backend().add_dimension(kind=kind, first_point=first_point, second_point=second_point,
                                    dimension_line_point=dimension_line_point, rotation_degrees=rotation_degrees,
-                                   text_override=text_override, layer=layer)
+                                   text_override=text_override, layer=layer, drawing_scale=drawing_scale)
 
 
 @cad_tool(toolset="annotation", kind="write", title="Add hatch", operation="add_hatch")

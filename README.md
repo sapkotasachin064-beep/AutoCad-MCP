@@ -10,7 +10,7 @@ produces is a structural design, a building-code check, or a professional bill
 of quantities.
 
 <!-- generated:start summary -->
-**74 MCP tools** in 11 toolsets; **656 catalogued capabilities**: 62 verified live, 175 tested, 26 implemented, 393 planned. Status words mean exactly what `docs/capabilities.json` says: only a live AutoCAD test promotes a capability to `verified`.
+**74 MCP tools** in 11 toolsets; **659 catalogued capabilities**: 62 verified live, 178 tested, 26 implemented, 393 planned. Status words mean exactly what `docs/capabilities.json` says: only a live AutoCAD test promotes a capability to `verified`.
 <!-- generated:end summary -->
 
 ## Quick start
@@ -148,10 +148,10 @@ does not need.
 | `autocad_draw_arc` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a counterclockwise arc around center from start_angle_degrees to end_angle_degrees (degrees from +X). Reports the angles and arc length read back. |
 | `autocad_draw_circle` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a circle at center ([x, y] or [x, y, z]) with a positive radius. |
 | `autocad_draw_line` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a line between two validated points in the active drawing's ModelSpace. Points are [x, y] or [x, y, z]; z defaults to 0. |
-| `autocad_draw_mtext` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Add multiline text (top-left at insertion_point). width 0 = no wrapping; \P in text starts a new paragraph. |
+| `autocad_draw_mtext` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Add multiline text (top-left at insertion_point). width 0 = no wrapping; \P (or a real line break) in text starts a new paragraph. Inch (") and foot (') marks are drawn as typed; a backslash in front of one (\" or \') is dropped, and the result then also reports text_requested. |
 | `autocad_draw_polyline` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a polyline through an ordered list of >=2 points ([x, y] or [x, y, z], z defaults to 0), optionally closed, as an AcDb3dPolyline. |
 | `autocad_draw_rectangle` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw an axis-aligned rectangle (as a closed polyline). Give exactly one of: corner1 and corner2 (opposite corners, same z-plane), or base_point with positive width and height. |
-| `autocad_draw_text` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Add single-line text at insertion_point with a positive height and an optional rotation in degrees (counterclockwise, viewed from +Z). |
+| `autocad_draw_text` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Add single-line text at insertion_point with a positive height and an optional rotation in degrees (counterclockwise, viewed from +Z). Inch (") and foot (') marks are drawn as typed; a backslash in front of one (\" or \') is dropped, and the result then also reports text_requested. |
 
 ### `layers`
 
@@ -194,7 +194,7 @@ does not need.
 
 | Tool | Kind | Backends | Description |
 |---|---|---|---|
-| `autocad_add_dimension` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Add a dimension between two points using the current dimension style. kind="aligned" measures along the points; kind="linear" measures along rotation_degrees (0 horizontal, 90 vertical). The dimension line passes through dimension_line_point. Verifies the measurement AutoCAD reports equals the geometry. |
+| `autocad_add_dimension` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Add a dimension between two points, sized so its numbers and arrowheads are readable without editing the dimension style. kind="aligned" measures along the points; kind="linear" measures along rotation_degrees (0 horizontal, 90 vertical). The dimension line passes through dimension_line_point. DIMSCALE is set to drawing_scale (null = the drawing's own DIMSCALE when it is above 1, else 50) and left in the drawing, so the next dimension agrees. Text, arrows and extension lines are their size on paper times that scale: 150 mm (6 in) text at 1:50, 105 mm at 1:35, in any drawing unit. A drawing whose units have no fixed length keeps its current dimension style. Verifies the measurement AutoCAD reports equals the geometry. |
 | `autocad_add_hatch` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Hatch one closed area: give boundary_handles (closed curves already drawn) or boundary_points (a polygon; a boundary polyline is drawn and kept unless keep_boundary=false). pattern is a predefined pattern name (ANSI31, SOLID, AR-CONC, ...). Reports the hatched area and verifies the pattern read back. |
 
 ### `blocks`
@@ -286,6 +286,28 @@ measured value (ezdxf's default style multiplied every dimension by 100):
 | double bed | 1500 x 2000 mm | 60 x 80 in |
 | text height | 150 mm | 6 in |
 
+**Dimension scale.** `autocad_add_dimension` sizes its dimension for the plot
+scale. DIMSCALE is `drawing_scale` (the denominator of 1:n: 50 for 1:50, 35 for
+1:35); without it the drawing's own DIMSCALE is used when it is above 1, else 50.
+Text, arrows and extension lines are given at their size on paper and multiplied
+by that scale, so the drawn text is 150 mm (6 in) at 1:50, 105 mm at 1:35, in any
+drawing unit, with no manual DIMSCALE override. The scale is left in the
+drawing's DIMSCALE, so the next dimension agrees. The plan generators' dimensions
+keep their absolute sizes and do not inherit it. A drawing whose units have no
+fixed length keeps its dimension style (notice `dimension_style_unchanged`).
+
+**Labels.** Inch (`"`) and foot (`'`) marks are ordinary text characters. A
+backslash in front of one (`\"`, `\'`), as a shell or a second layer of JSON
+produces, is dropped from TEXT, MTEXT, dimension text, room names and title-block
+fields; `\\` and MTEXT codes such as `\P` stay, and real line breaks in MTEXT
+become `\P`. A result that changed the text also carries `text_requested`.
+
+**Layers.** The plan generators make each entity's layer current while they draw
+it (the drawing's own current layer is put back afterwards) and read the layer
+back, so a column fill cannot end up on layer `0` unnoticed: an entity left on
+another layer is a `E_VERIFICATION_FAILED` error. The headless backend always
+created entities on their layer; the live path is the one that changed.
+
 **Wall windows replace walls.** Given a `wall_handle`, `autocad_draw_wall_window`
 deletes that wall outline and draws two pieces that stop at the opening (new
 handles in `trimmed_wall`; Ctrl+Z undoes it). Because that removes an entity it
@@ -301,7 +323,10 @@ outlines (as `autocad_draw_wall` and the floor-plan generators draw them) on
 `A-WALL*` layers; other outlines are counted in `wall_scan.outlines_ignored`.
 Doors are not cut into walls. The macros are covered by unit, headless-DXF,
 fake-COM and stdio tests; none has been run against a live AutoCAD, so their
-capabilities are `tested`, not `verified`.
+capabilities are `tested`, not `verified`. The same holds for the dimension
+scale and layer handling above: the live calls (`ScaleFactor` on a dimension,
+`SetVariable("DIMSCALE")`, `SetVariable("CLAYER")`) are only exercised against the
+test fake.
 
 ## Architecture
 

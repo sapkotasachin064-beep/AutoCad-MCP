@@ -167,6 +167,43 @@ def dimension_decimals(drawing_code) -> int:
     return DIMENSION_DECIMALS.get(drawing_code, 2)
 
 
+# ======= plot scale (DIMSCALE) =======
+
+# The plot scale at which the annotation standard above (150 mm / 6 in of text) is 3 mm tall on paper: 1:50.
+STANDARD_PLOT_SCALE = 50.0
+MAX_PLOT_SCALE = 100000.0
+
+
+def validate_plot_scale(value) -> float:
+    """A plot scale given as the denominator of 1:n (50 for 1:50)."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)) or not 0 < value <= MAX_PLOT_SCALE:
+        raise CadError(f"drawing_scale must be a number above 0 and at most {MAX_PLOT_SCALE:g} "
+                       f"(50 means a 1:50 drawing), got {value!r}", code="E_INVALID_INPUT")
+    return float(value)
+
+
+def resolve_plot_scale(requested, drawing_dimscale) -> tuple:
+    """(scale, source) for a new dimension: the scale the caller asked for, else the DIMSCALE the drawing
+    already carries (anything above 1; AutoCAD's own default is 1), else STANDARD_PLOT_SCALE."""
+    if requested is not None:
+        return validate_plot_scale(requested), "argument"
+    if isinstance(drawing_dimscale, (int, float)) and not isinstance(drawing_dimscale, bool) and drawing_dimscale > 1.0:
+        return float(drawing_dimscale), "drawing"
+    return STANDARD_PLOT_SCALE, "default"
+
+
+def plot_scale_dimension(drawing_code: int, plot_scale: float) -> dict:
+    """Dimension settings for a drawing plotted at 1:plot_scale.
+
+    DIMSCALE is the plot scale. Text, arrows and extension lines are given at their size on paper (the
+    standard text height divided by STANDARD_PLOT_SCALE, in drawing units), and AutoCAD multiplies them by
+    DIMSCALE: the drawn text is 150 mm (6 in) at 1:50, 105 mm (4.2 in) at 1:35, 300 mm (12 in) at 1:100.
+    Raises E_UNITS_MISMATCH for a drawing whose units have no fixed length."""
+    paper_text = defaults_for(drawing_code)["text_height"] / STANDARD_PLOT_SCALE
+    return {"dimscale": float(plot_scale), **dimension_sizes(paper_text),
+            "decimals": dimension_decimals(drawing_code), "drawn_text_height": paper_text * plot_scale}
+
+
 def annotation_scale(drawing_code: int, text_height: float | None = None) -> dict:
     """Text and dimension sizes in the drawing's own units. Without a caller
     text_height the standard for the drawing's unit system applies (150 mm in a

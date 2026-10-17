@@ -369,6 +369,34 @@ def test_architectural_macros_live(fresh_drawing, clean_session):
     assert refused == []
 
 
+@requires_autocad
+def test_dimension_scale_labels_and_hatch_layers_live(fresh_drawing, clean_session):
+    """Written without a live run, like test_architectural_macros_live. It settles what the fake cannot: that
+    AutoCAD accepts ScaleFactor on a dimension and DIMSCALE / CLAYER through SetVariable, keeps the hatch on the
+    layer it was created on, and draws inch marks as typed."""
+    import server
+
+    server.autocad_set_drawing_units("metric_mm")
+    dim = server.autocad_add_dimension("linear", [0, 0], [4000, 0], [0, -800])
+    assert dim["verified"] is True and dim["drawing_scale"] == 50.0 and dim["scale_confirmed"] is True
+    sized_refusals = [n for n in dim.get("notices", []) if n["kind"].startswith("dimension_")]
+    assert sized_refusals == []
+    grid = server.autocad_draw_column_grid(x_spacings=[4000], y_spacings=[3000])
+    text = server.autocad_draw_text("LIVING 12\\'-6\\\" x 10\\'-0\\\"", [0, 4000], 150)
+    with connection.com_initialized():
+        doc = connection.get_active_document(connection.get_connected_app())
+        drawn = doc.HandleToObject(dim["handle"])
+        assert drawn.ScaleFactor == pytest.approx(50.0) and drawn.TextHeight == pytest.approx(3.0)
+        assert doc.GetVariable("DIMSCALE") == pytest.approx(50.0)  # left in the drawing for the next dimension
+        column_dims = [doc.HandleToObject(h) for tag, h in grid["handles"].items() if tag.startswith("dim:")]
+        assert column_dims and all(d.ScaleFactor == pytest.approx(1.0) and d.TextHeight == pytest.approx(150.0)
+                                   for d in column_dims)  # absolute sizes, whatever the drawing's DIMSCALE
+        fills = [doc.HandleToObject(h) for tag, h in grid["handles"].items() if tag.startswith("column_fill:")]
+        assert len(fills) == 4 and {f.Layer for f in fills} == {"COLUMNS"}
+        assert doc.GetVariable("CLAYER") == "0"  # the layer that was current is current again
+        assert doc.HandleToObject(text["handle"]).TextString == "LIVING 12'-6\" x 10'-0\""
+
+
 # ======= civil =======
 
 

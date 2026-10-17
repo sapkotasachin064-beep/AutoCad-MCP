@@ -35,6 +35,7 @@ class Primitive:
     attach: str = "top_left"  # mtext attachment: top_left | middle_center
     pattern: str | None = None
     scale: float = 1.0
+    dim_scale: float | None = None  # dimensions only: DIMSCALE. None = 1, so `height` is the drawn text size
 
     def __post_init__(self):
         if self.kind not in PRIMITIVE_KINDS:
@@ -68,6 +69,8 @@ class Primitive:
             out["location"] = list(self.location)
         if self.pattern:
             out["pattern"] = self.pattern
+        if self.dim_scale is not None:
+            out["dim_scale"] = self.dim_scale
         return out
 
 
@@ -222,6 +225,7 @@ def validate_rooms_config(rooms_config) -> list[dict]:
         name = room.get("name")
         if not isinstance(name, str) or not name.strip():
             raise geometry.ValidationError(f"rooms_config[{i}].name must be a non-empty string")
+        name = geometry.clean_label_text(name, f"rooms_config[{i}].name")
         spec = {}
         for field, default in (("col", 0), ("row", 0), ("col_span", 1), ("row_span", 1)):
             value = room.get(field, default)
@@ -482,6 +486,7 @@ def validate_rooms(rooms) -> list[dict]:
         name = room.get("name")
         if not isinstance(name, str) or not name.strip():
             raise geometry.ValidationError(f"rooms[{i}].name must be a non-empty string")
+        name = geometry.clean_label_text(name, f"rooms[{i}].name")
         if name.lower() in names:
             raise geometry.ValidationError(f"room name {name!r} is used twice")
         names.add(name.lower())
@@ -1003,6 +1008,7 @@ def plan_sheet(paper: str, scale: float, drawing_code: int, *, orientation="land
     for k, v in fields.items():
         if not isinstance(v, str):
             raise geometry.ValidationError(f"title block field {k!r} must be text")
+    fields = {k: geometry.clean_label_text(v, f"fields.{k}", multiline=True) for k, v in fields.items()}
     fields.setdefault("scale", f"1:{scale:g}")
     ox = geometry.validate_number(origin[0], "origin.x")
     oy = geometry.validate_number(origin[1], "origin.y")

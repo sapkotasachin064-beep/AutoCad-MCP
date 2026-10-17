@@ -254,7 +254,8 @@ def draw_text(
     rotation_degrees: float = 0.0,
     layer: str | None = None,
 ) -> dict:
-    text = geometry.validate_text(text)
+    requested = geometry.validate_text(text)
+    text = geometry.clean_label_text(requested)
     point = geometry.validate_point_2d_or_3d(insertion_point, "insertion_point")
     height = geometry.validate_positive(height, "height")
     rotation_degrees = geometry.validate_angle_degrees(rotation_degrees, "rotation_degrees")
@@ -289,6 +290,7 @@ def draw_text(
             "status": "ok",
             "handle": text_obj.Handle,
             "text": text,
+            **geometry.cleaned_note(requested, text),
             "insertion_point": point,
             "height": height,
             "rotation_degrees": rotation_degrees,

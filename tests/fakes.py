@@ -41,6 +41,20 @@ class FakeEntity:
         for key, value in geometry.items():
             setattr(self, key, value)
 
+    @property
+    def Layer(self):
+        return self._layer
+
+    @Layer.setter
+    def Layer(self, name):
+        # AutoCAD keeps the layer table's own spelling, whatever case the caller used.
+        layers = getattr(self._space._doc, "Layers", None)
+        try:
+            name = layers.Item(name).Name
+        except Exception:  # not a known layer here: keep what was given
+            pass
+        self._layer = name
+
     # --- geometry -------------------------------------------------------
     def _points(self):
         if self.ObjectName == "AcDbLine":
@@ -205,6 +219,7 @@ class FakeSpace:
 
     def _add(self, object_name, **geometry):
         entity = FakeEntity(self, object_name, **geometry)
+        entity.Layer = self._doc.vars.get("CLAYER", "0")  # AutoCAD creates entities on the current layer
         self._items.append(entity)
         self._doc._by_handle[entity.Handle] = entity
         self._doc.Saved = False
@@ -235,15 +250,17 @@ class FakeSpace:
     def AddMText(self, p, width, text):
         return self._add("AcDbMText", TextString=text, InsertionPoint=_v(p), Width=width, Height=2.5, Rotation=0.0)
 
+    # A new dimension takes the drawing's DIMSCALE as it is at that moment, as in AutoCAD.
     def AddDimAligned(self, p1, p2, loc):
         a, b = _v(p1), _v(p2)
         return self._add("AcDbAlignedDimension", Measurement=math.dist(a[:2], b[:2]), TextOverride="",
-                         InsertionPoint=_v(loc))
+                         InsertionPoint=_v(loc), ScaleFactor=self._doc.vars.get("DIMSCALE", 1.0))
 
     def AddDimRotated(self, p1, p2, loc, rot):
         a, b = _v(p1), _v(p2)
         m = abs((b[0] - a[0]) * math.cos(rot) + (b[1] - a[1]) * math.sin(rot))
-        return self._add("AcDbRotatedDimension", Measurement=m, TextOverride="", InsertionPoint=_v(loc))
+        return self._add("AcDbRotatedDimension", Measurement=m, TextOverride="", InsertionPoint=_v(loc),
+                         ScaleFactor=self._doc.vars.get("DIMSCALE", 1.0))
 
     def AddHatch(self, pattern_type, name, associative):
         return self._add("AcDbHatch", PatternName=name.upper() if pattern_type == 1 else "_USER",
@@ -375,6 +392,7 @@ class FakeDocument:
         self.ReadOnly = False
         self.vars = {"CMDACTIVE": 0, "LUNITS": 3, "LUPREC": 4, "INSUNITS": 1, "MEASUREMENT": 0,
                      "BACKGROUNDPLOT": 2, "EXTMIN": (0.0, 0.0, 0.0), "EXTMAX": (100.0, 100.0, 0.0),
+                     "CLAYER": "0", "DIMSCALE": 1.0,
                      **(variables or {})}
         self._by_handle = {}
         self.ModelSpace = FakeSpace(self)
@@ -384,11 +402,18 @@ class FakeDocument:
         self.Blocks = FakeCollection({"*Model_Space": FakeBlock("*Model_Space", is_layout=True)})
         self.Layouts = FakeCollection({"Model": self.ModelSpace.Layout, "Layout1": FakeLayout("Layout1")})
         self.ActiveLayout = self.ModelSpace.Layout
-        self.ActiveLayer = self.Layers.Item("0")
         self._sets = {}
         self.Plot = FakePlot(self)
         self.sent = []
         self.saves = []
+
+    @property
+    def ActiveLayer(self):  # the CLAYER system variable, as an object
+        return self.Layers.Item(self.vars.get("CLAYER", "0"))
+
+    @ActiveLayer.setter
+    def ActiveLayer(self, layer):
+        self.vars["CLAYER"] = layer.Name
 
     @property
     def SelectionSets(self):
@@ -405,6 +430,11 @@ class FakeDocument:
         return self.vars.get(name, 0)
 
     def SetVariable(self, name, value):
+        if name == "CLAYER":  # AutoCAD: the layer must exist, and a frozen layer cannot be current
+            layer = self.Layers.Item(value)
+            if layer.Freeze:
+                raise com_error("Cannot set a frozen layer current")
+            value = layer.Name
         self.vars[name] = value
 
     def SendCommand(self, text):

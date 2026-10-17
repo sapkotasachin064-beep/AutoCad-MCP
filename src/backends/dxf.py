@@ -573,7 +573,8 @@ class DxfBackend(Backend):
         return self._run(run)
 
     def draw_text(self, text, insertion_point, height, rotation_degrees=0.0, layer=None):
-        text = geometry.validate_text(text)
+        requested = geometry.validate_text(text)
+        text = geometry.clean_label_text(requested)
         p = geometry.validate_point_2d_or_3d(insertion_point, "insertion_point")
         h = geometry.validate_positive(height, "height")
         rot = geometry.validate_angle_degrees(rotation_degrees, "rotation_degrees")
@@ -583,7 +584,7 @@ class DxfBackend(Backend):
             e = self._msp().add_text(text, height=h, rotation=rot, dxfattribs={"layer": self._layer(doc, layer)})
             e.set_placement(p)
             return self._created(e, f"Created text {e.dxf.handle} at {p}.", text=text, insertion_point=p,
-                                 height=h, rotation_degrees=rot)
+                                 height=h, rotation_degrees=rot, **geometry.cleaned_note(requested, text))
         return self._run(run)
 
     def draw_arc(self, center, radius, start_angle_degrees, end_angle_degrees, layer=None):
@@ -604,7 +605,8 @@ class DxfBackend(Backend):
         return self._run(run)
 
     def draw_mtext(self, text, insertion_point, height, width=0.0, rotation_degrees=0.0, layer=None):
-        text = geometry.validate_text(text)
+        requested = geometry.validate_text(text)
+        text = geometry.clean_label_text(requested, multiline=True)
         if not text:
             raise geometry.ValidationError("text must not be empty")
         p = geometry.validate_point_2d_or_3d(insertion_point, "insertion_point")
@@ -620,7 +622,7 @@ class DxfBackend(Backend):
                                                         "width": w, "rotation": rot})
             e.set_location(p)
             return self._created(e, "Created MTEXT.", text=text, insertion_point=p, height=h, width=w,
-                                 rotation_degrees=rot)
+                                 rotation_degrees=rot, **geometry.cleaned_note(requested, text))
         return self._run(run)
 
     # ======= layers =======
@@ -1082,7 +1084,7 @@ class DxfBackend(Backend):
     # ======= annotation =======
 
     def add_dimension(self, kind, first_point, second_point, dimension_line_point, rotation_degrees=0.0,
-                      text_override=None, layer=None):
+                      text_override=None, layer=None, drawing_scale=None):
         from domain.architecture import Primitive
         from utils.validation import DIMENSION_KINDS
 
@@ -1094,17 +1096,33 @@ class DxfBackend(Backend):
         if p1[:2] == p2[:2]:
             raise geometry.ValidationError("first_point and second_point must differ")
         rotation = geometry.validate_angle_degrees(rotation_degrees, "rotation_degrees")
+        requested_text = text_override
         if text_override is not None:
-            text_override = geometry.validate_text(text_override, "text_override")
+            text_override = geometry.clean_label_text(geometry.validate_text(text_override, "text_override"),
+                                                      "text_override")
+        if drawing_scale is not None:
+            units.validate_plot_scale(drawing_scale)
 
         def run():
             from backends.targets import DxfTarget
 
             doc = self._require_doc(write=True)
             name = self._layer(doc, layer)
+            scale, source = units.resolve_plot_scale(drawing_scale, doc.header.get("$DIMSCALE"))
+            try:
+                sizing = units.plot_scale_dimension(self._insunits(), scale)
+            except CadError as exc:  # units without a fixed length: nothing to size the text from
+                sizing = None
+                session.add_notice("dimension_style_unchanged", error=str(exc),
+                                   message="The drawing's units have no fixed length, so the dimension keeps the "
+                                           "style's text size; set the units with autocad_set_drawing_units.")
             prim = Primitive("dim_aligned" if kind == "aligned" else "dim_linear", name, "dim", points=(p1, p2),
-                             location=loc, rotation=rotation)
+                             location=loc, rotation=rotation,
+                             height=sizing["text_height"] if sizing else None,
+                             dim_scale=scale if sizing else None)
             handle = DxfTarget(doc).draw(prim)
+            if sizing:
+                doc.header["$DIMSCALE"] = scale  # the drawing's DIMSCALE: the next dimension agrees with this one
             dim = doc.entitydb.get(handle)
             if text_override is not None:
                 dim.dxf.text = text_override
@@ -1116,10 +1134,16 @@ class DxfBackend(Backend):
                 expected = abs((p2[0] - p1[0]) * math.cos(a) + (p2[1] - p1[1]) * math.sin(a))
             if not math.isclose(measurement, expected, rel_tol=1e-6, abs_tol=1e-9):
                 raise VerificationError(f"Dimension measures {measurement}, expected {expected}.")
+            scaled = ({"drawing_scale": scale, "drawing_scale_source": source, "dimscale": scale,
+                       "text_height": sizing["drawn_text_height"], "arrow_size": sizing["arrow"] * scale}
+                      if sizing else {"drawing_scale": None})
             return self._result(handle=handle, layer=name, kind=kind, measurement=measurement,
                                 expected_measurement=expected, text_override=text_override, verified=True,
                                 verification="measurement_matches_geometry",
-                                message=f"Created {kind} dimension measuring {measurement}.")
+                                drawing_unit=units.describe(self._insunits()), **scaled,
+                                **geometry.cleaned_note(requested_text, text_override),
+                                message=f"Created {kind} dimension measuring {measurement}"
+                                        + (f" at drawing scale 1:{scale:g}." if sizing else "."))
         return self._run(run)
 
     def add_hatch(self, boundary_handles=None, boundary_points=None, pattern="ANSI31", scale=1.0, angle_degrees=0.0,

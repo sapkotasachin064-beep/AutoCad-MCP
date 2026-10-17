@@ -7,9 +7,9 @@
   "verified"
  ],
  "summary": {
-  "total": 656,
+  "total": 659,
   "by_status": {
-   "tested": 175,
+   "tested": 178,
    "implemented": 26,
    "planned": 393,
    "verified": 62
@@ -68,8 +68,8 @@
    },
    "I. Text, MTEXT, dimensions, leaders and annotation": {
     "verified": 5,
-    "total": 36,
-    "tested": 5,
+    "total": 38,
+    "tested": 7,
     "implemented": 1,
     "planned": 25
    },
@@ -81,8 +81,8 @@
    },
    "K. Hatch, regions, boundaries and fills": {
     "verified": 3,
-    "total": 17,
-    "tested": 4,
+    "total": 18,
+    "tested": 5,
     "planned": 10
    },
    "L. Layouts, viewports, paper space and model space": {
@@ -6777,6 +6777,81 @@
    "overlaps": []
   },
   {
+   "id": "I-037",
+   "slug": "dim_plot_scale",
+   "category": "I. Text, MTEXT, dimensions, leaders and annotation",
+   "description": "Dimension tool sets DIMSCALE from the drawing's plot scale (given, already in the drawing, or 1:50) and sizes text and arrows at their paper size",
+   "user_problem": "Dimension numbers and arrows readable without editing the dimension style",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "text",
+    "points",
+    "style"
+   ],
+   "outputs": [
+    "handle",
+    "measurement"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_add_dimension"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf"
+   ],
+   "reference": "",
+   "overlaps": []
+  },
+  {
+   "id": "I-038",
+   "slug": "label_quote_marks",
+   "category": "I. Text, MTEXT, dimensions, leaders and annotation",
+   "description": "Inch and foot marks in text, MTEXT, dimension text, room names and title-block fields are drawn as typed; a backslash in front of one is dropped and real line breaks become MTEXT paragraph breaks",
+   "user_problem": "Labels like 12'-6\" x 10'-0\" without stray backslashes",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "text",
+    "points",
+    "style"
+   ],
+   "outputs": [
+    "handle",
+    "measurement"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_text",
+    "autocad_draw_mtext",
+    "autocad_add_dimension",
+    "autocad_generate_floor_plan",
+    "autocad_generate_2d_floor_plan",
+    "autocad_draw_sheet"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf"
+   ],
+   "reference": "",
+   "overlaps": []
+  },
+  {
    "id": "J-001",
    "slug": "layer_create",
    "category": "J. Layers, blocks, attributes and external references",
@@ -8325,6 +8400,42 @@
    "kind": "capability",
    "exposed_by": [],
    "test_evidence": [],
+   "reference": "",
+   "overlaps": []
+  },
+  {
+   "id": "K-018",
+   "slug": "plan_layer_read_back",
+   "category": "K. Hatch, regions, boundaries and fills",
+   "description": "Plan generators create each entity on its own layer (live: the layer is made current first) and read the layer back, so a column fill never lands on layer 0",
+   "user_problem": "Column fills and other plan entities on the layer you asked for",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "boundary",
+    "pattern"
+   ],
+   "outputs": [
+    "handle",
+    "area"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_column_grid",
+    "autocad_draw_structural_grid",
+    "autocad_generate_floor_plan"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf"
+   ],
    "reference": "",
    "overlaps": []
   },
