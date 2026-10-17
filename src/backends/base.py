@@ -42,6 +42,9 @@ class Backend:
         "list_layouts", "export_dxf", "plot_pdf", "render_preview",
         # composite drafting (runs a planned primitive list against the drawing)
         "draw_wall", "generate_2d_floor_plan", "emit_plan",
+        # civil / survey
+        "civil_alignment_station", "civil_station_point", "civil_ground_profile",
+        "civil_surface_volumes", "civil_pipe_clearance", "civil_place_points",
     )
 
     def _unsupported(self, operation: str):

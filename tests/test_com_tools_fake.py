@@ -18,9 +18,10 @@ import cad_engine
 from core import session
 from core.errors import CadError
 from fakes import FakeApp, FakeBlock
-from tools import annotation, blocks, documents, editing, layers, modify, output, primitives, query
+from tools import annotation, blocks, civil, documents, editing, layers, modify, output, primitives, query
 
-MODULES = ("documents", "query", "modify", "annotation", "blocks", "output", "layers", "primitives", "editing")
+MODULES = ("documents", "query", "modify", "annotation", "blocks", "output", "layers", "primitives", "editing",
+           "civil")
 
 
 @pytest.fixture
@@ -408,3 +409,65 @@ def test_hatch_existing_closed_boundary(app):
     rect = primitives.draw_rectangle(corner1=[0, 0], corner2=[2, 5])  # closed AcDb3dPolyline
     result = annotation.add_hatch(boundary_handles=[rect["handle"]], pattern="SOLID")
     assert result["pattern"] == "SOLID" and result["area"] == pytest.approx(10.0)
+
+
+# ======= civil =======
+
+
+def test_civil_alignment_station_and_station_point(app):
+    line = primitives.draw_line([0, 0, 0], [100, 0, 0])["handle"]
+    result = civil.alignment_station(line, [[50, 5]])
+    assert result["points"][0]["station"] == pytest.approx(50)
+    assert result["points"][0]["offset"] == pytest.approx(-5)  # left of +X travel
+    assert result["alignment"]["end_station"] == pytest.approx(100)
+    back = civil.station_point(line, [25], offset=2)
+    assert back["stations"][0]["point"] == pytest.approx([25, -2, 0])
+    assert back["clamped_count"] == 0
+    assert civil.station_point(line, [-5])["stations"][0]["clamped"] is True
+
+
+def test_civil_alignment_refuses_a_circle(app):
+    circle = primitives.draw_circle([0, 0], 5)["handle"]
+    with pytest.raises(CadError) as info:
+        civil.alignment_station(circle, [[0, 0]])
+    assert info.value.code == "E_UNSUPPORTED_ENTITY"
+
+
+def test_civil_place_points_creates_markers_and_labels(app):
+    result = civil.place_points([[1, 2, 3.5], [4, 5]], layer="C-POINT", start_number=7)
+    assert result["verified"] is True and result["count"] == 2
+    space = _doc(app).ModelSpace
+    assert space.Count == 2 + 2  # marker + label per point
+    labels = [e.TextString for e in space._items if e.ObjectName == "AcDbText"]
+    assert labels == ["7 Z=3.5", "8"]
+    assert {e.Layer for e in space._items} == {"C-POINT"}
+    assert _doc(app).Layers.Item("C-POINT").Name == "C-POINT"
+    with pytest.raises(CadError) as info:
+        civil.place_points([])
+    assert info.value.code == "E_INVALID_INPUT"
+
+
+def test_civil_ground_profile_and_volumes_from_placed_points(app):
+    line = primitives.draw_line([0, 0], [30, 0])["handle"]
+    civil.place_points([[0, 0, 10], [10, 0, 12], [20, 0, 14], [30, 0, 16]], layer="C-TOPO", label=False)
+    profile = civil.ground_profile(line, 10.0, layer="C-TOPO")
+    assert [row["elevation"] for row in profile["stations"]] == pytest.approx([10, 12, 14, 16])
+    assert profile["missing_elevations"] == 0
+    corners = ((0, 0), (4, 0), (4, 4), (0, 4))
+    civil.place_points([(x, y, 0.0) for x, y in corners], layer="EG", label=False)
+    civil.place_points([(x, y, 0.5) for x, y in corners], layer="FG", label=False)
+    volumes = civil.surface_volumes("EG", "FG", 1.0)
+    assert volumes["fill_volume"] == pytest.approx(8.0)
+    assert volumes["cut_volume"] == pytest.approx(0.0)
+    with pytest.raises(CadError) as info:
+        civil.surface_volumes("EG", "NOTHERE", 1.0)
+    assert info.value.code == "E_ENTITY_NOT_FOUND"
+
+
+def test_civil_pipe_clearance_crossing(app):
+    first = primitives.draw_line([0, 0, 0], [10, 0, 0])["handle"]
+    second = primitives.draw_line([5, -5, -3], [5, 5, -3])["handle"]
+    result = civil.pipe_clearance(first, second, first_diameter=0.5, second_diameter=0.5)
+    assert result["minimum_distance"] == pytest.approx(3.0)
+    assert result["surface_clearance"] == pytest.approx(2.5)
+    assert result["crossings"][0]["vertical_gap"] == pytest.approx(-3.0)

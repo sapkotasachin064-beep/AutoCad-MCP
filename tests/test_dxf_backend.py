@@ -265,3 +265,91 @@ def test_hatch_existing_closed_boundary(backend):
     assert result["area"] == pytest.approx(10.0) and result["verified"] is True
     circle = backend.draw_circle([10, 10], 1)
     assert backend.add_hatch(boundary_handles=[circle["handle"]])["area"] == pytest.approx(math.pi, rel=0.01)
+
+
+# ======= civil =======
+
+
+def test_civil_alignment_station_and_station_point_round_trip(backend):
+    poly = backend.draw_polyline([[0, 0], [100, 0], [100, 100]])
+    result = backend.civil_alignment_station(poly["handle"], [[50, -10], [110, 50]], start_station=1000.0)
+    first, second = result["points"]
+    assert first["station"] == pytest.approx(1050.0) and first["offset"] == pytest.approx(10.0)
+    assert second["station"] == pytest.approx(1150.0) and second["offset"] == pytest.approx(10.0)
+    assert result["alignment"]["length"] == pytest.approx(200.0)
+    assert result["alignment"]["end_station"] == pytest.approx(1200.0)
+    back = backend.civil_station_point(poly["handle"], [1050.0, 1150.0], offset=2.0, start_station=1000.0)
+    assert back["stations"][0]["point"] == pytest.approx([50.0, -2.0, 0.0])
+    assert back["stations"][0]["tangent_angle_degrees"] == pytest.approx(0.0)
+    assert back["stations"][1]["tangent_angle_degrees"] == pytest.approx(90.0)
+    assert back["clamped_count"] == 0
+    clamped = backend.civil_station_point(poly["handle"], [500.0])["stations"][0]
+    assert clamped["clamped"] is True
+
+
+def test_civil_alignment_refuses_anything_but_line_and_polyline(backend):
+    circle = backend.draw_circle([0, 0], 5)
+    with pytest.raises(CadError) as info:
+        backend.civil_alignment_station(circle["handle"], [[0, 0]])
+    assert info.value.code == "E_UNSUPPORTED_ENTITY" and "CIRCLE" in info.value.message
+
+
+def test_civil_place_points_round_trip_and_survives_save(backend, tmp_path):
+    result = backend.civil_place_points([[1, 2, 3.5], [4, 5]], layer="C-POINT", start_number=7)
+    assert result["verified"] is True and result["count"] == 2
+    assert result["points"][0]["number"] == 7
+    saved = backend.save_drawing(str(tmp_path / "points.dxf"))
+    assert saved["verified"] is True
+    doc = ezdxf.readfile(str(tmp_path / "points.dxf"))
+    points = [e for e in doc.modelspace() if e.dxftype() == "POINT"]
+    texts = [e.dxf.text for e in doc.modelspace() if e.dxftype() == "TEXT"]
+    assert [tuple(p.dxf.location) for p in points] == [(1.0, 2.0, 3.5), (4.0, 5.0, 0.0)]
+    assert "7 Z=3.5" in texts and "8" in texts
+    assert {e.dxf.layer for e in doc.modelspace()} == {"C-POINT"}
+
+
+def test_civil_ground_profile_samples_spot_levels(backend):
+    line = backend.draw_line([0, 0], [30, 0])
+    backend.civil_place_points([[0, 0, 10], [10, 0, 12], [20, 0, 14], [30, 0, 16]], layer="C-TOPO", label=False)
+    result = backend.civil_ground_profile(line["handle"], 10.0, layer="C-TOPO")
+    assert [row["station"] for row in result["stations"]] == [0.0, 10.0, 20.0, 30.0]
+    assert [row["elevation"] for row in result["stations"]] == pytest.approx([10.0, 12.0, 14.0, 16.0])
+    assert result["missing_elevations"] == 0 and result["rows_truncated"] is False
+    interpolated = backend.civil_ground_profile(line["handle"], 5.0, layer="C-TOPO", method="nearest")
+    assert [row["elevation"] for row in interpolated["stations"]] == pytest.approx([10, 10, 12, 12, 14, 14, 16])
+    empty = backend.civil_ground_profile(line["handle"], 10.0, layer="NOTHERE")
+    assert empty["spot_levels"]["count"] == 0
+    assert all(row["elevation"] is None for row in empty["stations"])
+
+
+def test_civil_surface_volumes_grid_is_exact_for_flat_surfaces(backend):
+    corners = ((0, 0), (4, 0), (4, 4), (0, 4))
+    backend.civil_place_points([(x, y, 0.0) for x, y in corners], layer="EG", label=False)
+    backend.civil_place_points([(x, y, 0.5) for x, y in corners], layer="FG", label=False)
+    result = backend.civil_surface_volumes("EG", "FG", 1.0)
+    assert result["cells_total"] == 16
+    assert result["fill_volume"] == pytest.approx(8.0)
+    assert result["cut_volume"] == pytest.approx(0.0)
+    assert result["net_volume"] == pytest.approx(8.0)
+    assert result["extrapolated_nodes"] == {"existing": 0, "design": 0}
+    with pytest.raises(CadError) as info:
+        backend.civil_surface_volumes("EG", "MISSING", 1.0)
+    assert info.value.code == "E_ENTITY_NOT_FOUND"
+
+
+def test_civil_alignment_reports_arc_bulges_as_chords(backend):
+    entity = backend._msp().add_lwpolyline([(0, 0, 0, 0, 1.0), (10, 0, 0, 0, 0.0)], format="xyseb")
+    result = backend.civil_alignment_station(entity.dxf.handle, [[5, 5]])
+    kinds = [notice["kind"] for notice in result.get("notices", [])]
+    assert "alignment_arc_bulges_as_chords" in kinds
+
+
+def test_civil_pipe_clearance_reports_crossing_and_surface_clearance(backend):
+    first = backend.draw_polyline([[0, 0, 0], [10, 0, 0]], layer="P-SWR")
+    second = backend.draw_polyline([[5, -5, -3], [5, 5, -3]], layer="P-WAT")
+    result = backend.civil_pipe_clearance(first["handle"], second["handle"], first_diameter=0.5,
+                                          second_diameter=0.5)
+    assert result["minimum_distance"] == pytest.approx(3.0)
+    assert result["surface_clearance"] == pytest.approx(2.5)
+    assert len(result["crossings"]) == 1
+    assert result["crossings"][0]["vertical_gap"] == pytest.approx(-3.0)

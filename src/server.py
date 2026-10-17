@@ -924,6 +924,124 @@ def autocad_draw_sheet(
                                                                                 "drawing_area", "fields")})
 
 
+# ======= civil / survey =======
+
+
+@cad_tool(toolset="civil", kind="read", title="Alignment station and offset", operation="civil_alignment_station")
+def autocad_civil_alignment_station(
+    alignment: str,
+    points: list[list[float]],
+    start_station: float = 0.0,
+) -> dict:
+    """Station (chainage) and offset of one or more query points against a centreline drawn as a
+    LINE or polyline (the alignment, given by handle). Stations run along the centreline in
+    drawing units from its first vertex; start_station shifts the chainage (e.g. 1000.0 when the
+    first station is CH 10+00). Offset is the perpendicular plan distance, positive to the right
+    of the direction of increasing station, negative to the left. Each result carries station,
+    offset, the closest point on the centreline (with its own z), the plan distance and the
+    z difference. Arc bulges in a lightweight polyline are treated as straight chords and
+    reported in notices. Read-only."""
+    return backend().civil_alignment_station(alignment=alignment, points=points, start_station=start_station)
+
+
+@cad_tool(toolset="civil", kind="read", title="Point at station and offset", operation="civil_station_point")
+def autocad_civil_station_point(
+    alignment: str,
+    stations: list[float],
+    offset: float = 0.0,
+    start_station: float = 0.0,
+) -> dict:
+    """The coordinates at one or more stations on a centreline (LINE or polyline by handle),
+    at one perpendicular offset (positive to the right of the direction of increasing station).
+    Each result carries the point [x, y, z], the tangent angle in degrees (AutoCAD convention:
+    0 = east, counterclockwise) and whether the station had to be clamped to the centreline
+    (a station before the start or past the end is clamped, never extrapolated). Useful for
+    setting out: pass the design stations, get the coordinates to stake. Read-only."""
+    return backend().civil_station_point(alignment=alignment, stations=stations, offset=offset,
+                                         start_station=start_station)
+
+
+@cad_tool(toolset="civil", kind="read", title="Ground profile from spot levels", operation="civil_ground_profile")
+def autocad_civil_ground_profile(
+    alignment: str,
+    interval: float,
+    layer: str | None = None,
+    offset: float = 0.0,
+    method: str = "idw",
+    neighbours: int = 8,
+    start_station: float = 0.0,
+    max_entities: int = 20000,
+) -> dict:
+    """Ground levels sampled at a station interval along a centreline, from POINT entities that
+    carry a Z (spot levels) on `layer` (all layers when None). interval is in drawing units and
+    required -- the tool has no built-in spacing. method is 'idw' (inverse-distance weighting of
+    the `neighbours` closest levels, power 2) or 'nearest'; exact hits on a point return that
+    point's z. Rows are capped at 500 (rows_truncated says so); the end station is included as
+    the last row. Reports the spot-level count and extents so you can judge coverage; the levels
+    come from the drawing, not from a Civil 3D surface. Read-only."""
+    return backend().civil_ground_profile(alignment=alignment, interval=interval, layer=layer, offset=offset,
+                                          method=method, neighbours=neighbours, start_station=start_station,
+                                          max_entities=max_entities)
+
+
+@cad_tool(toolset="civil", kind="read", title="Cut and fill volumes", operation="civil_surface_volumes")
+def autocad_civil_surface_volumes(
+    existing_layer: str,
+    design_layer: str,
+    cell_size: float,
+    method: str = "idw",
+    neighbours: int = 8,
+    max_entities: int = 20000,
+) -> dict:
+    """Cut and fill between two spot-level surfaces: existing ground from the Z of POINT entities
+    on existing_layer, design/finished ground from the Z of POINT entities on design_layer.
+    A square grid of cell_size (drawing units) covers the overlap of the two surfaces; every node
+    is sampled from its surface (method 'idw' over `neighbours` levels, or 'nearest'). Each cell
+    contributes cell_size squared x the mean (design - existing) of its corners: fill where the
+    design surface is above, cut where below. Reports cut_volume, fill_volume, net_volume
+    (positive = surplus fill), the grid used, and extrapolated_nodes -- nodes outside the spot
+    levels' convex hull where the value is interpolated beyond the data. A drafting aid from the
+    levels in the drawing, not a survey report. Read-only."""
+    return backend().civil_surface_volumes(existing_layer=existing_layer, design_layer=design_layer,
+                                           cell_size=cell_size, method=method, neighbours=neighbours,
+                                           max_entities=max_entities)
+
+
+@cad_tool(toolset="civil", kind="read", title="Pipe clearance check", operation="civil_pipe_clearance")
+def autocad_civil_pipe_clearance(
+    first: str,
+    second: str,
+    first_diameter: float | None = None,
+    second_diameter: float | None = None,
+) -> dict:
+    """Closest 3D approach between two pipe alignments drawn as LINE or polyline axes (handles),
+    plus every place the two cross in plan with the vertical gap between them there. Give both
+    diameters (drawing units) to also get surface_clearance = axis distance minus the two radii;
+    give neither for axis-to-axis only. A clash hint from the geometry drawn, not a code check.
+    Read-only."""
+    return backend().civil_pipe_clearance(first=first, second=second, first_diameter=first_diameter,
+                                          second_diameter=second_diameter)
+
+
+@cad_tool(toolset="civil", kind="write", title="Place survey points", operation="civil_place_points")
+def autocad_civil_place_points(
+    points: list[list[float]],
+    layer: str = "C-POINT",
+    label: bool = True,
+    text_height: float | None = None,
+    start_number: int = 1,
+) -> dict:
+    """Place numbered point markers (POINT entities) at the given [x, y] or [x, y, z] coordinates,
+    optionally with a label per point: the number, plus ' Z=<level>' when the z is not 0 (one TEXT
+    entity). Numbers run from start_number upwards. text_height defaults to the standard text
+    height for the drawing's units; layer defaults to 'C-POINT' and is created if missing. The
+    markers adopt the drawing's current point display style (PDMODE), which this tool does not
+    change. Up to 2000 points per call. Writes to the drawing and verifies every created entity
+    by reading it back."""
+    return backend().civil_place_points(points=points, layer=layer, label=label, text_height=text_height,
+                                        start_number=start_number)
+
+
 # ======= analysis =======
 
 

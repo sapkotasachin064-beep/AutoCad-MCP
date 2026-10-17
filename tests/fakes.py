@@ -45,6 +45,8 @@ class FakeEntity:
     def _points(self):
         if self.ObjectName == "AcDbLine":
             return [self.StartPoint, self.EndPoint]
+        if self.ObjectName == "AcDbPoint":
+            return [self.Coordinates]
         if self.ObjectName in ("AcDb3dPolyline", "AcDbPolyline"):
             step = 3 if self.ObjectName == "AcDb3dPolyline" else 2
             c = list(self.Coordinates)
@@ -62,6 +64,8 @@ class FakeEntity:
     def _set_points(self, transform):
         if self.ObjectName == "AcDbLine":
             self.StartPoint, self.EndPoint = transform(self.StartPoint), transform(self.EndPoint)
+        elif self.ObjectName == "AcDbPoint":
+            self.Coordinates = transform(self.Coordinates)
         elif self.ObjectName in ("AcDb3dPolyline", "AcDbPolyline"):
             step = 3 if self.ObjectName == "AcDb3dPolyline" else 2
             c = list(self.Coordinates)
@@ -221,6 +225,9 @@ class FakeSpace:
 
     def AddLightWeightPolyline(self, flat):
         return self._add("AcDbPolyline", Coordinates=_v(flat), Closed=False)
+
+    def AddPoint(self, p):
+        return self._add("AcDbPoint", Coordinates=_v(p))
 
     def AddText(self, text, p, h):
         return self._add("AcDbText", TextString=text, InsertionPoint=_v(p), Height=h, Rotation=0.0)

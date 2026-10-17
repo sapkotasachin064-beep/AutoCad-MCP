@@ -97,6 +97,13 @@ EXPECTED_V0_3_0_TOOLS = {
     "autocad_design_stair",
     "autocad_draw_stair_plan",
     "autocad_draw_sheet",
+    # civil / survey
+    "autocad_civil_alignment_station",
+    "autocad_civil_station_point",
+    "autocad_civil_ground_profile",
+    "autocad_civil_surface_volumes",
+    "autocad_civil_pipe_clearance",
+    "autocad_civil_place_points",
     # analysis
     "autocad_check_drawing",
     "autocad_quantity_takeoff",

@@ -7,11 +7,11 @@
   "verified"
  ],
  "summary": {
-  "total": 647,
+  "total": 650,
   "by_status": {
-   "tested": 160,
+   "tested": 165,
    "implemented": 26,
-   "planned": 399,
+   "planned": 397,
    "verified": 62
   },
   "by_category": {
@@ -62,8 +62,8 @@
    },
    "H. Lines, polylines, arcs, circles, splines and curves": {
     "verified": 5,
-    "total": 31,
-    "tested": 2,
+    "total": 32,
+    "tested": 3,
     "planned": 24
    },
    "I. Text, MTEXT, dimensions, leaders and annotation": {
@@ -167,12 +167,14 @@
     "total": 20
    },
    "Z. Surveying, coordinates, parcels and earthwork": {
-    "planned": 15,
-    "total": 15
+    "planned": 13,
+    "total": 16,
+    "tested": 3
    },
    "AA. Water supply, drainage, sanitary systems and plumbing": {
     "planned": 11,
-    "total": 11
+    "total": 12,
+    "tested": 1
    },
    "AB. Electrical schematics, circuits, panels and cable schedules": {
     "planned": 11,
@@ -241,7 +243,7 @@
     "planned": 7
    }
   },
-  "public_tools_referenced": 64
+  "public_tools_referenced": 70
  },
  "capabilities": [
   {
@@ -5118,11 +5120,45 @@
    "id": "H-015",
    "slug": "point",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
-   "description": "Place point entities and set the point style",
+   "description": "Place numbered point entities with number/level labels",
    "user_problem": "Survey and setting-out points",
-   "status": "planned",
+   "status": "tested",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "points",
+    "radii",
+    "angles"
+   ],
+   "outputs": [
+    "handle"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_VERIFICATION_FAILED",
+    "E_NO_ACTIVE_DOCUMENT"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_civil_place_points"
+   ],
+   "test_evidence": [
+    "unit",
+    "headless_dxf"
+   ],
+   "reference": "",
+   "overlaps": []
+  },
+  {
+   "id": "H-016",
+   "slug": "point_style",
+   "category": "H. Lines, polylines, arcs, circles, splines and curves",
+   "description": "Set the drawing's point display style (PDMODE/PDSIZE)",
+   "user_problem": "Markers that read clearly",
+   "status": "planned",
+   "backend": "com",
+   "app_version": "AutoCAD 2021+ (full AutoCAD, Windows; not LT)",
    "inputs": [
     "points",
     "radii",
@@ -5144,7 +5180,7 @@
    "overlaps": []
   },
   {
-   "id": "H-016",
+   "id": "H-017",
    "slug": "xline_ray",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw construction lines and rays on a construction layer",
@@ -5173,7 +5209,7 @@
    "overlaps": []
   },
   {
-   "id": "H-017",
+   "id": "H-018",
    "slug": "polygon",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a regular polygon inscribed or circumscribed",
@@ -5202,7 +5238,7 @@
    "overlaps": []
   },
   {
-   "id": "H-018",
+   "id": "H-019",
    "slug": "slot",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a slot (obround) between two centres",
@@ -5231,7 +5267,7 @@
    "overlaps": []
   },
   {
-   "id": "H-019",
+   "id": "H-020",
    "slug": "rounded_rect",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a rectangle with filleted corners",
@@ -5260,7 +5296,7 @@
    "overlaps": []
   },
   {
-   "id": "H-020",
+   "id": "H-021",
    "slug": "donut",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a filled donut",
@@ -5289,7 +5325,7 @@
    "overlaps": []
   },
   {
-   "id": "H-021",
+   "id": "H-022",
    "slug": "revcloud",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a revision cloud around an area",
@@ -5318,7 +5354,7 @@
    "overlaps": []
   },
   {
-   "id": "H-022",
+   "id": "H-023",
    "slug": "arc_3pt",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw an arc through three points",
@@ -5347,7 +5383,7 @@
    "overlaps": []
   },
   {
-   "id": "H-023",
+   "id": "H-024",
    "slug": "arc_ser",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw an arc by start, end and radius",
@@ -5376,7 +5412,7 @@
    "overlaps": []
   },
   {
-   "id": "H-024",
+   "id": "H-025",
    "slug": "circle_ttr",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Draw a circle tangent to two entities with a radius",
@@ -5405,7 +5441,7 @@
    "overlaps": []
   },
   {
-   "id": "H-025",
+   "id": "H-026",
    "slug": "divide_measure",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Divide or measure a curve with points or blocks",
@@ -5434,7 +5470,7 @@
    "overlaps": []
   },
   {
-   "id": "H-026",
+   "id": "H-027",
    "slug": "curve_length",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Exact length of any curve by handle",
@@ -5463,7 +5499,7 @@
    "overlaps": []
   },
   {
-   "id": "H-027",
+   "id": "H-028",
    "slug": "closest_point",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Closest point on a curve to a given point",
@@ -5492,7 +5528,7 @@
    "overlaps": []
   },
   {
-   "id": "H-028",
+   "id": "H-029",
    "slug": "intersections",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Intersection points of two curves",
@@ -5521,7 +5557,7 @@
    "overlaps": []
   },
   {
-   "id": "H-029",
+   "id": "H-030",
    "slug": "spline_to_polyline",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Convert a spline to a polyline at a tolerance",
@@ -5550,7 +5586,7 @@
    "overlaps": []
   },
   {
-   "id": "H-030",
+   "id": "H-031",
    "slug": "wipeout",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Wipeout masks behind text",
@@ -5579,7 +5615,7 @@
    "overlaps": []
   },
   {
-   "id": "H-031",
+   "id": "H-032",
    "slug": "multiline",
    "category": "H. Lines, polylines, arcs, circles, splines and curves",
    "description": "Multilines (MLINE) with styles",
@@ -14566,9 +14602,9 @@
    "category": "Z. Surveying, coordinates, parcels and earthwork",
    "description": "Grid-method cut and fill volumes",
    "user_problem": "Earthwork estimates",
-   "status": "planned",
-   "backend": "pure",
-   "app_version": "no CAD engine needed",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
     "coordinates, bearings, levels"
    ],
@@ -14581,8 +14617,13 @@
    ],
    "safety": "read",
    "kind": "capability",
-   "exposed_by": [],
-   "test_evidence": [],
+   "exposed_by": [
+    "autocad_civil_surface_volumes"
+   ],
+   "test_evidence": [
+    "unit",
+    "headless_dxf"
+   ],
    "reference": "pure computation + drafting; works without Civil 3D",
    "overlaps": []
   },
@@ -14670,9 +14711,9 @@
    "category": "Z. Surveying, coordinates, parcels and earthwork",
    "description": "Chainage and offset along a centreline",
    "user_problem": "Linear works",
-   "status": "planned",
-   "backend": "pure",
-   "app_version": "no CAD engine needed",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
     "coordinates, bearings, levels"
    ],
@@ -14685,13 +14726,50 @@
    ],
    "safety": "read",
    "kind": "capability",
-   "exposed_by": [],
-   "test_evidence": [],
+   "exposed_by": [
+    "autocad_civil_alignment_station",
+    "autocad_civil_station_point"
+   ],
+   "test_evidence": [
+    "unit",
+    "headless_dxf"
+   ],
    "reference": "pure computation + drafting; works without Civil 3D",
    "overlaps": []
   },
   {
    "id": "Z-013",
+   "slug": "profile_levels",
+   "category": "Z. Surveying, coordinates, parcels and earthwork",
+   "description": "Ground levels sampled along a centreline at a station interval",
+   "user_problem": "Long sections and earthwork without Civil 3D",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "coordinates, bearings, levels"
+   ],
+   "outputs": [
+    "geometry",
+    "tables"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT"
+   ],
+   "safety": "read",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_civil_ground_profile"
+   ],
+   "test_evidence": [
+    "unit",
+    "headless_dxf"
+   ],
+   "reference": "pure computation + drafting; works without Civil 3D",
+   "overlaps": []
+  },
+  {
+   "id": "Z-014",
    "slug": "boundary_plan",
    "category": "Z. Surveying, coordinates, parcels and earthwork",
    "description": "Boundary survey plan with bearings and distances",
@@ -14717,7 +14795,7 @@
    "overlaps": []
   },
   {
-   "id": "Z-014",
+   "id": "Z-015",
    "slug": "levelling",
    "category": "Z. Surveying, coordinates, parcels and earthwork",
    "description": "Levelling reduction (rise-and-fall and height-of-instrument)",
@@ -14743,7 +14821,7 @@
    "overlaps": []
   },
   {
-   "id": "Z-015",
+   "id": "Z-016",
    "slug": "tacheometry",
    "category": "Z. Surveying, coordinates, parcels and earthwork",
    "description": "Tacheometric reduction",
@@ -14795,6 +14873,36 @@
   },
   {
    "id": "AA-002",
+   "slug": "pipe_clearance",
+   "category": "AA. Water supply, drainage, sanitary systems and plumbing",
+   "description": "Closest 3D distance and plan crossings between two pipe runs",
+   "user_problem": "Drainage clash hints",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "runs, sizes, levels"
+   ],
+   "outputs": [
+    "drawing, schedules"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT"
+   ],
+   "safety": "read",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_civil_pipe_clearance"
+   ],
+   "test_evidence": [
+    "unit",
+    "headless_dxf"
+   ],
+   "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
+   "overlaps": []
+  },
+  {
+   "id": "AA-003",
    "slug": "fixture_symbols",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Plumbing fixture symbols",
@@ -14819,7 +14927,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-003",
+   "id": "AA-004",
    "slug": "drainage_layout",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Drainage layout with manholes and user-entered gradients",
@@ -14844,7 +14952,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-004",
+   "id": "AA-005",
    "slug": "manhole_schedule",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Manhole schedule (cover and invert levels, depth)",
@@ -14869,7 +14977,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-005",
+   "id": "AA-006",
    "slug": "pipe_long_section",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Pipe long section from invert levels",
@@ -14894,7 +15002,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-006",
+   "id": "AA-007",
    "slug": "water_isometric",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Water supply isometric diagram",
@@ -14919,7 +15027,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-007",
+   "id": "AA-008",
    "slug": "septic_tank_detail",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Septic tank detail from user dimensions",
@@ -14944,7 +15052,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-008",
+   "id": "AA-009",
    "slug": "rainwater_pipes",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Rainwater downpipe layout",
@@ -14969,7 +15077,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-009",
+   "id": "AA-010",
    "slug": "pipe_takeoff",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Pipe length takeoff by size and layer",
@@ -14994,7 +15102,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-010",
+   "id": "AA-011",
    "slug": "gradient_check",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Check drain gradients against user minimums",
@@ -15019,7 +15127,7 @@
    "overlaps": []
   },
   {
-   "id": "AA-011",
+   "id": "AA-012",
    "slug": "fixture_units",
    "category": "AA. Water supply, drainage, sanitary systems and plumbing",
    "description": "Fixture-unit tally with user-supplied unit values",
