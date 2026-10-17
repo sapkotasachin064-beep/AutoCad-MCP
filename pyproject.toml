@@ -31,7 +31,7 @@ autocad-mcp = "server:main"
 # packages, so install into a dedicated virtual environment.
 package-dir = { "" = "src" }
 packages = ["backends", "core", "core.catalog", "domain", "tools", "utils"]
-py-modules = ["server", "version"]
+py-modules = ["schemas", "server", "version"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

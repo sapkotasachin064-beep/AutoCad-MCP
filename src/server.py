@@ -23,22 +23,24 @@ import inspect
 import logging
 import sys
 from pathlib import Path
+from typing import Annotated
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
+from pydantic import Field
 
-from core import db
 from backends import get_backend
-from core import registry, session
-from core.executor import get_executor
-from core.hosts import detect_opencode
+from core import db, registry, session
 from core.errors import CadError, error_text
 from core.evidence import validate_limit
+from core.executor import get_executor
+from core.hosts import detect_opencode
 from core.registry import ToolSpec
 from domain import units
+from schemas import Handle, Handles, Layer, LayerName, Point, Points
 from utils.constants import get_db_path, get_output_dir
 from version import __version__
 
@@ -152,7 +154,7 @@ def autocad_get_status() -> dict:
 
 
 @cad_tool(toolset="core", kind="external", title="Launch AutoCAD", operation="launch_application")
-def autocad_launch_application(timeout_seconds: float = 60) -> dict:
+def autocad_launch_application(timeout_seconds: Annotated[float, Field(description='Seconds to wait for AutoCAD to answer COM calls; the executor deadline is 30 s longer than this.')] = 60) -> dict:
     """Launch AutoCAD if not already running, and wait until it answers COM calls.
     Does nothing destructive if AutoCAD is already running; just verifies it.
     Live backend only."""
@@ -195,7 +197,7 @@ def autocad_get_capabilities() -> dict:
 
 
 @cad_tool(toolset="core", kind="session", title="Pin the active drawing", operation="active_drawing_identity")
-def autocad_pin_document(identity: str | None = None) -> dict:
+def autocad_pin_document(identity: Annotated[str | None, Field(description="Drawing identity to pin (from autocad_list_drawings); must equal the active drawing's identity.")] = None) -> dict:
     """Pin this session to the active drawing: until autocad_unpin_document, every tool refuses
     (E_DOCUMENT_CHANGED, nothing changed) if a different drawing becomes active -- e.g. the user
     switches drawing tabs mid-job. identity, if given, must equal the active drawing's identity
@@ -224,7 +226,7 @@ def autocad_unpin_document() -> dict:
 
 @cad_tool(toolset="core", kind="external", title="Create test drawing (V0.1.0)",
           operation="create_test_drawing_with_line")
-def autocad_create_test_drawing_with_line(output_dir: str | None = None) -> dict:
+def autocad_create_test_drawing_with_line(output_dir: Annotated[str | None, Field(description='Folder to save the test drawing in (default: Documents/AutoCAD MCP Output); created if missing.')] = None) -> dict:
     """Create a new drawing, draw one line from (0,0,0) to (100,100,0), save it as
     mcp_test_<timestamp>.dwg under output_dir (default: Documents/AutoCAD MCP Output),
     and verify the entity and file exist. Requires AutoCAD to already be connected;
@@ -235,7 +237,7 @@ def autocad_create_test_drawing_with_line(output_dir: str | None = None) -> dict
 
 
 @cad_tool(toolset="core", kind="write", title="New drawing", operation="create_new_drawing")
-def autocad_create_new_drawing(template: str | None = None, pin: bool = False) -> dict:
+def autocad_create_new_drawing(template: Annotated[str | None, Field(description='Template to start from: a .dwt path, or a bare name AutoCAD finds on its template path.')] = None, pin: Annotated[bool, Field(description='Allow creating despite a document pin, moving the pin to the new drawing.')] = False) -> dict:
     """Create a new, unsaved drawing (live: Documents.Add; headless: a new in-memory DXF). Never
     touches disk, so it cannot overwrite a file. template, if given, is a .dwt path (or a bare
     template name AutoCAD finds on its template path). If a document pin is set, this refuses
@@ -251,7 +253,7 @@ def autocad_list_drawings() -> dict:
 
 
 @cad_tool(toolset="core", kind="write", title="Open drawing", operation="open_drawing")
-def autocad_open_drawing(path: str, read_only: bool = True, pin: bool = False) -> dict:
+def autocad_open_drawing(path: Annotated[str, Field(description='Path to the drawing file to open (.dwg, .dxf, .dwt or .dws).')], read_only: Annotated[bool, Field(description='Open read-only by default; pass false so the drawing can be edited.')] = True, pin: Annotated[bool, Field(description='Allow opening despite a document pin, moving the pin to the opened drawing.')] = False) -> dict:
     """Open a .dwg/.dxf/.dwt/.dws file (read-only by default -- pass read_only=false to edit it)
     and make it active; an already-open file is just activated. While a document pin is set this
     refuses unless pin=true, which moves the pin to the opened drawing."""
@@ -259,8 +261,8 @@ def autocad_open_drawing(path: str, read_only: bool = True, pin: bool = False) -
 
 
 @cad_tool(toolset="core", kind="destructive", title="Save drawing", operation="save_drawing")
-def autocad_save_drawing(path: str | None = None, overwrite: bool = False, format: str = "dwg",
-                         version: str = "R2018") -> dict:
+def autocad_save_drawing(path: Annotated[str | None, Field(description="Target file for save-as; null saves to the drawing's own file (requires a prior save and read-write access).")] = None, overwrite: Annotated[bool, Field(description='Allow replacing an existing different file; the active drawing itself is never overwritten without it.')] = False, format: Annotated[str, Field(description="'dwg' (binary drawing) or 'dxf' (ASCII exchange).")] = "dwg",
+                         version: Annotated[str, Field(description='DWG release tag written into the file: R2000, R2004, R2007, R2010, R2013 or R2018.')] = "R2018") -> dict:
     """Save the active drawing. path=None saves to its own file (it must have been saved before
     and not be read-only). With path: save as that .dwg (or .dxf with format="dxf"); an existing
     different file is only replaced with overwrite=true. Save-as re-points the open drawing at the
@@ -270,21 +272,21 @@ def autocad_save_drawing(path: str | None = None, overwrite: bool = False, forma
 
 
 @cad_tool(toolset="core", kind="destructive", title="Close drawing", operation="close_drawing")
-def autocad_close_drawing(identity: str | None = None, discard_changes: bool = False) -> dict:
+def autocad_close_drawing(identity: Annotated[str | None, Field(description='Identity of the drawing to close (default: the active one); from autocad_list_drawings.')] = None, discard_changes: Annotated[bool, Field(description='Close even when the drawing has unsaved changes.')] = False) -> dict:
     """Close a drawing (default: the active one) without saving. Refuses when it has unsaved
     changes unless discard_changes=true. Closing the pinned drawing removes the pin."""
     return backend().close_drawing(identity=identity, discard_changes=discard_changes)
 
 
 @cad_tool(toolset="core", kind="write", title="Activate drawing", operation="activate_drawing")
-def autocad_activate_drawing(identity: str, pin: bool = False) -> dict:
+def autocad_activate_drawing(identity: Annotated[str, Field(description='Identity of the open drawing to make active; from autocad_list_drawings.')], pin: Annotated[bool, Field(description='Allow activation despite a document pin, moving the pin.')] = False) -> dict:
     """Make the open drawing with this identity the active one. While a document pin is set this
     refuses unless pin=true, which moves the pin."""
     return backend().activate_drawing(identity=identity, pin=pin)
 
 
 @cad_tool(toolset="core", kind="write", title="Set drawing units", operation="set_drawing_units")
-def autocad_set_drawing_units(preset: str) -> dict:
+def autocad_set_drawing_units(preset: Annotated[str, Field(description="Units preset to apply and keep for this session: 'engineering', 'architectural', 'metric_mm', 'metric_m' or 'preserve'.")]) -> dict:
     """Apply a units preset to the active drawing and keep it for this session (drawing tools then
     stop re-applying the AUTOCAD_MCP_UNITS default): engineering (feet + decimal inches, INSUNITS
     inches), architectural (feet + fractional inches), metric_mm (INSUNITS mm), metric_m
@@ -296,14 +298,14 @@ def autocad_set_drawing_units(preset: str) -> dict:
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw line", operation="draw_line")
-def autocad_draw_line(start_point: list[float], end_point: list[float], layer: str | None = None) -> dict:
+def autocad_draw_line(start_point: Point, end_point: Point, layer: Layer = None) -> dict:
     """Draw a line between two validated points in the active drawing's
     ModelSpace. Points are [x, y] or [x, y, z]; z defaults to 0."""
     return backend().draw_line(start_point=start_point, end_point=end_point, layer=layer)
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw polyline", operation="draw_polyline")
-def autocad_draw_polyline(points: list[list[float]], closed: bool = False, layer: str | None = None) -> dict:
+def autocad_draw_polyline(points: Points, closed: Annotated[bool, Field(description='Close the polyline from its last vertex back to the first.')] = False, layer: Layer = None) -> dict:
     """Draw a polyline through an ordered list of >=2 points ([x, y] or
     [x, y, z], z defaults to 0), optionally closed, as an AcDb3dPolyline."""
     return backend().draw_polyline(points=points, closed=closed, layer=layer)
@@ -311,12 +313,12 @@ def autocad_draw_polyline(points: list[list[float]], closed: bool = False, layer
 
 @cad_tool(toolset="drawing", kind="write", title="Draw rectangle", operation="draw_rectangle")
 def autocad_draw_rectangle(
-    corner1: list[float] | None = None,
-    corner2: list[float] | None = None,
-    base_point: list[float] | None = None,
-    width: float | None = None,
-    height: float | None = None,
-    layer: str | None = None,
+    corner1: Annotated[list[float] | None, Field(description='One corner of the rectangle, [x, y] or [x, y, z]; used together with corner2 (the opposite corner, same z-plane).')] = None,
+    corner2: Annotated[list[float] | None, Field(description="Opposite corner of the rectangle, [x, y] or [x, y, z]; must share corner1's z-plane.")] = None,
+    base_point: Annotated[list[float] | None, Field(description='Lower-left corner, [x, y] or [x, y, z]; used together with width and height.')] = None,
+    width: Annotated[float | None, Field(description='Rectangle width in drawing units (with base_point); must be positive.')] = None,
+    height: Annotated[float | None, Field(description='Rectangle height in drawing units (with base_point); must be positive.')] = None,
+    layer: Layer = None,
 ) -> dict:
     """Draw an axis-aligned rectangle (as a closed polyline). Give exactly
     one of: corner1 and corner2 (opposite corners, same z-plane), or
@@ -327,18 +329,18 @@ def autocad_draw_rectangle(
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw circle", operation="draw_circle")
-def autocad_draw_circle(center: list[float], radius: float, layer: str | None = None) -> dict:
+def autocad_draw_circle(center: Point, radius: Annotated[float, Field(description='Circle radius in drawing units; must be positive.')], layer: Layer = None) -> dict:
     """Draw a circle at center ([x, y] or [x, y, z]) with a positive radius."""
     return backend().draw_circle(center=center, radius=radius, layer=layer)
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw text", operation="draw_text")
 def autocad_draw_text(
-    text: str,
-    insertion_point: list[float],
-    height: float,
-    rotation_degrees: float = 0.0,
-    layer: str | None = None,
+    text: Annotated[str, Field(description='Text string to draw.')],
+    insertion_point: Point,
+    height: Annotated[float, Field(description='Text height in drawing units; must be positive.')],
+    rotation_degrees: Annotated[float, Field(description='Rotation in degrees counterclockwise (AutoCAD convention).')] = 0.0,
+    layer: Layer = None,
 ) -> dict:
     """Add single-line text at insertion_point with a positive height and an
     optional rotation in degrees (counterclockwise, viewed from +Z)."""
@@ -348,8 +350,8 @@ def autocad_draw_text(
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw arc", operation="draw_arc")
-def autocad_draw_arc(center: list[float], radius: float, start_angle_degrees: float, end_angle_degrees: float,
-                     layer: str | None = None) -> dict:
+def autocad_draw_arc(center: Point, radius: Annotated[float, Field(description='Arc radius in drawing units; must be positive.')], start_angle_degrees: Annotated[float, Field(description='Start angle in degrees from +X, counterclockwise (AutoCAD convention).')], end_angle_degrees: Annotated[float, Field(description='End angle in degrees from +X, counterclockwise; the arc runs from start to end.')],
+                     layer: Layer = None) -> dict:
     """Draw a counterclockwise arc around center from start_angle_degrees to end_angle_degrees
     (degrees from +X). Reports the angles and arc length read back."""
     return backend().draw_arc(center=center, radius=radius, start_angle_degrees=start_angle_degrees,
@@ -357,8 +359,8 @@ def autocad_draw_arc(center: list[float], radius: float, start_angle_degrees: fl
 
 
 @cad_tool(toolset="drawing", kind="write", title="Draw MTEXT", operation="draw_mtext")
-def autocad_draw_mtext(text: str, insertion_point: list[float], height: float, width: float = 0.0,
-                       rotation_degrees: float = 0.0, layer: str | None = None) -> dict:
+def autocad_draw_mtext(text: Annotated[str, Field(description="Text string; '\\P' starts a new paragraph.")], insertion_point: Point, height: Annotated[float, Field(description='Text height in drawing units; must be positive.')], width: Annotated[float, Field(description='Wrapping width in drawing units; 0 means no wrapping.')] = 0.0,
+                       rotation_degrees: Annotated[float, Field(description='Rotation in degrees counterclockwise.')] = 0.0, layer: Layer = None) -> dict:
     """Add multiline text (top-left at insertion_point). width 0 = no wrapping; \\P in text starts a
     new paragraph."""
     return backend().draw_mtext(text=text, insertion_point=insertion_point, height=height, width=width,
@@ -376,10 +378,10 @@ def autocad_list_layers() -> dict:
 
 
 @cad_tool(toolset="layers", kind="write", title="Set layer properties", operation="set_layer_properties")
-def autocad_set_layer_properties(name: str, on: bool | None = None, frozen: bool | None = None,
-                                 locked: bool | None = None, color_index: int | None = None,
-                                 linetype: str | None = None, lineweight: int | None = None,
-                                 plottable: bool | None = None) -> dict:
+def autocad_set_layer_properties(name: Annotated[str, Field(description='Name of the existing layer to change.')], on: Annotated[bool | None, Field(description='Turn the layer on (true) or off (false); null leaves the current state.')] = None, frozen: Annotated[bool | None, Field(description='Freeze (true) or thaw (false); null leaves the current state.')] = None,
+                                 locked: Annotated[bool | None, Field(description='Lock (true) or unlock (false); null leaves the current state.')] = None, color_index: Annotated[int | None, Field(description='ACI colour index 0-255 (0 ByBlock, 256 ByLayer); null leaves it.')] = None,
+                                 linetype: Annotated[str | None, Field(description='Linetype name; loaded from acad.lin/acadiso.lin if not already present; null leaves it.')] = None, lineweight: Annotated[int | None, Field(description='Lineweight in hundredths of a millimetre (-3 Default, 25 = 0.25 mm); null leaves it.')] = None,
+                                 plottable: Annotated[bool | None, Field(description='Plot the layer (true) or not (false); null leaves it.')] = None) -> dict:
     """Change only the given properties of an existing layer and read them back. lineweight is in
     hundredths of a millimetre (25 = 0.25 mm, -3 = Default). A linetype that isn't loaded is loaded
     from acad.lin / acadiso.lin. The current layer cannot be frozen."""
@@ -389,7 +391,7 @@ def autocad_set_layer_properties(name: str, on: bool | None = None, frozen: bool
 
 
 @cad_tool(toolset="layers", kind="write", title="Create layer", operation="create_layer")
-def autocad_create_layer(name: str, color_index: int | None = None, linetype: str | None = None) -> dict:
+def autocad_create_layer(name: Annotated[str, Field(description='Name of the layer to create; an existing layer is updated, not replaced.')], color_index: Annotated[int | None, Field(description='ACI colour index 0-255 to set; null leaves the layer untouched.')] = None, linetype: Annotated[str | None, Field(description='Linetype to set; null leaves the layer untouched.')] = None) -> dict:
     """Create a layer if it doesn't exist. color_index (0-255) and linetype,
     when given, update that property on an existing layer; every other
     layer property (locked, frozen, on/off, ...) is left untouched."""
@@ -397,7 +399,7 @@ def autocad_create_layer(name: str, color_index: int | None = None, linetype: st
 
 
 @cad_tool(toolset="layers", kind="write", title="Ensure standard layer", operation="ensure_layer")
-def autocad_ensure_layer(name: str, color_index: int | None = None, linetype: str | None = None) -> dict:
+def autocad_ensure_layer(name: Annotated[str, Field(description="Layer name; a name matching the architectural standard (A-WALL, A-DOOR, ...) gets that standard's colour/linetype unless overridden.")], color_index: Annotated[int | None, Field(description='Explicit ACI colour index 0-255; always overrides the standard.')] = None, linetype: Annotated[str | None, Field(description='Explicit linetype name; always overrides the standard.')] = None) -> dict:
     """Same as autocad_create_layer, except a name matching the
     architectural layer standard (A-WALL, A-WALL-EXT, A-WALL-INT, A-DOOR, A-GLAZ, A-ANNO,
     A-TEXT, A-DIM, ...) falls back to that standard's color_index/linetype when not given
@@ -409,27 +411,27 @@ def autocad_ensure_layer(name: str, color_index: int | None = None, linetype: st
 
 
 @cad_tool(toolset="editing", kind="write", title="Move entity", operation="move_entity")
-def autocad_move_entity(handle: str, displacement: list[float]) -> dict:
+def autocad_move_entity(handle: Handle, displacement: Annotated[list[float], Field(description='Translation vector [dx, dy, dz] in drawing units.')]) -> dict:
     """Move the entity with this handle by a validated [dx, dy, dz] vector."""
     return backend().move_entity(handle=handle, displacement=displacement)
 
 
 @cad_tool(toolset="editing", kind="write", title="Rotate entity", operation="rotate_entity")
-def autocad_rotate_entity(handle: str, base_point: list[float], angle_degrees: float) -> dict:
+def autocad_rotate_entity(handle: Handle, base_point: Point, angle_degrees: Annotated[float, Field(description='Rotation in degrees counterclockwise about base_point.')]) -> dict:
     """Rotate the entity with this handle about base_point by angle_degrees
     (counterclockwise-positive, viewed from +Z -- AutoCAD's own convention)."""
     return backend().rotate_entity(handle=handle, base_point=base_point, angle_degrees=angle_degrees)
 
 
 @cad_tool(toolset="editing", kind="write", title="Copy entity", operation="copy_entity")
-def autocad_copy_entity(handle: str, displacement: list[float]) -> dict:
+def autocad_copy_entity(handle: Handle, displacement: Annotated[list[float], Field(description='Offset [dx, dy, dz] of the copy from the original, in drawing units.')]) -> dict:
     """Copy the entity with this handle, offsetting the copy by a validated
     [dx, dy, dz] vector. Returns the new entity's handle."""
     return backend().copy_entity(handle=handle, displacement=displacement)
 
 
 @cad_tool(toolset="editing", kind="write", title="Highlight entity", operation="highlight_entity")
-def autocad_highlight_entity(handle: str, method: str = "temporary", color: int = 1, clear: bool = False) -> dict:
+def autocad_highlight_entity(handle: Handle, method: Annotated[str, Field(description="'temporary' uses AutoCAD's native Highlight flag (not saved to the DWG); 'persistent' sets entity.Color.")] = "temporary", color: Annotated[int, Field(description="ACI colour index 0-255 used by method='persistent'.")] = 1, clear: Annotated[bool, Field(description="Turn a temporary highlight back off (method='temporary').")] = False) -> dict:
     """Highlight an entity. method="temporary" uses AutoCAD's native
     Highlight() flag (a visual-only state, not saved to the DWG, that never
     touches the entity's Color property) -- pass clear=True to turn it back
@@ -439,12 +441,12 @@ def autocad_highlight_entity(handle: str, method: str = "temporary", color: int 
 
 @cad_tool(toolset="editing", kind="write", title="Highlight matching text", operation="highlight_text_matches")
 def autocad_highlight_text_matches(
-    pattern: str,
-    use_regex: bool = False,
-    method: str = "temporary",
-    color: int = 1,
-    clear: bool = False,
-    limit: int = 500,
+    pattern: Annotated[str, Field(description='Literal substring matched against the text of TEXT/MTEXT entities.')],
+    use_regex: Annotated[bool, Field(description='Treat pattern as a regular expression instead of a literal substring.')] = False,
+    method: Annotated[str, Field(description="Highlight mode: 'temporary' (native Highlight flag) or 'persistent' (sets entity.Color).")] = "temporary",
+    color: Annotated[int, Field(description="ACI colour index 0-255 for method='persistent'.")] = 1,
+    clear: Annotated[bool, Field(description='Also clear existing temporary highlights on the matched entities.')] = False,
+    limit: Annotated[int, Field(description='Maximum number of matches to list (every match is highlighted).')] = 500,
 ) -> dict:
     """Find TEXT/MTEXT entities matching pattern (literal substring, or a
     regex if use_regex=True) and highlight them the same way as
@@ -456,15 +458,15 @@ def autocad_highlight_text_matches(
 
 
 @cad_tool(toolset="editing", kind="write", title="Scale entity", operation="scale_entity")
-def autocad_scale_entity(handle: str, base_point: list[float], factor: float) -> dict:
+def autocad_scale_entity(handle: Handle, base_point: Point, factor: Annotated[float, Field(description='Uniform scale factor; must be positive.')]) -> dict:
     """Scale the entity uniformly about base_point by a positive factor; verifies the extents
     changed by that factor."""
     return backend().scale_entity(handle=handle, base_point=base_point, factor=factor)
 
 
 @cad_tool(toolset="editing", kind="write", title="Mirror entity", operation="mirror_entity")
-def autocad_mirror_entity(handle: str, axis_start: list[float], axis_end: list[float],
-                          keep_original: bool = True) -> dict:
+def autocad_mirror_entity(handle: Handle, axis_start: Point, axis_end: Point,
+                          keep_original: Annotated[bool, Field(description='Delete the original entity after mirroring when false.')] = True) -> dict:
     """Mirror the entity across the line axis_start-axis_end. Returns the mirrored copy's handle;
     keep_original=false deletes the source afterwards."""
     return backend().mirror_entity(handle=handle, axis_start=axis_start, axis_end=axis_end,
@@ -472,15 +474,15 @@ def autocad_mirror_entity(handle: str, axis_start: list[float], axis_end: list[f
 
 
 @cad_tool(toolset="editing", kind="write", title="Offset curve", operation="offset_entity")
-def autocad_offset_entity(handle: str, distance: float) -> dict:
+def autocad_offset_entity(handle: Handle, distance: Annotated[float, Field(description='Offset distance in drawing units; the sign picks the side.')]) -> dict:
     """Offset a curve (line, arc, circle, polyline, ellipse, spline) by distance; the sign picks the
     side. Returns the new handles."""
     return backend().offset_entity(handle=handle, distance=distance)
 
 
 @cad_tool(toolset="editing", kind="write", title="Rectangular array", operation="array_rectangular")
-def autocad_array_rectangular(handle: str, rows: int, columns: int, row_spacing: float,
-                              column_spacing: float) -> dict:
+def autocad_array_rectangular(handle: Handle, rows: Annotated[int, Field(description='Number of rows (stacked along Y).')], columns: Annotated[int, Field(description='Number of columns (stacked along X).')], row_spacing: Annotated[float, Field(description='Row spacing in drawing units.')],
+                              column_spacing: Annotated[float, Field(description='Column spacing in drawing units.')]) -> dict:
     """Copy the entity into a rows x columns grid (row_spacing along Y, column_spacing along X; the
     original is the first cell). Returns the rows*columns-1 new handles."""
     return backend().array_rectangular(handle=handle, rows=rows, columns=columns, row_spacing=row_spacing,
@@ -488,7 +490,7 @@ def autocad_array_rectangular(handle: str, rows: int, columns: int, row_spacing:
 
 
 @cad_tool(toolset="editing", kind="destructive", title="Delete entities", operation="delete_entities")
-def autocad_delete_entities(handles: list[str], dry_run: bool = True) -> dict:
+def autocad_delete_entities(handles: Handles, dry_run: Annotated[bool, Field(description='true (the default) only lists what would be deleted and changes nothing; false deletes.')] = True) -> dict:
     """Delete entities by handle. dry_run=true (the default) only lists what would be deleted and
     changes nothing; call again with dry_run=false to delete. Verifies each deleted handle no longer
     resolves. Ctrl+Z in AutoCAD can undo it."""
@@ -496,8 +498,8 @@ def autocad_delete_entities(handles: list[str], dry_run: bool = True) -> dict:
 
 
 @cad_tool(toolset="editing", kind="write", title="Set entity properties", operation="set_entity_properties")
-def autocad_set_entity_properties(handles: list[str], layer: str | None = None, color_index: int | None = None,
-                                  linetype: str | None = None, lineweight: int | None = None) -> dict:
+def autocad_set_entity_properties(handles: Handles, layer: Layer = None, color_index: Annotated[int | None, Field(description='ACI colour index 0-256 (0 ByBlock, 256 ByLayer); null leaves it.')] = None,
+                                  linetype: Annotated[str | None, Field(description='Linetype name; null leaves it.')] = None, lineweight: Annotated[int | None, Field(description='Lineweight in hundredths of a millimetre (-1 ByLayer); null leaves it.')] = None) -> dict:
     """Set layer / color (ACI 0-256: 0 ByBlock, 256 ByLayer) / linetype / lineweight (hundredths of
     mm, -1 ByLayer) on one or more entities and read them back. A missing layer is created."""
     return backend().set_entity_properties(handles=handles, layer=layer, color_index=color_index,
@@ -508,7 +510,7 @@ def autocad_set_entity_properties(handles: list[str], layer: str | None = None, 
 
 
 @cad_tool(toolset="query", kind="read", title="Drawing summary", operation="drawing_summary")
-def autocad_drawing_summary(max_entities: int = 20000) -> dict:
+def autocad_drawing_summary(max_entities: Annotated[int, Field(description='Read at most this many model-space entities (larger drawings are truncated, and the result says so).')] = 20000) -> dict:
     """Compact overview of the active drawing: identity, saved/unsaved state, units (INSUNITS,
     LUNITS, imperial/metric), extents, entity counts by type and by layer, layers, block
     definitions and layouts. Reads at most max_entities model-space entities (truncated says if
@@ -517,9 +519,9 @@ def autocad_drawing_summary(max_entities: int = 20000) -> dict:
 
 
 @cad_tool(toolset="query", kind="read", title="List entities", operation="list_entities")
-def autocad_list_entities(entity_types: list[str] | None = None, layers: list[str] | None = None,
-                          bbox: list[list[float]] | None = None, offset: int = 0, limit: int = 100,
-                          include_bbox: bool = False) -> dict:
+def autocad_list_entities(entity_types: Annotated[list[str] | None, Field(description='DXF type names to include (LINE, LWPOLYLINE, CIRCLE, TEXT, MTEXT, ...); null = all types.')] = None, layers: Annotated[list[str] | None, Field(description='Layer names to include; null = all layers.')] = None,
+                          bbox: Annotated[list[list[float]] | None, Field(description='Filter window [[xmin, ymin], [xmax, ymax]] in drawing units; only entities lying inside it are returned.')] = None, offset: Annotated[int, Field(description='Skip this many matches (combine with the returned next_offset to page).')] = 0, limit: Annotated[int, Field(description='Return at most this many rows.')] = 100,
+                          include_bbox: Annotated[bool, Field(description="Include each entity's bounding box in the result rows.")] = False) -> dict:
     """Page through model-space entities as {handle, type, layer}, optionally filtered by DXF type
     names (LINE, LWPOLYLINE, POLYLINE3D, CIRCLE, ARC, TEXT, MTEXT, INSERT, HATCH, DIMENSION, ...),
     layer names, and a bbox window [[xmin, ymin], [xmax, ymax]] the entity must lie inside. Use
@@ -529,7 +531,7 @@ def autocad_list_entities(entity_types: list[str] | None = None, layers: list[st
 
 
 @cad_tool(toolset="query", kind="read", title="Get entity", operation="get_entity")
-def autocad_get_entity(handle: str) -> dict:
+def autocad_get_entity(handle: Handle) -> dict:
     """Full detail of one entity: type, layer, color, linetype, lineweight, geometry (points,
     center/radius, angles in degrees, text, block name and attributes, hatch pattern and area,
     dimension measurement), length/area where AutoCAD reports them, and bounding box."""
@@ -540,9 +542,9 @@ def autocad_get_entity(handle: str) -> dict:
 
 
 @cad_tool(toolset="annotation", kind="write", title="Add dimension", operation="add_dimension")
-def autocad_add_dimension(kind: str, first_point: list[float], second_point: list[float],
-                          dimension_line_point: list[float], rotation_degrees: float = 0.0,
-                          text_override: str | None = None, layer: str | None = None) -> dict:
+def autocad_add_dimension(kind: Annotated[str, Field(description="'aligned' measures along the line through the two points; 'linear' measures horizontally/vertically along rotation_degrees.")], first_point: Point, second_point: Point,
+                          dimension_line_point: Point, rotation_degrees: Annotated[float, Field(description="Degrees counterclockwise; used with kind='linear'.")] = 0.0,
+                          text_override: Annotated[str | None, Field(description='Custom dimension text; null uses the measured value.')] = None, layer: Layer = None) -> dict:
     """Add a dimension between two points using the current dimension style. kind="aligned"
     measures along the points; kind="linear" measures along rotation_degrees (0 horizontal, 90
     vertical). The dimension line passes through dimension_line_point. Verifies the measurement
@@ -553,9 +555,9 @@ def autocad_add_dimension(kind: str, first_point: list[float], second_point: lis
 
 
 @cad_tool(toolset="annotation", kind="write", title="Add hatch", operation="add_hatch")
-def autocad_add_hatch(boundary_handles: list[str] | None = None, boundary_points: list[list[float]] | None = None,
-                      pattern: str = "ANSI31", scale: float = 1.0, angle_degrees: float = 0.0,
-                      layer: str | None = None, keep_boundary: bool = True) -> dict:
+def autocad_add_hatch(boundary_handles: Annotated[list[str] | None, Field(description='Handles of an already-closed boundary (curves or a closed polyline).')] = None, boundary_points: Annotated[list[list[float]] | None, Field(description='Polygon vertices [x, y] or [x, y, z]; a boundary polyline is drawn for them.')] = None,
+                      pattern: Annotated[str, Field(description='Predefined hatch pattern name (ANSI31, SOLID, AR-CONC, ...).')] = "ANSI31", scale: Annotated[float, Field(description='Pattern scale; must be positive.')] = 1.0, angle_degrees: Annotated[float, Field(description='Pattern rotation in degrees.')] = 0.0,
+                      layer: Layer = None, keep_boundary: Annotated[bool, Field(description='Keep the boundary polyline drawn for boundary_points (true by default).')] = True) -> dict:
     """Hatch one closed area: give boundary_handles (closed curves already drawn) or boundary_points
     (a polygon; a boundary polyline is drawn and kept unless keep_boundary=false). pattern is a
     predefined pattern name (ANSI31, SOLID, AR-CONC, ...). Reports the hatched area and verifies the
@@ -569,15 +571,15 @@ def autocad_add_hatch(boundary_handles: list[str] | None = None, boundary_points
 
 
 @cad_tool(toolset="blocks", kind="read", title="List blocks", operation="list_blocks")
-def autocad_list_blocks(include_anonymous: bool = False) -> dict:
+def autocad_list_blocks(include_anonymous: Annotated[bool, Field(description='Also list anonymous block definitions (created internally by AutoCAD).')] = False) -> dict:
     """List block definitions (not layouts) with entity count, attribute tags, and xref status."""
     return backend().list_blocks(include_anonymous=include_anonymous)
 
 
 @cad_tool(toolset="blocks", kind="write", title="Insert block", operation="insert_block")
-def autocad_insert_block(name: str, insertion_point: list[float], scale: float = 1.0,
-                         rotation_degrees: float = 0.0, layer: str | None = None,
-                         attributes: dict[str, str] | None = None) -> dict:
+def autocad_insert_block(name: Annotated[str, Field(description='Block definition name (must already exist in the drawing).')], insertion_point: Point, scale: Annotated[float, Field(description='Insertion scale; must be positive.')] = 1.0,
+                         rotation_degrees: Annotated[float, Field(description='Insertion rotation in degrees counterclockwise.')] = 0.0, layer: Layer = None,
+                         attributes: Annotated[dict[str, str] | None, Field(description='Attribute values {TAG: value}; unknown tags are rejected before anything is inserted.')] = None) -> dict:
     """Insert a block already defined in the drawing, optionally filling attributes {TAG: value}.
     Unknown tags are rejected before anything is inserted; values are read back."""
     return backend().insert_block(name=name, insertion_point=insertion_point, scale=scale,
@@ -585,13 +587,13 @@ def autocad_insert_block(name: str, insertion_point: list[float], scale: float =
 
 
 @cad_tool(toolset="blocks", kind="read", title="Get block attributes", operation="get_block_attributes")
-def autocad_get_block_attributes(handle: str) -> dict:
+def autocad_get_block_attributes(handle: Handle) -> dict:
     """List the attributes (tag, value, handle) of a block reference."""
     return backend().get_block_attributes(handle=handle)
 
 
 @cad_tool(toolset="blocks", kind="write", title="Set block attributes", operation="set_block_attributes")
-def autocad_set_block_attributes(handle: str, values: dict[str, str]) -> dict:
+def autocad_set_block_attributes(handle: Handle, values: Annotated[dict[str, str], Field(description='Attribute values {TAG: text} to set; unknown tags are rejected.')]) -> dict:
     """Update attribute values {TAG: text} on a block reference and read them back. Unknown tags
     are rejected before any change."""
     return backend().set_block_attributes(handle=handle, values=values)
@@ -608,7 +610,7 @@ def autocad_list_layouts() -> dict:
 
 
 @cad_tool(toolset="output", kind="external", title="Export DXF copy", operation="export_dxf")
-def autocad_export_dxf(path: str, overwrite: bool = False) -> dict:
+def autocad_export_dxf(path: Annotated[str, Field(description='Destination .dxf path (absolute).')], overwrite: Annotated[bool, Field(description='Allow replacing an existing file; the open drawing itself is never renamed (a copy is written).')] = False) -> dict:
     """Write a DXF copy of the active drawing to path (.dxf) without renaming or re-pointing the open
     drawing (unlike save-as). Existing files are replaced only with overwrite=true, and only after
     the new file was written. Reports size and SHA-256 read back from disk."""
@@ -616,8 +618,8 @@ def autocad_export_dxf(path: str, overwrite: bool = False) -> dict:
 
 
 @cad_tool(toolset="output", kind="external", title="Plot to PDF", operation="plot_pdf")
-def autocad_plot_pdf(path: str, layout: str | None = None, paper: str | None = None,
-                     plot_style: str | None = None, overwrite: bool = False) -> dict:
+def autocad_plot_pdf(path: Annotated[str, Field(description='Destination .pdf path.')], layout: Annotated[str | None, Field(description='Layout name to plot; null plots model space fitted to the paper extents.')] = None, paper: Annotated[str | None, Field(description="Canonical media name or a unique part of one (e.g. 'ISO_full_bleed_A3').")] = None,
+                     plot_style: Annotated[str | None, Field(description="Plot style table name (e.g. 'monochrome.ctb').")] = None, overwrite: Annotated[bool, Field(description='Allow replacing an existing file.')] = False) -> dict:
     """Plot to a PDF with AutoCAD's 'DWG To PDF.pc3'. layout=None plots model space to its extents,
     fitted to the paper; a layout name plots that sheet at 1:1. paper is a canonical media name or a
     unique part of one (e.g. 'ISO_full_bleed_A3'); plot_style e.g. 'monochrome.ctb'. The layout's
@@ -640,7 +642,7 @@ def autocad_scan_all_entities() -> dict:
 
 
 @cad_tool(toolset="query", kind="read", title="Count text matches", operation="count_text_patterns")
-def autocad_count_text_patterns(pattern: str, use_regex: bool = False, limit: int = 500) -> dict:
+def autocad_count_text_patterns(pattern: Annotated[str, Field(description='Literal substring matched against the text of TEXT/MTEXT entities.')], use_regex: Annotated[bool, Field(description='Treat pattern as a regular expression instead of a literal substring.')] = False, limit: Annotated[int, Field(description='Maximum number of matches to list.')] = 500) -> dict:
     """Count TEXT/MTEXT entities in the active drawing whose text matches
     pattern: a literal substring by default, or a regex if use_regex=True.
     match_count is the full count; at most `limit` matches are listed."""
@@ -648,7 +650,7 @@ def autocad_count_text_patterns(pattern: str, use_regex: bool = False, limit: in
 
 
 @cad_tool(toolset="query", kind="read", title="Read-only SQL over scans")
-def autocad_execute_query(query: str, params: list | None = None, limit: int = 1000) -> dict:
+def autocad_execute_query(query: Annotated[str, Field(description='One read-only SELECT statement (a WITH clause is allowed); values belong in params, never inline.')], params: Annotated[list | None, Field(description='Bound parameters for ? placeholders in the query (strings or numbers).')] = None, limit: Annotated[int, Field(description='Maximum rows to return (1 to 100000).')] = 1000) -> dict:
     """Run one read-only SELECT (optionally with a WITH clause) against the
     scanned-entities database. Writes, DDL, PRAGMA, and multi-statement
     input are rejected; use params for a parameterized query (never string-
@@ -667,11 +669,11 @@ def autocad_execute_query(query: str, params: list | None = None, limit: int = 1
 
 @cad_tool(toolset="editing", kind="write", title="Query and highlight", operation="query_and_highlight")
 def autocad_query_and_highlight(
-    query: str,
-    params: list | None = None,
-    method: str = "temporary",
-    color: int = 1,
-    clear: bool = False,
+    query: Annotated[str, Field(description="Read-only SELECT whose result set includes a 'handle' column (same rules as autocad_execute_query).")],
+    params: Annotated[list | None, Field(description='Bound parameters for ? placeholders.')] = None,
+    method: Annotated[str, Field(description="'temporary' (native Highlight flag) or 'persistent' (sets entity.Color).")] = "temporary",
+    color: Annotated[int, Field(description="ACI colour index 0-255 for method='persistent'.")] = 1,
+    clear: Annotated[bool, Field(description='Also clear existing temporary highlights.')] = False,
 ) -> dict:
     """Run a read-only query (same rules as autocad_execute_query) whose
     result set includes a 'handle' column, then highlight every matching
@@ -685,10 +687,10 @@ def autocad_query_and_highlight(
 
 @cad_tool(toolset="architecture", kind="write", title="Draw wall", operation="draw_wall")
 def autocad_draw_wall(
-    start_point: list[float],
-    end_point: list[float],
-    thickness: float | None = None,
-    layer: str = "A-WALL",
+    start_point: Point,
+    end_point: Point,
+    thickness: Annotated[float | None, Field(description='Wall thickness in drawing units; null uses the standard exterior (9 in / 230 mm).')] = None,
+    layer: LayerName = "A-WALL",
 ) -> dict:
     """Draw a wall as a closed double-line outline (4-point polyline)
     centered on start_point-end_point, offset by thickness/2 on each side.
@@ -702,11 +704,11 @@ def autocad_draw_wall(
 @cad_tool(toolset="architecture", kind="write", title="Generate 2x3 floor plan",
           operation="generate_2d_floor_plan")
 def autocad_generate_2d_floor_plan(
-    width_ft: float = 24.0,
-    length_ft: float = 30.0,
-    units: str = "INCHES",
-    rooms_config: list[dict] | None = None,
-    dry_run: bool = False,
+    width_ft: Annotated[float, Field(description='Footprint width in feet; must be positive.')] = 24.0,
+    length_ft: Annotated[float, Field(description='Footprint length in feet; must be positive.')] = 30.0,
+    units: Annotated[str, Field(description="'INCHES' draws the plan in inches (default); 'FEET' treats room bounds as feet.")] = "INCHES",
+    rooms_config: Annotated[list[dict] | None, Field(description='Room overrides [{name, width, depth}] replacing the default 2x3 room grid.')] = None,
+    dry_run: Annotated[bool, Field(description='Plan and report the entities without drawing anything.')] = False,
 ) -> dict:
     """Generate a complete residential floor plan in one call: 9"
     exterior walls, 4.5" interior partitions splitting the footprint into a
@@ -759,20 +761,20 @@ def _origin(origin):
 
 @cad_tool(toolset="architecture", kind="write", title="Floor plan from rooms", operation="emit_plan")
 def autocad_generate_floor_plan(
-    rooms: list[dict],
-    unit: str = "ft",
-    exterior_wall: float | None = None,
-    interior_wall: float | None = None,
-    doors: list[dict] | None = None,
-    windows: str = "auto",
-    entry_room: str | None = None,
-    door_width: float | None = None,
-    main_door_width: float | None = None,
-    window_width: float | None = None,
-    label_height: float | None = None,
-    dimensions: bool = True,
-    origin: list[float] | None = None,
-    dry_run: bool = False,
+    rooms: Annotated[list[dict], Field(description='Rooms [{name, x, y, width, depth}] measured to wall centrelines in `unit`; rooms must not overlap.')],
+    unit: Annotated[str, Field(description="Unit for every measurement here: 'ft', 'in', 'm' or 'mm'.")] = "ft",
+    exterior_wall: Annotated[float | None, Field(description='Exterior wall thickness in `unit`; null = 9 in (imperial) or 230 mm (metric).')] = None,
+    interior_wall: Annotated[float | None, Field(description='Interior wall thickness in `unit`; null = 4.5 in (imperial) or 115 mm (metric).')] = None,
+    doors: Annotated[list[dict] | None, Field(description='Door specs [{between: [roomA, roomB], width?, position? 0-1}]; null connects every room to the entry room.')] = None,
+    windows: Annotated[str, Field(description="'auto' places one window per room on its longest outside wall; 'none' skips windows.")] = "auto",
+    entry_room: Annotated[str | None, Field(description='Room receiving the main door (default: the first room).')] = None,
+    door_width: Annotated[float | None, Field(description='Interior door width in `unit`; null = 30 in (imperial) or 760 mm (metric).')] = None,
+    main_door_width: Annotated[float | None, Field(description='Main entrance door width in `unit`; null = 36 in (imperial) or 915 mm (metric).')] = None,
+    window_width: Annotated[float | None, Field(description='Window width in `unit`; null = 48 in (imperial) or 1220 mm (metric).')] = None,
+    label_height: Annotated[float | None, Field(description='Room label text height in `unit`; null = the standard for these units.')] = None,
+    dimensions: Annotated[bool, Field(description='Add overall dimension chains around the footprint.')] = True,
+    origin: Annotated[list[float] | None, Field(description='Plan origin [x, y] in drawing units; null = (0, 0).')] = None,
+    dry_run: Annotated[bool, Field(description='Show the plan and schedules without drawing anything.')] = False,
 ) -> dict:
     """Draw a residential floor plan from explicit rooms. rooms: [{name, x, y, width, depth}] in
     `unit` (ft, in, m, mm), measured to wall centrelines; rooms must not overlap and may form any
@@ -805,17 +807,17 @@ def autocad_generate_floor_plan(
 
 @cad_tool(toolset="architecture", kind="write", title="Structural grid", operation="emit_plan")
 def autocad_draw_structural_grid(
-    x_spacings: list[float],
-    y_spacings: list[float],
-    unit: str = "m",
-    origin: list[float] | None = None,
-    extension: float | None = None,
-    bubble_diameter: float | None = None,
-    text_height: float | None = None,
-    column_size: list[float] | None = None,
-    skip_letters: bool = True,
-    dimensions: bool = True,
-    dry_run: bool = False,
+    x_spacings: Annotated[list[float], Field(description='Bay widths left to right in `unit` (at least one value).')],
+    y_spacings: Annotated[list[float], Field(description='Bay depths bottom to top in `unit`.')],
+    unit: Annotated[str, Field(description="'m', 'mm', 'ft' or 'in'.")] = "m",
+    origin: Annotated[list[float] | None, Field(description='Grid origin [x, y]; null = (0, 0).')] = None,
+    extension: Annotated[float | None, Field(description='Extra length the grid lines extend beyond the outer lines, in `unit`; null = auto.')] = None,
+    bubble_diameter: Annotated[float | None, Field(description='Diameter of the grid-line bubbles, in `unit`; null = auto.')] = None,
+    text_height: Annotated[float | None, Field(description='Bubble label text height in `unit`; null = the standard for these units.')] = None,
+    column_size: Annotated[list[float] | None, Field(description='Column mark [width, depth] in `unit` at every grid intersection; null skips the marks.')] = None,
+    skip_letters: Annotated[bool, Field(description='Skip the letters I and O in grid line labels (true by default).')] = True,
+    dimensions: Annotated[bool, Field(description='Add bay and overall dimensions between the grid lines.')] = True,
+    dry_run: Annotated[bool, Field(description='Plan and report without drawing.')] = False,
 ) -> dict:
     """Draw a column grid: x_spacings are bay widths left to right (lines numbered 1, 2, 3...),
     y_spacings bay depths bottom to top (lettered A, B, C...; I and O skipped unless
@@ -841,15 +843,15 @@ def autocad_draw_structural_grid(
 
 @cad_tool(toolset="architecture", kind="read", title="Design a stair")
 def autocad_design_stair(
-    floor_to_floor: float,
-    unit: str = "mm",
-    max_riser: float | None = None,
-    min_tread: float | None = None,
-    tread: float | None = None,
-    width: float | None = None,
-    step_relation_min: float | None = None,
-    step_relation_max: float | None = None,
-    max_pitch_degrees: float | None = None,
+    floor_to_floor: Annotated[float, Field(description='Total rise in `unit`; must be positive.')],
+    unit: Annotated[str, Field(description="'m', 'mm', 'ft' or 'in'.")] = "mm",
+    max_riser: Annotated[float | None, Field(description='Maximum riser height in `unit`; null = 190 mm equivalent.')] = None,
+    min_tread: Annotated[float | None, Field(description='Minimum tread depth in `unit`; null = 250 mm equivalent.')] = None,
+    tread: Annotated[float | None, Field(description='Fixed tread depth in `unit` (overrides the riser/tread split).')] = None,
+    width: Annotated[float | None, Field(description='Flight width in `unit`.')] = None,
+    step_relation_min: Annotated[float | None, Field(description='Minimum 2R+G in `unit`; null = 550 mm equivalent.')] = None,
+    step_relation_max: Annotated[float | None, Field(description='Maximum 2R+G in `unit`; null = 700 mm equivalent.')] = None,
+    max_pitch_degrees: Annotated[float | None, Field(description='Maximum pitch angle in degrees; null = 42.')] = None,
 ) -> dict:
     """Calculate a straight stair flight: number of risers, riser height, tread depth, run
     length, pitch and the 2R+G step relation, checked against limits. Defaults are residential
@@ -866,16 +868,16 @@ def autocad_design_stair(
 
 @cad_tool(toolset="architecture", kind="write", title="Draw stair plan", operation="emit_plan")
 def autocad_draw_stair_plan(
-    floor_to_floor: float,
-    unit: str = "mm",
-    origin: list[float] | None = None,
-    direction_degrees: float = 90.0,
-    width: float | None = None,
-    max_riser: float | None = None,
-    min_tread: float | None = None,
-    tread: float | None = None,
-    text_height: float | None = None,
-    dry_run: bool = False,
+    floor_to_floor: Annotated[float, Field(description='Total rise in `unit`; must be positive.')],
+    unit: Annotated[str, Field(description="'m', 'mm', 'ft' or 'in'.")] = "mm",
+    origin: Annotated[list[float] | None, Field(description='Stair origin [x, y]; null = (0, 0).')] = None,
+    direction_degrees: Annotated[float, Field(description='Climb direction in degrees: 0, 90, 180 or 270.')] = 90.0,
+    width: Annotated[float | None, Field(description='Flight width in `unit`.')] = None,
+    max_riser: Annotated[float | None, Field(description='Maximum riser height in `unit`; null = 190 mm equivalent.')] = None,
+    min_tread: Annotated[float | None, Field(description='Minimum tread depth in `unit`; null = 250 mm equivalent.')] = None,
+    tread: Annotated[float | None, Field(description='Fixed tread depth in `unit` (overrides the riser/tread split).')] = None,
+    text_height: Annotated[float | None, Field(description='Annotation text height in `unit`; null = the standard for these units.')] = None,
+    dry_run: Annotated[bool, Field(description='Plan and report without drawing.')] = False,
 ) -> dict:
     """Design a straight flight (same rules and defaults as autocad_design_stair) and draw it in
     plan: outline, tread nosings, walking line with arrow and an "UP nR" note, starting at origin
@@ -898,12 +900,12 @@ def autocad_draw_stair_plan(
 
 @cad_tool(toolset="architecture", kind="write", title="Sheet border and title block", operation="emit_plan")
 def autocad_draw_sheet(
-    paper: str = "A3",
-    scale: float = 100.0,
-    orientation: str = "landscape",
-    origin: list[float] | None = None,
-    fields: dict[str, str] | None = None,
-    dry_run: bool = False,
+    paper: Annotated[str, Field(description='Paper size: A0-A4, ANSI_A-ANSI_E or ARCH_A-ARCH_E.')] = "A3",
+    scale: Annotated[float, Field(description='Plot scale denominator (1:scale; 100 = 1:100).')] = 100.0,
+    orientation: Annotated[str, Field(description="'landscape' or 'portrait'.")] = "landscape",
+    origin: Annotated[list[float] | None, Field(description='Sheet origin [x, y] in model space, in drawing units; null = (0, 0).')] = None,
+    fields: Annotated[dict[str, str] | None, Field(description='Title block fields {project, title, drawing_number, scale, date, drawn_by, checked_by, sheet, revision}.')] = None,
+    dry_run: Annotated[bool, Field(description='Plan and report without drawing.')] = False,
 ) -> dict:
     """Draw a sheet border, drawing frame and title block in model space at plot scale 1:scale
     (paper: A0-A4, ANSI_A-ANSI_E, ARCH_A-ARCH_E). fields fills the title block: project, title,
@@ -929,9 +931,9 @@ def autocad_draw_sheet(
 
 @cad_tool(toolset="civil", kind="read", title="Alignment station and offset", operation="civil_alignment_station")
 def autocad_civil_alignment_station(
-    alignment: str,
-    points: list[list[float]],
-    start_station: float = 0.0,
+    alignment: Handle,
+    points: Points,
+    start_station: Annotated[float, Field(description="Chainage at the centreline's first vertex (e.g. 0.0; 1000.0 when the design starts at CH 10+00).")] = 0.0,
 ) -> dict:
     """Station (chainage) and offset of one or more query points against a centreline drawn as a
     LINE or polyline (the alignment, given by handle). Stations run along the centreline in
@@ -946,10 +948,10 @@ def autocad_civil_alignment_station(
 
 @cad_tool(toolset="civil", kind="read", title="Point at station and offset", operation="civil_station_point")
 def autocad_civil_station_point(
-    alignment: str,
-    stations: list[float],
-    offset: float = 0.0,
-    start_station: float = 0.0,
+    alignment: Handle,
+    stations: Annotated[list[float], Field(description='Chainages along the centreline, in drawing units.')],
+    offset: Annotated[float, Field(description='Perpendicular offset in drawing units; positive is right of the direction of increasing station.')] = 0.0,
+    start_station: Annotated[float, Field(description="Chainage at the centreline's first vertex (e.g. 0.0; 1000.0 when the design starts at CH 10+00).")] = 0.0,
 ) -> dict:
     """The coordinates at one or more stations on a centreline (LINE or polyline by handle),
     at one perpendicular offset (positive to the right of the direction of increasing station).
@@ -963,14 +965,14 @@ def autocad_civil_station_point(
 
 @cad_tool(toolset="civil", kind="read", title="Ground profile from spot levels", operation="civil_ground_profile")
 def autocad_civil_ground_profile(
-    alignment: str,
-    interval: float,
-    layer: str | None = None,
-    offset: float = 0.0,
-    method: str = "idw",
-    neighbours: int = 8,
-    start_station: float = 0.0,
-    max_entities: int = 20000,
+    alignment: Handle,
+    interval: Annotated[float, Field(description='Station spacing in drawing units (required; the tool has no default spacing).')],
+    layer: Annotated[str | None, Field(description='Layer holding the spot-level POINT entities; null reads every layer.')] = None,
+    offset: Annotated[float, Field(description='Perpendicular offset in drawing units; positive is right of increasing station.')] = 0.0,
+    method: Annotated[str, Field(description="'idw' (inverse-distance weighting) or 'nearest' (closest level only).")] = "idw",
+    neighbours: Annotated[int, Field(description='How many of the closest spot levels IDW uses (1 to 64).')] = 8,
+    start_station: Annotated[float, Field(description="Chainage at the centreline's first vertex (e.g. 0.0; 1000.0 when the design starts at CH 10+00).")] = 0.0,
+    max_entities: Annotated[int, Field(description='Read at most this many POINT entities (truncation is reported).')] = 20000,
 ) -> dict:
     """Ground levels sampled at a station interval along a centreline, from POINT entities that
     carry a Z (spot levels) on `layer` (all layers when None). interval is in drawing units and
@@ -986,12 +988,12 @@ def autocad_civil_ground_profile(
 
 @cad_tool(toolset="civil", kind="read", title="Cut and fill volumes", operation="civil_surface_volumes")
 def autocad_civil_surface_volumes(
-    existing_layer: str,
-    design_layer: str,
-    cell_size: float,
-    method: str = "idw",
-    neighbours: int = 8,
-    max_entities: int = 20000,
+    existing_layer: Annotated[str, Field(description='Layer holding existing-ground POINT spot levels (their Z is the level).')],
+    design_layer: Annotated[str, Field(description='Layer holding design-ground POINT spot levels.')],
+    cell_size: Annotated[float, Field(description='Grid cell size in drawing units; must be positive.')],
+    method: Annotated[str, Field(description="'idw' (inverse-distance weighting) or 'nearest'.")] = "idw",
+    neighbours: Annotated[int, Field(description='How many of the closest spot levels IDW uses.')] = 8,
+    max_entities: Annotated[int, Field(description='Read at most this many POINT entities per layer.')] = 20000,
 ) -> dict:
     """Cut and fill between two spot-level surfaces: existing ground from the Z of POINT entities
     on existing_layer, design/finished ground from the Z of POINT entities on design_layer.
@@ -1009,10 +1011,10 @@ def autocad_civil_surface_volumes(
 
 @cad_tool(toolset="civil", kind="read", title="Pipe clearance check", operation="civil_pipe_clearance")
 def autocad_civil_pipe_clearance(
-    first: str,
-    second: str,
-    first_diameter: float | None = None,
-    second_diameter: float | None = None,
+    first: Handle,
+    second: Handle,
+    first_diameter: Annotated[float | None, Field(description='First pipe diameter in drawing units; give both diameters or neither.')] = None,
+    second_diameter: Annotated[float | None, Field(description='Second pipe diameter in drawing units; give both diameters or neither.')] = None,
 ) -> dict:
     """Closest 3D approach between two pipe alignments drawn as LINE or polyline axes (handles),
     plus every place the two cross in plan with the vertical gap between them there. Give both
@@ -1025,11 +1027,11 @@ def autocad_civil_pipe_clearance(
 
 @cad_tool(toolset="civil", kind="write", title="Place survey points", operation="civil_place_points")
 def autocad_civil_place_points(
-    points: list[list[float]],
-    layer: str = "C-POINT",
-    label: bool = True,
-    text_height: float | None = None,
-    start_number: int = 1,
+    points: Points,
+    layer: LayerName = "C-POINT",
+    label: Annotated[bool, Field(description='Add one numbered TEXT label per point.')] = True,
+    text_height: Annotated[float | None, Field(description="Label text height in drawing units; null = the standard for the drawing's units.")] = None,
+    start_number: Annotated[int, Field(description='First point number; labels count up from it.')] = 1,
 ) -> dict:
     """Place numbered point markers (POINT entities) at the given [x, y] or [x, y, z] coordinates,
     optionally with a label per point: the number, plus ' Z=<level>' when the z is not 0 (one TEXT
@@ -1047,10 +1049,10 @@ def autocad_civil_place_points(
 
 @cad_tool(toolset="analysis", kind="read", title="Check drawing", operation="snapshot_entities")
 def autocad_check_drawing(
-    rules: list[str] | None = None,
-    layer_pattern: str | None = None,
-    max_entities: int = 20000,
-    max_issues: int = 200,
+    rules: Annotated[list[str] | None, Field(description='Rule names to run (zero_length, degenerate_polyline, tiny_circle, duplicate, empty_text, on_layer_0, unclosed_wall_outline, text_height_variety, layer_name); null = all.')] = None,
+    layer_pattern: Annotated[str | None, Field(description="Regex that layer names must match (e.g. '^[A-Z]-[A-Z0-9-]+$'); null skips the layer-name rule.")] = None,
+    max_entities: Annotated[int, Field(description='Read at most this many entities (truncation is reported).')] = 20000,
+    max_issues: Annotated[int, Field(description='Cap on findings returned (default 200).')] = 200,
 ) -> dict:
     """Read-only drafting checks on model space: zero_length, degenerate_polyline, tiny_circle,
     duplicate, empty_text, on_layer_0, unclosed_wall_outline, text_height_variety, and layer_name
@@ -1076,9 +1078,9 @@ def autocad_check_drawing(
 
 @cad_tool(toolset="analysis", kind="read", title="Quantity takeoff", operation="snapshot_entities")
 def autocad_quantity_takeoff(
-    layers: list[str] | None = None,
-    wall_height: float | None = None,
-    max_entities: int = 20000,
+    layers: Annotated[list[str] | None, Field(description='Layers to measure; null = every layer.')] = None,
+    wall_height: Annotated[float | None, Field(description='Wall face height in drawing units; enables wall face area and volume from A-WALL* outlines.')] = None,
+    max_entities: Annotated[int, Field(description='Read at most this many entities (truncation is reported).')] = 20000,
 ) -> dict:
     """Measure model-space geometry per layer: line/polyline/arc lengths, closed-shape counts,
     areas and perimeters, circle and hatch areas, block counts, and wall length (plus face area
@@ -1098,14 +1100,14 @@ def autocad_quantity_takeoff(
 
 @cad_tool(toolset="analysis", kind="external", title="Save check/takeoff report", operation="snapshot_entities")
 def autocad_save_report(
-    report: str,
-    path: str,
-    format: str = "json",
-    overwrite: bool = False,
-    rules: list[str] | None = None,
-    layer_pattern: str | None = None,
-    layers: list[str] | None = None,
-    wall_height: float | None = None,
+    report: Annotated[str, Field(description="'qc' runs autocad_check_drawing; 'takeoff' runs autocad_quantity_takeoff.")],
+    path: Annotated[str, Field(description='Destination file path (absolute).')],
+    format: Annotated[str, Field(description="'json', 'csv' or 'md'.")] = "json",
+    overwrite: Annotated[bool, Field(description='Allow replacing an existing file.')] = False,
+    rules: Annotated[list[str] | None, Field(description='Passed to autocad_check_drawing; null = all rules.')] = None,
+    layer_pattern: Annotated[str | None, Field(description='Passed to autocad_check_drawing as the layer-name regex.')] = None,
+    layers: Annotated[list[str] | None, Field(description='Passed to autocad_quantity_takeoff; null = every layer.')] = None,
+    wall_height: Annotated[float | None, Field(description='Passed to autocad_quantity_takeoff as the wall face height.')] = None,
 ) -> dict:
     """Run autocad_check_drawing (report="qc") or autocad_quantity_takeoff (report="takeoff") and
     write the result to path as json, csv or md. Never touches the drawing; reports the file's
@@ -1132,7 +1134,7 @@ def autocad_save_report(
 
 
 @cad_tool(toolset="analysis", kind="read", title="Compare two DXF files")
-def autocad_compare_dxf(path_a: str, path_b: str, max_items: int = 200) -> dict:
+def autocad_compare_dxf(path_a: Annotated[str, Field(description='Path to the first .dxf file to compare (treated as the older revision).')], path_b: Annotated[str, Field(description='Path to the second .dxf file to compare (treated as the newer revision).')], max_items: Annotated[int, Field(description='Cap on reported changed/added/removed items.')] = 200) -> dict:
     """Compare two DXF files (e.g. two revisions): entities matched by handle, then by geometry;
     reports changed (with the fields that changed), added, removed, and same-geometry-new-handle.
     Reads files only; needs ezdxf (pip install -e ".[dxf]") on either backend."""
@@ -1147,7 +1149,7 @@ def autocad_compare_dxf(path_a: str, path_b: str, max_items: int = 200) -> dict:
 
 
 @cad_tool(toolset="analysis", kind="read", title="Validate a DXF file")
-def autocad_validate_dxf_file(path: str) -> dict:
+def autocad_validate_dxf_file(path: Annotated[str, Field(description='Path to the .dxf file to parse and audit.')]) -> dict:
     """Parse a DXF file in recover mode and report version, units, entity counts by type, layer and
     block counts, and every error the auditor found or had to fix. Reads the file only; needs ezdxf."""
     from backends.dxf import validate_file
@@ -1156,7 +1158,7 @@ def autocad_validate_dxf_file(path: str) -> dict:
 
 
 @cad_tool(toolset="output", kind="external", title="Render preview image", operation="render_preview")
-def autocad_render_preview(path: str, overwrite: bool = False) -> dict:
+def autocad_render_preview(path: Annotated[str, Field(description='Destination image path (.png, .pdf or .svg); headless backend only.')], overwrite: Annotated[bool, Field(description='Allow replacing an existing file.')] = False) -> dict:
     """Headless backend: render model space to a .png, .pdf or .svg file with ezdxf's drawing
     add-on (needs matplotlib: pip install -e ".[render]"). Returns the file's size and SHA-256.
     The live backend uses autocad_plot_pdf instead."""
@@ -1207,7 +1209,7 @@ def resource_layer_standard() -> str:
 
 @server.prompt(name="residential_floor_plan", title="Residential floor plan workflow",
                description="Step-by-step: rooms -> dry run -> draw -> check -> save.")
-def prompt_residential_floor_plan(description: str = "a 2-bedroom house") -> str:
+def prompt_residential_floor_plan(description: Annotated[str, Field(description="What the floor plan is for, e.g. 'a 2-bedroom house'.")] = "a 2-bedroom house") -> str:
     return (
         f"Draft a floor plan for {description}.\n"
         "1. autocad_get_status; on the live backend autocad_launch_application if needed.\n"
@@ -1222,7 +1224,7 @@ def prompt_residential_floor_plan(description: str = "a 2-bedroom house") -> str
 
 @server.prompt(name="drawing_review", title="Review an existing drawing",
                description="Read-only review: summary, checks, quantities, optional report.")
-def prompt_drawing_review(path: str = "") -> str:
+def prompt_drawing_review(path: Annotated[str, Field(description='DXF to open read-only for the review; empty reviews the active drawing.')] = "") -> str:
     target = f"Open {path} read-only with autocad_open_drawing, then " if path else ""
     return (
         f"{target}review the active drawing without changing it:\n"
@@ -1236,7 +1238,7 @@ def prompt_drawing_review(path: str = "") -> str:
 
 @server.prompt(name="sheet_and_plot", title="Sheet and PDF",
                description="Title block, then a verified PDF (live backend) or preview (headless).")
-def prompt_sheet_and_plot(paper: str = "A3", scale: str = "100") -> str:
+def prompt_sheet_and_plot(paper: Annotated[str, Field(description="Paper size for the sheet (default 'A3').")] = "A3", scale: Annotated[str, Field(description="Plot scale denominator as text, e.g. '100' meaning 1:100.")] = "100") -> str:
     return (
         f"1. autocad_draw_sheet(paper='{paper}', scale={scale}, fields={{project, title, drawn_by, date}}).\n"
         "2. Live backend: autocad_plot_pdf(path) and report paper_mm and the SHA-256 from the result.\n"
