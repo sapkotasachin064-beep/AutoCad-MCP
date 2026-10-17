@@ -134,3 +134,49 @@ def defaults_for(drawing_code: int) -> dict:
         "window": base.window * factor,
         "text_height": base.text_height * factor,
     }
+
+
+def length_factor(unit: str | None, drawing_code: int) -> float:
+    """Factor that turns a length given in `unit` into drawing units. unit=None
+    means the caller already works in the drawing's own units (factor 1)."""
+    if unit is None:
+        return 1.0
+    return convert(1.0, unit_code(unit), drawing_code)
+
+
+# ======= annotation scale =======
+
+# Dimension parts keep ISO 25 proportions to the text height (arrow = text,
+# extension lines run 0.5 text past the dimension line and start 0.25 text off
+# the measured point), so one number -- the text height -- scales them all.
+DIMENSION_RATIOS = {"arrow": 1.0, "extension_beyond": 0.5, "extension_offset": 0.25, "text_gap": 0.25}
+
+# Decimal places of dimension text per drawing unit (INSUNITS code): whole millimetres, tenths of a
+# centimetre, millimetres in metres, hundredths of an inch. Anything else shows two.
+DIMENSION_DECIMALS = {4: 0, 5: 1, 14: 2, 6: 3, 7: 3, 1: 2, 2: 3, 3: 3, 10: 2}
+
+
+def dimension_sizes(text_height: float) -> dict:
+    """Dimension text, arrow, extension and gap sizes for a text height, in
+    whatever unit the text height is in."""
+    return {"text_height": text_height, **{name: text_height * ratio for name, ratio in DIMENSION_RATIOS.items()}}
+
+
+def dimension_decimals(drawing_code) -> int:
+    """Decimal places for dimension text in a drawing of these units."""
+    return DIMENSION_DECIMALS.get(drawing_code, 2)
+
+
+def annotation_scale(drawing_code: int, text_height: float | None = None) -> dict:
+    """Text and dimension sizes in the drawing's own units. Without a caller
+    text_height the standard for the drawing's unit system applies (150 mm in a
+    metric drawing, 6 in in an imperial one -- DraftingDefaults.text_height), so
+    the same call prints equally large text on paper whichever units the drawing
+    uses. A caller text_height must already be in drawing units."""
+    base = defaults_for(drawing_code)["text_height"] if text_height is None else text_height
+    return {
+        "system": "metric" if is_metric(drawing_code) else "imperial",
+        "drawing_unit": describe(drawing_code),
+        "text_height": base,
+        "dimension": dimension_sizes(base),
+    }

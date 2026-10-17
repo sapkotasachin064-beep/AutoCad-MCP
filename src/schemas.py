@@ -21,6 +21,14 @@ Points = Annotated[list[list[float]], Field(
     description="Ordered vertices in the drawing's own units; each is [x, y] or [x, y, z]."
 )]
 
+# Unit for the lengths a drawing macro takes (sizes, spacings, offsets, text height).
+# Coordinates (start points, origins, positions) stay in the drawing's own units.
+MacroUnit = Annotated[str | None, Field(
+    description="Unit of every length argument that is not a coordinate (sizes, spacings, offsets, text "
+                "height): 'mm', 'cm', 'm', 'in' or 'ft'. null = the drawing's own units. Coordinates "
+                "(start points, origins, positions) are always in drawing units."
+)]
+
 # Entity handles: opaque hex strings AutoCAD assigns, e.g. '2A7F'.
 Handle = Annotated[str, Field(
     description="AutoCAD entity handle as reported, a hex string e.g. '2A7F'; "

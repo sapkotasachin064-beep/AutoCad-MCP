@@ -715,9 +715,9 @@ def plan_room_floor_plan(rooms, unit_code: int, drawing_code: int, *, exterior_w
         x0, x1, y0, y1 = min(xs), max(xs), min(ys), max(ys)
         gap = t_ext * 4
         plan.add(Primitive("dim_linear", "A-DIM", "dim:overall_x", points=((x0, y0, 0.0), (x1, y0, 0.0)),
-                           location=(x0, y0 - gap, 0.0), rotation=0.0))
+                           location=(x0, y0 - gap, 0.0), rotation=0.0, height=h_label))
         plan.add(Primitive("dim_linear", "A-DIM", "dim:overall_y", points=((x0, y0, 0.0), (x0, y1, 0.0)),
-                           location=(x0 - gap, y0, 0.0), rotation=90.0))
+                           location=(x0 - gap, y0, 0.0), rotation=90.0, height=h_label))
 
     plan.meta = {
         "rooms": room_rows,
@@ -828,16 +828,16 @@ def plan_grid(x_spacings, y_spacings, unit_code: int, drawing_code: int, *, orig
         gap1, gap2 = ext * 0.5, ext * 0.8
         for i in range(len(xs) - 1):
             plan.add(Primitive("dim_linear", "S-ANNO-DIMS", f"dim:x:{i}", points=((xs[i], y0, 0.0), (xs[i + 1], y0, 0.0)),
-                               location=(xs[i], y0 - gap1, 0.0), rotation=0.0))
+                               location=(xs[i], y0 - gap1, 0.0), rotation=0.0, height=th))
         if len(xs) > 2:
             plan.add(Primitive("dim_linear", "S-ANNO-DIMS", "dim:x:overall", points=((x0, y0, 0.0), (x1, y0, 0.0)),
-                               location=(x0, y0 - gap2, 0.0), rotation=0.0))
+                               location=(x0, y0 - gap2, 0.0), rotation=0.0, height=th))
         for j in range(len(ys) - 1):
             plan.add(Primitive("dim_linear", "S-ANNO-DIMS", f"dim:y:{j}", points=((x1, ys[j], 0.0), (x1, ys[j + 1], 0.0)),
-                               location=(x1 + gap1, ys[j], 0.0), rotation=90.0))
+                               location=(x1 + gap1, ys[j], 0.0), rotation=90.0, height=th))
         if len(ys) > 2:
             plan.add(Primitive("dim_linear", "S-ANNO-DIMS", "dim:y:overall", points=((x1, y0, 0.0), (x1, y1, 0.0)),
-                               location=(x1 + gap2, y0, 0.0), rotation=90.0))
+                               location=(x1 + gap2, y0, 0.0), rotation=90.0, height=th))
 
     plan.meta = {
         "x_lines": [{"label": n, "x": x} for n, x in zip(numbers, xs)],

@@ -80,6 +80,8 @@ I_ = ("I", "Text, MTEXT, dimensions, leaders and annotation", {"inputs": ["text"
     ("scale_bar", "Graphic scale bar", "Scale that survives reduction", "planned", "both", "write", [], N),
     ("section_markers", "Section and elevation markers", "Cross-referenced drawings", "planned", "both", "write", [], N),
     ("level_markers", "Level and spot-elevation markers", "Floor and site levels", "planned", "both", "write", [], N),
+    ("annotation_unit_scale", "Text, dimension arrows and dimension precision sized from the drawing's units (150 mm or 6 in text)", "Annotation as readable in millimetres as in inches", "tested", "both", "write", ["autocad_draw_staircase", "autocad_draw_column_grid", "autocad_draw_wall_window", "autocad_place_architectural_block", "autocad_generate_floor_plan", "autocad_draw_structural_grid"], TMH),
+    ("dim_text_value", "Headless dimension text shows the measured value, not ezdxf's default times-100 linear factor", "Dimensions read correctly in DXF files", "tested", "dxf", "write", ["autocad_add_dimension", "autocad_draw_column_grid", "autocad_generate_floor_plan", "autocad_draw_structural_grid"], TH),
 ])
 
 J_ = ("J", "Layers, blocks, attributes and external references", {"inputs": ["names", "properties"], "outputs": ["read-back"],

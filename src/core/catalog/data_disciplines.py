@@ -5,6 +5,7 @@ nothing here certifies a design against a building code."""
 T = ["unit"]
 TH = ["unit", "headless_dxf"]
 GMH = ["golden_regression", "mock_com", "headless_dxf"]
+TMHS = ["unit", "mock_com", "headless_dxf", "stdio_e2e"]
 N = []
 DRAFT = "drafting aid from user-supplied dimensions and limits; not a design or code check"
 
@@ -25,21 +26,23 @@ V = ("V", "Architectural plans: walls, doors, windows, stairs and rooms", {"inpu
     ("openings_cut", "Cut door and window openings into wall outlines", "Walls broken at openings", "planned", "both", "write", [], N),
     ("wall_justification", "Wall justification (centre, left, right)", "Draw to finished faces", "planned", "both", "write", [], N),
     ("door_types", "Door types: single, double, sliding, pocket", "Correct symbols per door", "planned", "both", "write", [], N),
-    ("window_types", "Window types with sill and head heights", "Window data for elevations", "planned", "both", "write", [], N),
+    ("window_types", "Window types with sill and head heights", "Window data for elevations", "tested", "both", "write", ["autocad_draw_wall_window"], TMHS),
     ("opening_blocks", "Doors and windows as blocks with tag attributes", "Schedules read from the drawing", "planned", "both", "write", [], N),
     ("room_detection", "Detect rooms from existing wall linework", "Areas from other people's drawings", "planned", "both", "read", [], N),
-    ("furniture", "Insert furniture and sanitary blocks with nominal sizes", "Furnished plans", "planned", "both", "write", [], N),
-    ("kitchen_run", "Kitchen counter run layout", "Kitchen planning", "planned", "both", "write", [], N),
+    ("furniture", "Insert furniture and sanitary blocks with nominal sizes", "Furnished plans", "tested", "both", "write", ["autocad_place_architectural_block"], TMHS),
+    ("kitchen_run", "Kitchen counter run layout", "Kitchen planning", "tested", "both", "write", ["autocad_place_architectural_block"], TMHS),
     ("bathroom_layout", "Bathroom fixture layout with user clearances", "Bathroom planning", "planned", "both", "write", [], N),
     ("ramp", "Ramp plan with slope check against user limits", "Accessible entrances", "planned", "both", "write", [], N),
     ("stair_landings", "L- and U-shaped stairs with landings", "Common residential stairs", "planned", "both", "write", [], N),
     ("railings", "Balconies and railings in plan", "Complete upper floors", "planned", "both", "write", [], N),
-    ("columns_in_walls", "Columns embedded in walls", "Framed buildings", "planned", "both", "write", [], N),
+    ("columns_in_walls", "Columns embedded in walls", "Framed buildings", "tested", "both", "write", ["autocad_draw_column_grid"], TMHS),
     ("roof_plan", "Roof outlines, ridges, hips and slope arrows", "Roof plans", "planned", "both", "write", [], N),
     ("elevation", "Elevation drafting from the plan and storey heights", "Front/side elevations", "planned", "both", "write", [], N),
     ("section", "Building section drafting from plan and heights", "Sections for submissions", "planned", "both", "write", [], N),
     ("ceiling_plan", "Reflected ceiling plan grid and fixtures", "Ceiling coordination", "planned", "both", "write", [], N),
     ("floor_finishes", "Floor finish hatching per room", "Finish plans", "planned", "both", "write", [], N),
+    ("staircase_macro", "Parametric straight staircase from start point, width, tread depth and riser count: treads, risers, landing, handrails and an UP/DN walking-line arrow on separate layers", "Stairs drawn from a few numbers", "tested", "both", "write", ["autocad_draw_staircase"], TMHS),
+    ("window_openings_cut", "Cut a window opening into a wall: the wall outline is replaced by two pieces that stop at the opening", "Walls broken at windows", "tested", "both", "destructive", ["autocad_draw_wall_window"], TMHS),
 ])
 
 W = ("W", "Residential building layouts and drafting automation", {"inputs": ["rooms, doors, windows"], "outputs": ["plan", "schedules"],
@@ -85,6 +88,8 @@ X = ("X", "Structural drafting: grids, columns, beams and reinforcement", {"inpu
     ("structural_notes", "General notes block with user-entered material grades", "Standard notes", "planned", "both", "write", [], N),
     ("steel_sections", "Steel section outlines from user-supplied dimensions", "Steel detailing", "planned", "both", "write", [], N),
     ("foundation_section", "Foundation section drafting", "Foundation details", "planned", "both", "write", [], N),
+    ("column_grid_macro", "Rectangular columns with a solid fill on layer COLUMNS from a grid, custom points or wall intersections", "Column layouts that follow the plan", "tested", "both", "write", ["autocad_draw_column_grid"], TMHS),
+    ("wall_intersections", "Find where wall centrelines meet (corners, T and X junctions) from the rectangular wall outlines in the drawing", "Columns where walls meet", "tested", "both", "read", ["autocad_draw_column_grid"], TMHS),
 ])
 
 Y = ("Y", "Civil 3D surfaces, alignments, profiles, corridors and grading", {"inputs": ["Civil 3D objects"], "outputs": ["Civil 3D objects"],
