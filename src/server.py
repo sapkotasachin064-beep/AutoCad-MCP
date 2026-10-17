@@ -14,8 +14,8 @@ Every tool is declared with @cad_tool, which:
     AUTOCAD_MCP_TOOLSETS (the function still exists for tests).
 
 The work itself lives in backends/ (engine-specific), tools/ (live COM
-implementations) and domain/ (pure engineering logic). Version history is in
-CHANGELOG.md.
+implementations), domain/ (pure engineering logic) and schemas.py (typed
+argument descriptions the MCP SDK turns into each tool's input schema).
 """
 
 import functools

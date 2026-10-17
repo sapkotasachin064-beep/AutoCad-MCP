@@ -320,6 +320,7 @@ Never skip or loosen a failing test to get a green run.
 | Path | Contents |
 |---|---|
 | `src/server.py` | MCP surface: tool functions, resources, prompts; `cad_tool` builds the error envelope and state block |
+| `src/schemas.py` | Reusable `Annotated[..., Field(description=...)]` argument types; the SDK turns them into each tool's JSON input schema |
 | `src/core/` | errors, session, registry, catalog, paths, evidence, reports, hosts, executor, `db.py` (scan cache) |
 | `src/backends/` | `base.py` (operation contract), `com.py` (live), `com_engine.py` (COM plumbing), `dxf.py` (headless), `targets.py` (plan emitters) |
 | `src/domain/` | pure logic: `units.py`, `architecture.py`, `analysis.py`, `civil.py` |
