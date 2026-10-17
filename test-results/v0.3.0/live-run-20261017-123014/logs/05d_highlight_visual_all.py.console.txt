@@ -1,0 +1,19 @@
+baseline                                     blue=     0 red=     0
+control: direct Highlight(True)              blue=  2873 red=     0
+control: direct Highlight(False)             blue=     0 red=     0
+direct Highlight(True) then doc.Regen(1)     blue=     0 red=     0
+reset                                        blue=     0 red=     0
+TOOL highlight_entity temporary              blue=     0 red=     0
+TOOL highlight_entity clear                  blue=     0 red=     0
+TOOL highlight_text_matches temporary        blue=     0 red=     0
+TOOL highlight_text_matches clear            blue=     0 red=     0
+TOOL query_and_highlight temporary           blue=     0 red=     0
+TOOL query_and_highlight clear               blue=     0 red=     0
+TOOL highlight_entity persistent colour 1    blue=     0 red=     0
+same, after a regen by the harness           blue=     0 red=   444
+control +2873 blue px; direct highlight followed by Regen +0 blue px
+[FAIL] HL02 the tool reported success but nothing is highlighted on AutoCAD's screen: +0 blue px after the call (a direct Highlight(True) gives +2873; Highlight(True) followed by doc.Regen(1) -- the tool's own sequence -- gives +0)
+[FAIL] HL19 the tool reported success but nothing is highlighted on AutoCAD's screen: +0 blue px after the call (a direct Highlight(True) gives +2873; Highlight(True) followed by doc.Regen(1) -- the tool's own sequence -- gives +0)
+[FAIL] HL29 the tool reported success but nothing is highlighted on AutoCAD's screen: +0 blue px after the call (a direct Highlight(True) gives +2873; Highlight(True) followed by doc.Regen(1) -- the tool's own sequence -- gives +0)
+[FAIL] HL02b after the persistent highlight call, +0 red pixels appeared on AutoCAD's screen without any redraw by the harness; after a regen by the harness +444 red pixels (the colour IS stored, it is only repainted on the next redraw)
+cleanup closed: ['Drawing43.dwg']

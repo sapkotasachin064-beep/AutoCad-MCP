@@ -1,0 +1,12 @@
+{'call': 1, 'ok': True, 'code': None, 'message': '', 'ms': 4571.7, 'new_files': ['mcp_test_20261017_125137_355863.dwg'], 'docs_open_after': 1}
+{'call': 2, 'ok': True, 'code': None, 'message': '', 'ms': 5480.5, 'new_files': ['mcp_test_20261017_125143_191966.dwg'], 'docs_open_after': 1}
+{'call': 3, 'ok': False, 'code': 'E_INTERNAL', 'message': 'AttributeError: AddLine.Handle', 'ms': 3998.3, 'new_files': ['mcp_test_20261017_125150_065519.dwg'], 'docs_open_after': 1}
+{'call': 4, 'ok': True, 'code': None, 'message': '', 'ms': 5764.6, 'new_files': ['mcp_test_20261017_125155_466181.dwg'], 'docs_open_after': 1}
+{'call': 5, 'ok': True, 'code': None, 'message': '', 'ms': 5044.7, 'new_files': ['mcp_test_20261017_125203_106191.dwg'], 'docs_open_after': 1}
+{'call': 6, 'ok': True, 'code': None, 'message': '', 'ms': 4382.9, 'new_files': ['mcp_test_20261017_125209_729461.dwg'], 'docs_open_after': 1}
+{'call': 7, 'ok': True, 'code': None, 'message': '', 'ms': 5230.4, 'new_files': ['mcp_test_20261017_125215_618226.dwg'], 'docs_open_after': 1}
+{'call': 8, 'ok': True, 'code': None, 'message': '', 'ms': 4392.4, 'new_files': ['mcp_test_20261017_125222_523025.dwg'], 'docs_open_after': 1}
+{'call': 9, 'ok': True, 'code': None, 'message': '', 'ms': 5223.0, 'new_files': ['mcp_test_20261017_125228_872170.dwg'], 'docs_open_after': 1}
+{'call': 10, 'ok': True, 'code': None, 'message': '', 'ms': 5241.6, 'new_files': ['mcp_test_20261017_125235_539939.dwg'], 'docs_open_after': 1}
+cleanup closed: []
+[FAIL] TD04 ["1 of 10 calls failed (['E_INTERNAL']): AttributeError: AddLine.Handle; 1 of the failed calls had already saved a DWG and left the drawing open"]

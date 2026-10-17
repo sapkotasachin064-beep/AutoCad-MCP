@@ -1,0 +1,35 @@
+baseline drawings (never touched): []
+handles: {'L1': '7E', 'L2': '7F', 'C1': '80', 'T1': '82', 'T2': '83', 'T3': '84', 'T4': '85', 'M1': '86'} | texts: {'T1': 'PMC-3M-A101', 'T2': 'PMC-3M-A102', 'T3': 'PMC-3M-B7', 'T4': 'OTHER-77', 'M1': 'Room: PMC-3M-A103\\P12 m2'}
+[PASS] HL01 autocad_highlight_entity: temporary highlight: accepted, colour untouched (direct COM), and honestly reports verified=false (state is not readable over COM)
+pixels changed by the temporary highlight: {'printwindow': 0, 'grab': 0}
+[PASS] HL03 autocad_highlight_entity: clear=true switches the temporary highlight off
+pixels changed by clearing: {'printwindow': 0, 'grab': 0} | after clear vs original: {'printwindow': 0, 'grab': 0}
+[PASS] HL04 autocad_highlight_entity: persistent highlight sets the colour (read back: 1) and reports the original (256)
+positive control (persistent colour) changed pixels: {'printwindow': 0, 'grab': 0}
+[BLOCKED] HL02 the screenshot method could not even see a persistent colour change (0 px); the temporary highlight cannot be judged visually
+[PASS] HL05 autocad_highlight_entity: persistent highlight colour 4 on another line
+[PASS] HL06 autocad_highlight_entity: a well-formed but non-existent handle -> E_ENTITY_NOT_FOUND
+[PASS] HL07 autocad_highlight_entity: a malformed handle -> E_INVALID_INPUT
+[PASS] HL08 autocad_highlight_entity: unknown method -> E_INVALID_INPUT
+[PASS] HL09 autocad_highlight_entity: persistent colour 999 -> E_INVALID_INPUT and the entity keeps its colour
+[PASS] HL10 autocad_highlight_text_matches: literal 'PMC-3M': exactly the 3 TEXT + 1 MTEXT entities, text content unchanged, colours untouched (direct COM)
+[PASS] HL11 autocad_highlight_text_matches: regex PMC-3M-A\d+ matches the 2 TEXT + the MTEXT, not PMC-3M-B7
+[PASS] HL12 autocad_highlight_text_matches: limit=2: match_count stays 4, only 2 listed, truncated=true
+[PASS] HL13 autocad_highlight_text_matches: clear=true reports highlighted=false for every match
+[PASS] HL14 autocad_highlight_text_matches: persistent colour 2 on 'PMC-3M-A': 3 matches recoloured (direct COM), others and all text content untouched
+[PASS] HL15 autocad_highlight_text_matches: empty literal pattern -> E_INVALID_INPUT
+[PASS] HL16 autocad_highlight_text_matches: invalid regex -> E_INVALID_INPUT
+[PASS] HL17 autocad_highlight_text_matches: no match -> ok with match_count 0
+[PASS] HL18 autocad_highlight_text_matches: matching is case-sensitive (lower-case pattern finds nothing)
+[PASS] HL20 autocad_scan_all_entities: scan: 8 entities counted by type like AutoCAD does, and the SQLite file (read independently) holds exactly those handles
+[PASS] HL21 autocad_query_and_highlight: query for lines, temporary highlight: both line handles highlighted, none missing, colours untouched
+[PASS] HL22 autocad_query_and_highlight: query on layer MCP_H, persistent colour 6: only the circle changes (direct COM)
+[PASS] HL23 autocad_query_and_highlight: a stale handle (entity deleted after the scan) is reported in not_found, the rest is highlighted, nothing is raised
+[PASS] HL24 autocad_query_and_highlight: a query without a handle column -> E_INVALID_INPUT
+[PASS] HL25 autocad_query_and_highlight: a write statement is rejected (E_QUERY_REJECTED)
+[PASS] HL26 autocad_query_and_highlight: two statements are rejected (E_QUERY_REJECTED)
+[PASS] HL27 autocad_query_and_highlight: a query with no rows highlights nothing and says so
+[PASS] HL28 autocad_query_and_highlight: clear=true with a query highlights none visually but reports the handles processed
+[OBSERVE:medium] OBS-query-highlight-scope autocad_query_and_highlight: query_and_highlight is not scoped to the active drawing: a scan row of drawing A (layer MCP_H) coloured an unrelated circle on layer MCP_OTHER in drawing B because both drawings give the same handle.
+[PASS] HL30 (autocad_query_and_highlight): observation: scan rows of drawing A used while drawing B is active (handle collision between drawings)
+cleanup closed scratch drawings: ['Drawing36.dwg', 'Drawing37.dwg']

@@ -1,0 +1,156 @@
+{
+  "counts": {
+    "baseline": {
+      "file": "V0_baseline.png",
+      "blue": 0,
+      "red": 0
+    },
+    "control: direct Highlight(True)": {
+      "file": "V1_direct_on.png",
+      "blue": 2873,
+      "red": 0
+    },
+    "control: direct Highlight(False)": {
+      "file": "V2_direct_off.png",
+      "blue": 0,
+      "red": 0
+    },
+    "direct Highlight(True) then doc.Regen(1)": {
+      "file": "V3_direct_on_regen.png",
+      "blue": 0,
+      "red": 0
+    },
+    "reset": {
+      "file": "V4_reset.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL highlight_entity temporary": {
+      "file": "V5_tool_entity.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL highlight_entity clear": {
+      "file": "V6_tool_entity_clear.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL highlight_text_matches temporary": {
+      "file": "V7_tool_text.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL highlight_text_matches clear": {
+      "file": "V8_tool_text_clear.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL query_and_highlight temporary": {
+      "file": "V9_tool_query.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL query_and_highlight clear": {
+      "file": "V10_tool_query_clear.png",
+      "blue": 0,
+      "red": 0
+    },
+    "TOOL highlight_entity persistent colour 1": {
+      "file": "V11_tool_persistent.png",
+      "blue": 0,
+      "red": 0
+    },
+    "same, after a regen by the harness": {
+      "file": "V12_persistent_after_regen.png",
+      "blue": 0,
+      "red": 444
+    }
+  },
+  "payloads": {
+    "entity": {
+      "status": "ok",
+      "handle": "7E",
+      "method": "temporary",
+      "highlighted": true,
+      "color": 256,
+      "verified": false,
+      "verification": "not_verifiable_highlight_state_is_not_readable_over_com",
+      "drawing_identity": "unsaved:drawing43.dwg",
+      "message": "Entity 7E temporary highlight set to True; original color untouched.",
+      "backend": "com",
+      "state": {
+        "accepted": true,
+        "preflight_passed": true,
+        "executed": true,
+        "verified": false,
+        "saved": false
+      }
+    },
+    "text": {
+      "status": "ok",
+      "pattern": "PMC",
+      "use_regex": false,
+      "method": "temporary",
+      "match_count": 1,
+      "matches": [
+        {
+          "handle": "80",
+          "text": "PMC-3M-A1",
+          "highlighted": true
+        }
+      ],
+      "truncated": false,
+      "drawing_identity": "unsaved:drawing43.dwg",
+      "message": "1 text entity(ies) matched 'PMC'; text content was not modified.",
+      "backend": "com",
+      "state": {
+        "accepted": true,
+        "preflight_passed": true,
+        "executed": true,
+        "verified": null,
+        "saved": false
+      }
+    },
+    "query": {
+      "status": "ok",
+      "method": "temporary",
+      "color": null,
+      "row_count": 5,
+      "highlighted_count": 2,
+      "highlighted_handles": [
+        "80",
+        "7E"
+      ],
+      "not_found": [],
+      "drawing_identity": "unsaved:drawing43.dwg",
+      "message": "Highlighted 2 of 2 entity(ies) from query result.",
+      "backend": "com",
+      "state": {
+        "accepted": true,
+        "preflight_passed": true,
+        "executed": true,
+        "verified": null,
+        "saved": false
+      }
+    },
+    "persistent": {
+      "status": "ok",
+      "handle": "7F",
+      "method": "persistent",
+      "original_color": 256,
+      "color": 1,
+      "verified": true,
+      "verification": "color_read_back",
+      "drawing_identity": "unsaved:drawing43.dwg",
+      "message": "Entity 7F color changed from 256 to 1 (persistent).",
+      "backend": "com",
+      "state": {
+        "accepted": true,
+        "preflight_passed": true,
+        "executed": true,
+        "verified": true,
+        "saved": false
+      }
+    }
+  }
+}

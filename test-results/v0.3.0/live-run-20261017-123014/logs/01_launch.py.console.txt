@@ -1,0 +1,70 @@
+[PASS] LV01 autocad_get_status: status while AutoCAD is closed: installed, not running, not connected (and the call does not start it)
+[PASS] LV02 autocad_list_drawings: a drawing tool while AutoCAD is closed fails with E_AUTOCAD_NOT_RUNNING and does not start AutoCAD
+[FAIL] LV10 autocad_launch_application: start AutoCAD 2024 from cold through the tool and wait until COM answers
+       -> check failed: {"installed": true, "running": false, "connected": false, "supported": false, "version": null, "release_year": null, "message": "Failed to launch AutoCAD via COM: (-2146959355, 'Server execution failed', None, None)", "backend": "com", "verified": false, "state": {"accepted": true, "preflight_passed...
+launch took 88.8 s
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\01_launch.py", line 106, in <module>
+  |     asyncio.run(main())
+  |     ~~~~~~~~~~~^^^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 205, in run
+  |     return runner.run(main)
+  |            ~~~~~~~~~~^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 128, in run
+  |     return self._loop.run_until_complete(task)
+  |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 720, in run_until_complete
+  |     return future.result()
+  |            ~~~~~~~~~~~~~^^
+  |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\01_launch.py", line 27, in main
+  |     async with h.open_session("01_launch", env=h.server_env("com")) as (session, log):
+  |                ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 235, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\mcp_harness.py", line 81, in open_session
+  |     async with stdio_client(params, errlog=errfile) as (read, write):
+  |                ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 235, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\mcp\client\stdio.py", line 201, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\anyio\_backends\_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\mcp\client\stdio.py", line 205, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\mcp_harness.py", line 82, in open_session
+    |     async with ClientSession(read, write) as session:
+    |                ~~~~~~~~~~~~~^^^^^^^^^^^^^
+    |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\mcp\client\session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\anyio\_backends\_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    |         "unhandled errors in a TaskGroup", self._exceptions
+    |     ) from None
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\mcp_harness.py", line 89, in open_session
+      |     yield session, log
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\01_launch.py", line 64, in main
+      |     info = cp.acad_info()
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\com_probe.py", line 293, in acad_info
+      |     a = app()
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\com_probe.py", line 43, in app
+      |     return retry(lambda: win32com.client.GetActiveObject("AutoCAD.Application"))
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\com_probe.py", line 28, in retry
+      |     return fn()
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\com_probe.py", line 43, in <lambda>
+      |     return retry(lambda: win32com.client.GetActiveObject("AutoCAD.Application"))
+      |                          ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\win32com\client\__init__.py", line 94, in GetActiveObject
+      |     dispatch = pythoncom.GetActiveObject(resultCLSID)
+      | pywintypes.com_error: (-2147221021, 'Operation unavailable', None, None)
+      +------------------------------------

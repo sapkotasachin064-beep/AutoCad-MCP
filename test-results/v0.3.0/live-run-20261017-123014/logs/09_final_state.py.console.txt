@@ -1,0 +1,5 @@
+Application.Version: 24.3s (LMS Tech) | ACADVER: 24.3s (LMS Tech) | _VERNUM: U.61.0.0 (UNICODE) | PRODUCT: AutoCAD | RELEASE: <com_error -2147352567>
+AutoCAD pids: [15472] | drawings open now: []
+src/tests changed: none | git status identical: True
+6 PDFs verified; all fine: True
+crash facts: {"note": "collected after the first, tool-started AutoCAD launch failed (logs/01_launch.*); AutoCAD's own crash reporter output", "cer_log_copied": true, "minidump": {"file": "AppData/Local/Autodesk/CER/be2ccf74547c04f0063873f12064f78647a2a370/1/acminidump.dmp", "dump_time_utc": "2026-10-17T06:48:27Z", "exception_code": "0xE0434352", "meaning": "0xE0434352 = a .NET (CLR) exception thrown inside AutoCAD; first parameter 0x80131534 = TypeInitializationException", "exception_parameters": ["0xffffffff80131534", "0x0", "0x0", "0x0", "0x7ffd1cf80000"]}, "dcom_event_10010": {"TimeCreated": "/Date(179

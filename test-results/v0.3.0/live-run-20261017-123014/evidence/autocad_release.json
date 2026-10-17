@@ -1,0 +1,16 @@
+{
+  "Application.Version": "24.3s (LMS Tech)",
+  "Application.Name": "AutoCAD",
+  "Application.Caption": "Autodesk AutoCAD 2024 - [Start]",
+  "Application.FullName": "C:\\Program Files\\Autodesk\\AutoCAD 2024\\acad.exe",
+  "Application.Path": "C:\\Program Files\\Autodesk\\AutoCAD 2024",
+  "Application.LocaleId": 1033,
+  "Application.Visible": true,
+  "Application.HWND": 329744,
+  "Documents.Count": 0,
+  "acad_pids": [
+    15472
+  ],
+  "documents_when_campaign_attached": [],
+  "started_by": "the owner, by hand (the server-started cold start crashed: see logs/01_launch.*)"
+}

@@ -1,0 +1,80 @@
+[
+  {
+    "file": "pytest-tmp/test_v030_export_and_plot_live0/sheet.pdf",
+    "size_bytes": 1907,
+    "header": "%PDF-1.7",
+    "header_ok": true,
+    "ends_with_eof": true,
+    "pages": 1,
+    "page_mm": [
+      279.4,
+      215.9
+    ],
+    "sha256": "610f5c912927bbdceb66f49f9e3292f10e8b27057e32c634c13566fdfd05334c"
+  },
+  {
+    "file": "workspace/plots/layout1.pdf",
+    "size_bytes": 1926,
+    "header": "%PDF-1.7",
+    "header_ok": true,
+    "ends_with_eof": true,
+    "pages": 1,
+    "page_mm": [
+      279.4,
+      215.9
+    ],
+    "sha256": "97546423ce6f25603911283051aae28b13443061abb6daba55dcd976f6a1ebd2"
+  },
+  {
+    "file": "workspace/plots/model-default.pdf",
+    "size_bytes": 2551,
+    "header": "%PDF-1.7",
+    "header_ok": true,
+    "ends_with_eof": true,
+    "pages": 1,
+    "page_mm": [
+      279.4,
+      215.9
+    ],
+    "sha256": "16bafad51fcb2fd1c9b8a50affff2c5e46a8fa9b16347f6b57c401aa2c50f9be"
+  },
+  {
+    "file": "workspace/plots/monochrome.pdf",
+    "size_bytes": 2537,
+    "header": "%PDF-1.7",
+    "header_ok": true,
+    "ends_with_eof": true,
+    "pages": 1,
+    "page_mm": [
+      279.4,
+      215.9
+    ],
+    "sha256": "27045ea1c1cb8fb6f5dd60bcbe1bd5b3d946029cf89c7a083da3fae8123e846b"
+  },
+  {
+    "file": "workspace/plots/paper-a3.pdf",
+    "size_bytes": 2549,
+    "header": "%PDF-1.7",
+    "header_ok": true,
+    "ends_with_eof": true,
+    "pages": 1,
+    "page_mm": [
+      297.0,
+      420.2
+    ],
+    "sha256": "2c7745b098dd4d7dc41530497422668aac0314f09d2c2795865af0ea75772b6f"
+  },
+  {
+    "file": "workspace/rel-plot.pdf",
+    "size_bytes": 2551,
+    "header": "%PDF-1.7",
+    "header_ok": true,
+    "ends_with_eof": true,
+    "pages": 1,
+    "page_mm": [
+      279.4,
+      215.9
+    ],
+    "sha256": "0956d097413d9b49b66a3bad1fcc334a6813fbfc9820349593705b9dc82a5de8"
+  }
+]

@@ -1,0 +1,23 @@
+baseline drawings (never touched): []
+linetypes already in the scratch drawing: ['byblock', 'bylayer', 'continuous'] -> will use DASHED (was loaded: False )
+[PASS] LAY01 autocad_create_layer: create the test layer (colour 3); direct COM shows it with default flags
+[PASS] LAY02 autocad_set_layer_properties: switch the layer off (on=false): only that flag changes, direct COM agrees
+[PASS] LAY03 autocad_set_layer_properties: freeze it (frozen=true): only that flag changes
+[PASS] LAY04 autocad_set_layer_properties: lock it (locked=true): only that flag changes
+[PASS] LAY05 autocad_set_layer_properties: colour 5: only the colour changes
+[PASS] LAY06 autocad_set_layer_properties: linetype DASHED: loaded from the AutoCAD library when missing (was NOT loaded before) and assigned
+[PASS] LAY07 autocad_set_layer_properties: lineweight 35 (0.35 mm): only the lineweight changes
+[PASS] LAY08 autocad_set_layer_properties: plottable=false: only that flag changes
+[PASS] LAY09 autocad_set_layer_properties: all seven properties in one call restore the defaults (on, thawed, unlocked, colour 1, Continuous, default weight, plottable)
+[PASS] LAY10 autocad_set_layer_properties: layer names are case-insensitive (lower-case spelling works)
+[PASS] LAY11 autocad_set_layer_properties: switch it back on
+[PASS] LAY12 autocad_set_layer_properties: freezing the current layer (0) is refused up front (E_INVALID_INPUT), layer stays thawed
+[PASS] LAY13 autocad_set_layer_properties: unknown layer -> E_LAYER_NOT_FOUND and nothing is created
+[PASS] LAY14 autocad_set_layer_properties: no property given -> E_INVALID_INPUT
+[PASS] LAY15 autocad_set_layer_properties: lineweight 37 is not an AutoCAD lineweight -> E_INVALID_INPUT, layer untouched
+[PASS] LAY16 autocad_set_layer_properties: colour 300 -> E_INVALID_INPUT, layer untouched
+[PASS] LAY17 autocad_set_layer_properties: a linetype that is in no library -> E_INVALID_INPUT, layer untouched
+[PASS] LAY18 autocad_set_layer_properties: a linetype name with illegal characters is rejected before any COM call
+[PASS] LAY19 autocad_list_layers: list_layers equals AutoCAD's own layer table for every layer and every flag (direct COM)
+[PASS] LAY20 (autocad_set_layer_properties): an entity on a frozen layer stays in the drawing and in list_entities; thawing restores the layer
+cleanup closed scratch drawings: ['Drawing25.dwg']

@@ -1,0 +1,7 @@
+tool autocad_set_layer_properties failed: ValidationError: '0' is the current layer, which AutoCAD cannot freeze
+tool autocad_set_layer_properties failed: CadStateError: Layer 'MCP_NO_SUCH_LAYER' does not exist.
+tool autocad_set_layer_properties failed: ValidationError: give at least one property to change
+tool autocad_set_layer_properties failed: ValidationError: lineweight must be one of [-3, 0, 5, 9, 13, 15, 18, 20, 25, 30, 35, 40, 50, 53, 60, 70, 80, 90, 100, 106, 120, 140, 158, 200, 211] (hundredths of mm, -3 = Default)
+tool autocad_set_layer_properties failed: ValidationError: color_index must be between 0 and 255, got 300
+tool autocad_set_layer_properties failed: ValidationError: linetype 'NO_SUCH_LINETYPE' is not loaded and could not be loaded from acad.lin: (-2147352567, 'Exception occurred.', (0, 'AutoCAD.Application', 'Undefined linetype', 'C:\\Program Files\\Autodesk\\AutoCAD 2024\\HELP\\OLE_ERR.CHM', -2145386359, -2145386359), None)
+tool autocad_set_layer_properties failed: ValidationError: invalid linetype name 'BAD"NAME'
