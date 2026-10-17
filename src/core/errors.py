@@ -13,6 +13,7 @@ V0.3.0 (ValueError for bad input, RuntimeError for AutoCAD state), so existing
 """
 
 import json
+import traceback
 
 # code -> (recoverable, recommended_action). Recoverable means retrying the
 # same call can succeed once the named condition is fixed outside the call
@@ -185,8 +186,25 @@ def classify(exc: BaseException) -> CadError:
     return CadError(f"{exc_type.__name__}: {exc}", code="E_INTERNAL")
 
 
-def error_envelope(exc: BaseException, *, tool: str | None = None, backend: str | None = None) -> dict:
+# Codes a failure falls to when nothing more specific fits. The message alone
+# cannot say where such a bug is, so the traceback is attached for these.
+_UNRECOGNISED_CODES = ("E_INTERNAL", "E_COM_ERROR")
+
+
+def classify_with_traceback(exc: BaseException) -> CadError:
+    """classify(exc), plus the full traceback in details for an unanticipated failure.
+
+    A CadError already says what went wrong and comes back unchanged. Any other
+    exception that lands on a catch-all code (a NameError, say) gets its traceback,
+    so the failing line is visible to the client at once."""
     error = classify(exc)
+    if not isinstance(exc, CadError) and error.code in _UNRECOGNISED_CODES:
+        error.details["traceback"] = "".join(traceback.format_exception(exc))
+    return error
+
+
+def error_envelope(exc: BaseException, *, tool: str | None = None, backend: str | None = None) -> dict:
+    error = classify_with_traceback(exc)
     envelope = {"ok": False, "error": error.to_payload()}
     if tool:
         envelope["tool"] = tool

@@ -69,7 +69,7 @@ class ComBackend(Backend):
         # The executor deadline must outlast launch_and_wait's own polling.
         return self._call(
             "launch_application",
-            lambda: dataclasses.asdict(com_engine.launch_and_wait(timeout=timeout_seconds)),
+            lambda: dataclasses.asdict(cad_engine.launch_and_wait(timeout=timeout_seconds)),
             timeout=max(float(timeout_seconds), 0) + 30.0,
         )
 

@@ -194,7 +194,7 @@ AL = ("AL", "Security, permissions, observability and diagnostics", {"inputs": [
     ("allowed_dirs", "Optional output allow-list (AUTOCAD_MCP_ALLOWED_DIRS)", "Confine file writes", "tested", "pure", "read", [], T),
     ("no_raw_execution", "No raw command, LISP or code-execution tool", "The model cannot run arbitrary code in AutoCAD", "tested", "pure", "read", [], T),
     ("name_validation", "Reject command-separator characters in layer and linetype names", "Names cannot inject commands", "tested", "pure", "read", [], T),
-    ("no_tracebacks", "Error envelopes carry messages, never tracebacks", "No internal details leak to clients", "tested", "pure", "read", [], T),
+    ("no_tracebacks", "Error envelopes carry messages, never tracebacks, except unanticipated launch failures", "Internal details reach clients only to locate a launch bug", "tested", "pure", "read", [], T),
     ("stderr_logging", "Log to stderr only; stdout stays the protocol channel", "Logs never corrupt the protocol", "implemented", "pure", "read", [], N),
     ("audit_log", "Audit log of mutating calls without secrets", "Accountability", "planned", "pure", "session", [], N),
     ("read_only_mode", "Server-wide read-only mode", "Safe reviews of production drawings", "planned", "pure", "session", [], N),

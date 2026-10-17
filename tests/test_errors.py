@@ -132,3 +132,57 @@ def test_unsupported_operation_names_operation_and_backend():
     assert payload["code"] == "E_UNSUPPORTED_BACKEND"
     assert payload["details"] == {"operation": "plot_pdf", "backend": "dxf"}
     assert "needs AutoCAD" in payload["message"]
+
+
+def test_unanticipated_failure_keeps_its_traceback_in_details():
+    try:
+        raise NameError("name 'com_engine' is not defined")
+    except NameError as exc:
+        classified = errors.classify_with_traceback(exc)
+    assert classified.code == "E_INTERNAL"
+    assert classified.message == "NameError: name 'com_engine' is not defined"
+    assert classified.details["traceback"].startswith("Traceback (most recent call last):")
+    assert classified.details["traceback"].rstrip().endswith("NameError: name 'com_engine' is not defined")
+
+
+def test_typed_failures_get_no_traceback():
+    assert "traceback" not in errors.classify_with_traceback(RuntimeError("AutoCAD is not running.")).details
+    assert "traceback" not in errors.classify_with_traceback(ValueError("bad input")).details
+
+
+def test_launch_envelope_carries_the_traceback_of_a_name_error(monkeypatch):
+    import server
+    from mcp.server.mcpserver.exceptions import ToolError
+
+    class BrokenBackend:
+        name = "com"
+
+        def launch_application(self, timeout_seconds):
+            raise NameError("name 'com_engine' is not defined")
+
+    monkeypatch.setattr(server, "backend", lambda: BrokenBackend())
+    with pytest.raises(ToolError) as info:
+        server.autocad_launch_application()
+    error = json.loads(str(info.value))["error"]
+    assert error["code"] == "E_INTERNAL"
+    assert error["details"]["traceback"].startswith("Traceback (most recent call last):")
+    assert "NameError: name 'com_engine' is not defined" in error["details"]["traceback"]
+
+
+def test_every_tool_envelope_carries_the_traceback_of_a_name_error(monkeypatch):
+    import server
+    from mcp.server.mcpserver.exceptions import ToolError
+
+    class BrokenBackend:
+        name = "com"
+
+        def get_status(self):
+            raise NameError("name 'com_engine' is not defined")
+
+    monkeypatch.setattr(server, "backend", lambda: BrokenBackend())
+    with pytest.raises(ToolError) as info:
+        server.autocad_get_status()
+    error = json.loads(str(info.value))["error"]
+    assert error["code"] == "E_INTERNAL"
+    assert error["details"]["traceback"].startswith("Traceback (most recent call last):")
+    assert "NameError: name 'com_engine' is not defined" in error["details"]["traceback"]
