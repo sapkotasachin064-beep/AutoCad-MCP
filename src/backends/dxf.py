@@ -28,9 +28,10 @@ from core import session
 from core.errors import CadError, CadStateError, DependencyMissingError, VerificationError
 from core.evidence import file_evidence, page, validate_limit, validate_offset
 from core.paths import input_path, output_path
-from domain import units
+from domain import civil, units
 from utils import geometry
 from utils.constants import ARCHITECTURAL_LAYERS, get_db_path
+from utils.validation import MAX_CIVIL_PLACE_POINTS, MAX_CIVIL_PROFILE_SAMPLES, MAX_CIVIL_QUERY_POINTS
 
 DXF_VERSIONS = {"R2000": "AC1015", "R2004": "AC1018", "R2007": "AC1021", "R2010": "AC1024",
                 "R2013": "AC1027", "R2018": "AC1032"}
@@ -1367,3 +1368,242 @@ class DxfBackend(Backend):
         if notices:
             result["notices"] = notices
         return result
+
+    # ======= civil =======
+
+    def _civil_alignment(self, handle, label="alignment"):
+        """LINE or polyline as a centreline; anything else refuses."""
+        e = self._entity(handle)
+        t = e.dxftype()
+        if t == "LINE":
+            points = [_p3(e.dxf.start), _p3(e.dxf.end)]
+            closed = False
+        elif t == "LWPOLYLINE":
+            raw = [tuple(float(c) for c in p) for p in e.get_points("xyseb")]
+            points = [[p[0], p[1], 0.0] for p in raw]
+            closed = bool(e.closed)
+            bulges = sum(1 for p in raw if p[4])
+            if bulges:
+                session.add_notice("alignment_arc_bulges_as_chords", handle=e.dxf.handle, bulge_vertices=bulges,
+                                   checked=True)
+        elif t == "POLYLINE":
+            points = [_p3(v.dxf.location) for v in e.vertices]
+            closed = bool(e.is_closed)
+            bulges = sum(1 for v in e.vertices if v.dxf.get("bulge", 0.0))
+            if bulges:
+                session.add_notice("alignment_arc_bulges_as_chords", handle=e.dxf.handle, bulge_vertices=bulges,
+                                   checked=True)
+        else:
+            raise CadStateError(
+                f"{label} {handle} is a {t} entity; stationing needs a LINE or a polyline "
+                "(LWPOLYLINE, POLYLINE or 3D polyline).",
+                code="E_UNSUPPORTED_ENTITY",
+                details={"handle": handle, "type": t},
+            )
+        if len(points) < 2:
+            raise CadStateError(f"{label} {handle} has fewer than 2 usable vertices.", code="E_UNSUPPORTED_ENTITY",
+                                details={"handle": handle, "type": t})
+        kind = "POLYLINE3D" if (t == "POLYLINE" and e.is_3d_polyline) else t
+        return {"handle": e.dxf.handle, "type": kind, "closed": closed, "points": points,
+                "length": civil.alignment_length(points, closed=closed)}
+
+    def _civil_point_samples(self, layer, max_entities):
+        wanted = layer.lower() if layer else None
+        samples, layers_seen = [], []
+        for e in self._iter(max_entities):
+            if e.dxftype() != "POINT":
+                continue
+            entity_layer = str(e.dxf.get("layer", "0"))
+            if wanted is not None and entity_layer.lower() != wanted:
+                continue
+            samples.append(_p3(e.dxf.location))
+            if entity_layer not in layers_seen:
+                layers_seen.append(entity_layer)
+        total = len(self._msp())
+        return {"samples": samples, "scanned_entities": min(total, max_entities), "truncated": total > max_entities,
+                "layers_seen": layers_seen}
+
+    @staticmethod
+    def _civil_input_list(values, label, validate_item, *, limit=MAX_CIVIL_QUERY_POINTS, hint=""):
+        if not isinstance(values, (list, tuple)) or not values:
+            raise geometry.ValidationError(f"{label} must be a non-empty list{hint}, got {values!r}")
+        if len(values) > limit:
+            raise geometry.ValidationError(f"{label} has {len(values)} entries; the limit is {limit}")
+        return [validate_item(v, f"{label}[{i}]") for i, v in enumerate(values)]
+
+    def civil_alignment_station(self, alignment, points, start_station=0.0):
+        wanted = self._civil_input_list(points, "points", geometry.validate_point_2d_or_3d,
+                                        hint=" of [x, y] or [x, y, z] points")
+        start_station = geometry.validate_number(start_station, "start_station")
+
+        def run():
+            self._require_doc(write=False)
+            data = self._civil_alignment(alignment)
+            rows = []
+            for point in wanted:
+                result = civil.station_offset(data["points"], point, closed=data["closed"],
+                                              start_station=start_station)
+                rows.append({"point": list(point), "station": result["station"], "offset": result["offset"],
+                             "closest_point": result["closest_point"], "plan_distance": result["plan_distance"],
+                             "z_difference": result["z_difference"], "segment_index": result["segment_index"]})
+            length = data["length"]
+            return self._result(
+                alignment={"handle": data["handle"], "type": data["type"], "closed": data["closed"],
+                           "vertex_count": len(data["points"]), "length": length, "start_station": start_station,
+                           "end_station": start_station + length},
+                points=rows,
+                message=f"{len(rows)} point(s) queried against a {length:.3f}-unit alignment.")
+        return self._run(run)
+
+    def civil_station_point(self, alignment, stations, offset=0.0, start_station=0.0):
+        wanted = self._civil_input_list(stations, "stations", geometry.validate_number,
+                                        hint=" of station numbers")
+        offset = geometry.validate_number(offset, "offset")
+        start_station = geometry.validate_number(start_station, "start_station")
+
+        def run():
+            self._require_doc(write=False)
+            data = self._civil_alignment(alignment)
+            rows = []
+            for station in wanted:
+                result = civil.point_at_station(data["points"], station, offset=offset, closed=data["closed"],
+                                                start_station=start_station)
+                rows.append({"station": result["station"], "offset": result["offset"], "point": result["point"],
+                             "tangent_angle_degrees": result["tangent_angle_degrees"],
+                             "segment_index": result["segment_index"], "clamped": result["clamped"]})
+            return self._result(
+                alignment={"handle": data["handle"], "type": data["type"], "closed": data["closed"],
+                           "length": data["length"], "start_station": start_station,
+                           "end_station": start_station + data["length"]},
+                stations=rows, clamped_count=sum(1 for row in rows if row["clamped"]),
+                message=f"{len(rows)} station(s) computed on a {data['length']:.3f}-unit alignment.")
+        return self._run(run)
+
+    def civil_ground_profile(self, alignment, interval, layer=None, offset=0.0, method="idw", neighbours=8,
+                             start_station=0.0, max_entities=20000):
+        interval = geometry.validate_positive(interval, "interval")
+        offset = geometry.validate_number(offset, "offset")
+        start_station = geometry.validate_number(start_station, "start_station")
+        if layer is not None:
+            layer = geometry.validate_layer_name(layer)
+        max_entities = validate_limit(max_entities, default=20000, maximum=500000, label="max_entities")
+
+        def run():
+            self._require_doc(write=False)
+            data = self._civil_alignment(alignment)
+            series = civil.station_series(start_station, interval, start_station + data["length"],
+                                          max_rows=MAX_CIVIL_PROFILE_SAMPLES)
+            places = []
+            for station in series["stations"]:
+                at = civil.point_at_station(data["points"], station, offset=offset, closed=data["closed"],
+                                            start_station=start_station)
+                places.append((at["station"], at["point"][0], at["point"][1]))
+            found = self._civil_point_samples(layer, max_entities)
+            rows = civil.sample_profile(places, found["samples"], method=method, neighbours=neighbours)
+            elevations = [row["elevation"] for row in rows if row["elevation"] is not None]
+            result = self._result(
+                alignment={"handle": data["handle"], "type": data["type"], "closed": data["closed"],
+                           "length": data["length"], "start_station": start_station,
+                           "end_station": start_station + data["length"]},
+                interval=interval, offset=offset,
+                spot_levels={"count": len(found["samples"]), "layer": layer,
+                             "layers_seen": found["layers_seen"] if layer is None else None,
+                             "scanned_entities": found["scanned_entities"], "scan_truncated": found["truncated"]},
+                stations=rows, rows_truncated=series["truncated"],
+                missing_elevations=len(rows) - len(elevations),
+                elevation_min=min(elevations) if elevations else None,
+                elevation_max=max(elevations) if elevations else None)
+            if not found["samples"]:
+                result["message"] = ("No POINT entities with a Z were found"
+                                     + (f" on layer {layer!r}." if layer else " in ModelSpace.")
+                                     + " Every station reports elevation null.")
+            else:
+                result["message"] = (f"{len(rows)} station(s) sampled from {len(found['samples'])} spot level(s); "
+                                     f"{result['missing_elevations']} without a value.")
+            return result
+        return self._run(run)
+
+    def civil_surface_volumes(self, existing_layer, design_layer, cell_size, method="idw", neighbours=8,
+                              max_entities=20000):
+        existing_layer = geometry.validate_layer_name(existing_layer, "existing_layer")
+        design_layer = geometry.validate_layer_name(design_layer, "design_layer")
+        max_entities = validate_limit(max_entities, default=20000, maximum=500000, label="max_entities")
+
+        def run():
+            self._require_doc(write=False)
+            ground = self._civil_point_samples(existing_layer, max_entities)
+            design = self._civil_point_samples(design_layer, max_entities)
+            for samples, name in ((ground, existing_layer), (design, design_layer)):
+                if not samples["samples"]:
+                    raise CadStateError(
+                        f"No POINT entities with a Z were found on layer {name!r}.",
+                        code="E_ENTITY_NOT_FOUND",
+                        details={"layer": name},
+                        recommended_action=("add POINT entities with Z to that layer, or pass the layer "
+                                            "that holds the spot levels"),
+                    )
+            result = civil.grid_volumes(ground["samples"], design["samples"], cell_size, method=method,
+                                        neighbours=neighbours)
+            return self._result(
+                existing_layer=existing_layer, design_layer=design_layer, **result,
+                spot_levels={"existing": {"count": len(ground["samples"]), "scan_truncated": ground["truncated"]},
+                             "design": {"count": len(design["samples"]), "scan_truncated": design["truncated"]}},
+                message=(f"Grid method over {result['cells_total']} cell(s) of {result['cell_size']} unit(s): "
+                         f"cut {result['cut_volume']:.3f}, fill {result['fill_volume']:.3f} "
+                         f"(net {result['net_volume']:.3f}, positive = surplus fill). "
+                         "A drafting aid from the spot levels given, not a survey report."))
+        return self._run(run)
+
+    def civil_pipe_clearance(self, first, second, first_diameter=None, second_diameter=None):
+        def run():
+            self._require_doc(write=False)
+            first_data = self._civil_alignment(first, label="first pipe")
+            second_data = self._civil_alignment(second, label="second pipe")
+            result = civil.pipe_clearance(first_data["points"], second_data["points"],
+                                          first_diameter=first_diameter, second_diameter=second_diameter)
+            return self._result(
+                first_pipe={"handle": first_data["handle"], "type": first_data["type"],
+                            "vertex_count": len(first_data["points"])},
+                second_pipe={"handle": second_data["handle"], "type": second_data["type"],
+                             "vertex_count": len(second_data["points"])},
+                **result,
+                message=(f"Closest approach {result['minimum_distance']:.3f} unit(s) over "
+                         f"{len(result['crossings'])} plan crossing(s)."))
+        return self._run(run)
+
+    def civil_place_points(self, points, layer="C-POINT", label=True, text_height=None, start_number=1):
+        wanted = self._civil_input_list(points, "points", geometry.validate_point_2d_or_3d,
+                                        hint=" of [x, y] or [x, y, z] points", limit=MAX_CIVIL_PLACE_POINTS)
+        layer = geometry.validate_layer_name(layer)
+        if isinstance(start_number, bool) or not isinstance(start_number, int) or start_number < 0:
+            raise geometry.ValidationError(f"start_number must be a non-negative integer, got {start_number!r}")
+        if text_height is not None:
+            text_height = geometry.validate_positive(text_height, "text_height")
+
+        def run():
+            doc = self._require_doc(write=True)
+            name = self._layer(doc, layer)
+            height = text_height if text_height is not None else units.defaults_for(self._insunits() or 1)["text_height"]
+            placed = []
+            for index, point in enumerate(wanted):
+                number = start_number + index
+                marker = self._msp().add_point(point, dxfattribs={"layer": name})
+                row = {"number": number, "point": list(point), "handle": marker.dxf.handle}
+                if label:
+                    text = str(number) if point[2] == 0 else f"{number} Z={point[2]:g}"
+                    anchor = (point[0] + height * 0.5, point[1] + height * 0.5, point[2])
+                    tag = self._msp().add_text(text, height=height, dxfattribs={"layer": name})
+                    tag.set_placement(anchor)
+                    row["label_handle"] = tag.dxf.handle
+                placed.append(row)
+            for row in placed:
+                if self._entity(row["handle"]).dxftype() != "POINT":
+                    raise VerificationError(f"Entity {row['handle']} is not a POINT after creation.")
+                if label and self._entity(row["label_handle"]).dxftype() != "TEXT":
+                    raise VerificationError(f"Entity {row['label_handle']} is not a TEXT label after creation.")
+            return self._result(
+                layer=name, points=placed, count=len(placed), labelled=bool(label), text_height=height,
+                verified=True, verification="entities_read_back_from_entitydb",
+                message=(f"Placed {len(placed)} point marker(s) on layer {name!r}"
+                         + (f" with number/level labels at height {height}." if label else ".")))
+        return self._run(run)

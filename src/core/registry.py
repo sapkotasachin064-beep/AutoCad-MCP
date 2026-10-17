@@ -26,6 +26,7 @@ TOOLSETS = {
     "architecture": "walls, floor plans, stairs, structural grids, sheets and title blocks",
     "analysis": "drawing checks, quantity takeoff, DXF comparison",
     "output": "DXF export, PDF plotting, layouts, previews, file evidence",
+    "civil": "alignment stationing, ground profiles, cut/fill volumes, pipe clearance, COGO points",
 }
 
 # kind -> (readOnlyHint, destructiveHint, idempotentHint)

@@ -17,12 +17,12 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 
 ## Totals
 
-- Catalogued capabilities: **647**
-- planned: 399
+- Catalogued capabilities: **650**
+- planned: 397
 - implemented: 26
-- tested: 160
+- tested: 165
 - verified: 62
-- Public MCP tools referenced: 64
+- Public MCP tools referenced: 70
 
 ## By category
 
@@ -35,7 +35,7 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | E. Document discovery, identity, ownership and lifecycle | 28 | 7 | 1 | 17 | 3 |
 | F. Drawing inspection and metadata | 17 | 7 | 0 | 7 | 3 |
 | G. Entity creation, selection, querying, editing and deletion | 28 | 12 | 1 | 0 | 15 |
-| H. Lines, polylines, arcs, circles, splines and curves | 31 | 24 | 0 | 2 | 5 |
+| H. Lines, polylines, arcs, circles, splines and curves | 32 | 24 | 0 | 3 | 5 |
 | I. Text, MTEXT, dimensions, leaders and annotation | 34 | 25 | 1 | 3 | 5 |
 | J. Layers, blocks, attributes and external references | 33 | 20 | 0 | 7 | 6 |
 | K. Hatch, regions, boundaries and fills | 17 | 10 | 0 | 4 | 3 |
@@ -53,8 +53,8 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | W. Residential building layouts and drafting automation | 20 | 10 | 1 | 7 | 2 |
 | X. Structural drafting: grids, columns, beams and reinforcement | 17 | 13 | 0 | 3 | 1 |
 | Y. Civil 3D surfaces, alignments, profiles, corridors and grading | 20 | 20 | 0 | 0 | 0 |
-| Z. Surveying, coordinates, parcels and earthwork | 15 | 15 | 0 | 0 | 0 |
-| AA. Water supply, drainage, sanitary systems and plumbing | 11 | 11 | 0 | 0 | 0 |
+| Z. Surveying, coordinates, parcels and earthwork | 16 | 13 | 0 | 3 | 0 |
+| AA. Water supply, drainage, sanitary systems and plumbing | 12 | 11 | 0 | 1 | 0 |
 | AB. Electrical schematics, circuits, panels and cable schedules | 11 | 11 | 0 | 0 | 0 |
 | AC. HVAC, mechanical drafting and equipment layouts | 9 | 9 | 0 | 0 | 0 |
 | AD. P&ID symbols, piping, valves, instruments and schedules | 9 | 9 | 0 | 0 | 0 |
@@ -268,23 +268,24 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | H-012 | Draw ellipses and elliptical arcs | planned | both | write |  |
 | H-013 | Draw a spline through fit points | planned | both | write |  |
 | H-014 | Draw a spline from control points | planned | both | write |  |
-| H-015 | Place point entities and set the point style | planned | both | write |  |
-| H-016 | Draw construction lines and rays on a construction layer | planned | both | write |  |
-| H-017 | Draw a regular polygon inscribed or circumscribed | planned | both | write |  |
-| H-018 | Draw a slot (obround) between two centres | planned | both | write |  |
-| H-019 | Draw a rectangle with filleted corners | planned | both | write |  |
-| H-020 | Draw a filled donut | planned | both | write |  |
-| H-021 | Draw a revision cloud around an area | planned | both | write |  |
-| H-022 | Draw an arc through three points | planned | both | write |  |
-| H-023 | Draw an arc by start, end and radius | planned | both | write |  |
-| H-024 | Draw a circle tangent to two entities with a radius | planned | both | write |  |
-| H-025 | Divide or measure a curve with points or blocks | planned | both | write |  |
-| H-026 | Exact length of any curve by handle | planned | both | read |  |
-| H-027 | Closest point on a curve to a given point | planned | both | read |  |
-| H-028 | Intersection points of two curves | planned | both | read |  |
-| H-029 | Convert a spline to a polyline at a tolerance | planned | both | write |  |
-| H-030 | Wipeout masks behind text | planned | dxf | write |  |
-| H-031 | Multilines (MLINE) with styles | planned | com | write |  |
+| H-015 | Place numbered point entities with number/level labels | tested | both | write | `autocad_civil_place_points` |
+| H-016 | Set the drawing's point display style (PDMODE/PDSIZE) | planned | com | write |  |
+| H-017 | Draw construction lines and rays on a construction layer | planned | both | write |  |
+| H-018 | Draw a regular polygon inscribed or circumscribed | planned | both | write |  |
+| H-019 | Draw a slot (obround) between two centres | planned | both | write |  |
+| H-020 | Draw a rectangle with filleted corners | planned | both | write |  |
+| H-021 | Draw a filled donut | planned | both | write |  |
+| H-022 | Draw a revision cloud around an area | planned | both | write |  |
+| H-023 | Draw an arc through three points | planned | both | write |  |
+| H-024 | Draw an arc by start, end and radius | planned | both | write |  |
+| H-025 | Draw a circle tangent to two entities with a radius | planned | both | write |  |
+| H-026 | Divide or measure a curve with points or blocks | planned | both | write |  |
+| H-027 | Exact length of any curve by handle | planned | both | read |  |
+| H-028 | Closest point on a curve to a given point | planned | both | read |  |
+| H-029 | Intersection points of two curves | planned | both | read |  |
+| H-030 | Convert a spline to a polyline at a tolerance | planned | both | write |  |
+| H-031 | Wipeout masks behind text | planned | dxf | write |  |
+| H-032 | Multilines (MLINE) with styles | planned | com | write |  |
 
 ## I. Text, MTEXT, dimensions, leaders and annotation
 
@@ -687,30 +688,32 @@ Machine-readable version: [`catalog/capabilities.json`](catalog/capabilities.jso
 | Z-005 | Parcel area from coordinates | planned | pure | read |  |
 | Z-006 | Subdivide a parcel by area or frontage | planned | pure | read |  |
 | Z-007 | Contours from spot levels (TIN) without Civil 3D | planned | both | write |  |
-| Z-008 | Grid-method cut and fill volumes | planned | pure | read |  |
+| Z-008 | Grid-method cut and fill volumes | tested | both | read | `autocad_civil_surface_volumes` |
 | Z-009 | Cross-sections from levels | planned | both | write |  |
 | Z-010 | Setting-out coordinate tables | planned | both | write |  |
 | Z-011 | Transform between local and projected coordinates (user-given parameters) | planned | pure | read |  |
-| Z-012 | Chainage and offset along a centreline | planned | pure | read |  |
-| Z-013 | Boundary survey plan with bearings and distances | planned | both | write |  |
-| Z-014 | Levelling reduction (rise-and-fall and height-of-instrument) | planned | pure | read |  |
-| Z-015 | Tacheometric reduction | planned | pure | read |  |
+| Z-012 | Chainage and offset along a centreline | tested | both | read | `autocad_civil_alignment_station`, `autocad_civil_station_point` |
+| Z-013 | Ground levels sampled along a centreline at a station interval | tested | both | read | `autocad_civil_ground_profile` |
+| Z-014 | Boundary survey plan with bearings and distances | planned | both | write |  |
+| Z-015 | Levelling reduction (rise-and-fall and height-of-instrument) | planned | pure | read |  |
+| Z-016 | Tacheometric reduction | planned | pure | read |  |
 
 ## AA. Water supply, drainage, sanitary systems and plumbing
 
 | ID | Capability | Status | Backend | Safety | Tools |
 |---|---|---|---|---|---|
 | AA-001 | Pipe runs with sizes and flow arrows | planned | both | write |  |
-| AA-002 | Plumbing fixture symbols | planned | both | write |  |
-| AA-003 | Drainage layout with manholes and user-entered gradients | planned | both | write |  |
-| AA-004 | Manhole schedule (cover and invert levels, depth) | planned | pure | read |  |
-| AA-005 | Pipe long section from invert levels | planned | both | write |  |
-| AA-006 | Water supply isometric diagram | planned | both | write |  |
-| AA-007 | Septic tank detail from user dimensions | planned | both | write |  |
-| AA-008 | Rainwater downpipe layout | planned | both | write |  |
-| AA-009 | Pipe length takeoff by size and layer | planned | pure | read |  |
-| AA-010 | Check drain gradients against user minimums | planned | pure | read |  |
-| AA-011 | Fixture-unit tally with user-supplied unit values | planned | pure | read |  |
+| AA-002 | Closest 3D distance and plan crossings between two pipe runs | tested | both | read | `autocad_civil_pipe_clearance` |
+| AA-003 | Plumbing fixture symbols | planned | both | write |  |
+| AA-004 | Drainage layout with manholes and user-entered gradients | planned | both | write |  |
+| AA-005 | Manhole schedule (cover and invert levels, depth) | planned | pure | read |  |
+| AA-006 | Pipe long section from invert levels | planned | both | write |  |
+| AA-007 | Water supply isometric diagram | planned | both | write |  |
+| AA-008 | Septic tank detail from user dimensions | planned | both | write |  |
+| AA-009 | Rainwater downpipe layout | planned | both | write |  |
+| AA-010 | Pipe length takeoff by size and layer | planned | pure | read |  |
+| AA-011 | Check drain gradients against user minimums | planned | pure | read |  |
+| AA-012 | Fixture-unit tally with user-supplied unit values | planned | pure | read |  |
 
 ## AB. Electrical schematics, circuits, panels and cable schedules
 

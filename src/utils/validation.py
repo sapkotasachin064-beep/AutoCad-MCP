@@ -51,6 +51,11 @@ LAYER_LINEWEIGHTS = VALID_LINEWEIGHTS - {-1, -2}
 
 DIMENSION_KINDS = ("aligned", "linear")
 
+# Civil/survey tool limits, shared by both backends.
+MAX_CIVIL_QUERY_POINTS = 1000
+MAX_CIVIL_PLACE_POINTS = 2000
+MAX_CIVIL_PROFILE_SAMPLES = 500
+
 
 def validate_handles(handles, label: str = "handles", maximum: int = 5000) -> list[str]:
     if not isinstance(handles, list) or not handles:

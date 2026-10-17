@@ -20,6 +20,7 @@ from tools import (
     annotation,
     architectural,
     blocks,
+    civil,
     documents,
     editing,
     layers,
@@ -294,3 +295,32 @@ class ComBackend(Backend):
             return session.collect(lambda: architectural.run_plan_com(build, dry_run=dry_run))
 
         return get_executor().run(job, timeout=com_timeout(), label="emit_plan")
+
+    # ======= civil =======
+
+    def civil_alignment_station(self, alignment, points, start_station=0.0):
+        return self._call("civil_alignment_station", civil.alignment_station, alignment,
+                          points=points, start_station=start_station)
+
+    def civil_station_point(self, alignment, stations, offset=0.0, start_station=0.0):
+        return self._call("civil_station_point", civil.station_point, alignment,
+                          stations=stations, offset=offset, start_station=start_station)
+
+    def civil_ground_profile(self, alignment, interval, layer=None, offset=0.0, method="idw", neighbours=8,
+                             start_station=0.0, max_entities=20000):
+        return self._call("civil_ground_profile", civil.ground_profile, alignment, interval,
+                          layer=layer, offset=offset, method=method, neighbours=neighbours,
+                          start_station=start_station, max_entities=max_entities)
+
+    def civil_surface_volumes(self, existing_layer, design_layer, cell_size, method="idw", neighbours=8,
+                              max_entities=20000):
+        return self._call("civil_surface_volumes", civil.surface_volumes, existing_layer, design_layer,
+                          cell_size, method=method, neighbours=neighbours, max_entities=max_entities)
+
+    def civil_pipe_clearance(self, first, second, first_diameter=None, second_diameter=None):
+        return self._call("civil_pipe_clearance", civil.pipe_clearance, first, second,
+                          first_diameter=first_diameter, second_diameter=second_diameter)
+
+    def civil_place_points(self, points, layer="C-POINT", label=True, text_height=None, start_number=1):
+        return self._call("civil_place_points", civil.place_points, points,
+                          layer=layer, label=label, text_height=text_height, start_number=start_number)

@@ -219,7 +219,7 @@ def test_scan_all_entities_and_execute_query_round_trip(fresh_drawing, tmp_path)
 import math  # noqa: E402
 
 from core import session  # noqa: E402
-from tools import annotation, blocks, documents, modify, output, query  # noqa: E402
+from tools import annotation, blocks, civil, documents, modify, output, query  # noqa: E402
 
 
 @pytest.fixture
@@ -338,3 +338,38 @@ def test_v030_generators_live(fresh_drawing, clean_session):
     assert legacy["verified"] is True and legacy["entity_count"] == 50
     check = server.autocad_check_drawing()
     assert check["entity_count"] > 0 and not math.isnan(check["issue_count"])
+
+
+# ======= civil =======
+
+
+@requires_autocad
+def test_v030_civil_live(fresh_drawing, clean_session):
+    polyline = entities.draw_polyline([[0, 0], [100, 0], [100, 100]])
+    result = civil.alignment_station(polyline["handle"], [[50, -10], [110, 50]], start_station=1000.0)
+    first, second = result["points"]
+    assert first["station"] == pytest.approx(1050.0) and first["offset"] == pytest.approx(10.0)
+    assert second["station"] == pytest.approx(1150.0) and second["offset"] == pytest.approx(10.0)
+    back = civil.station_point(polyline["handle"], [1050.0], offset=2.0, start_station=1000.0)
+    assert back["stations"][0]["point"] == pytest.approx([50.0, -2.0, 0.0])
+    assert back["stations"][0]["tangent_angle_degrees"] == pytest.approx(0.0)
+
+    placed = civil.place_points([[0, 0, 10], [10, 0, 12], [20, 0, 14], [30, 0, 16]], layer="MCP_TOPO",
+                                label=False)
+    assert placed["verified"] is True and placed["count"] == 4
+    ground = entities.draw_line([0, 0], [30, 0])
+    profile = civil.ground_profile(ground["handle"], 10.0, layer="MCP_TOPO")
+    assert [row["elevation"] for row in profile["stations"]] == pytest.approx([10, 12, 14, 16])
+
+    corners = ((0, 0), (4, 0), (4, 4), (0, 4))
+    civil.place_points([(x, y, 0.0) for x, y in corners], layer="MCP_EG", label=False)
+    civil.place_points([(x, y, 0.5) for x, y in corners], layer="MCP_FG", label=False)
+    volumes = civil.surface_volumes("MCP_EG", "MCP_FG", 1.0)
+    assert volumes["fill_volume"] == pytest.approx(8.0) and volumes["cut_volume"] == pytest.approx(0.0)
+
+    first_pipe = entities.draw_line([0, 0, 0], [10, 0, 0])
+    second_pipe = entities.draw_line([5, -5, -3], [5, 5, -3])
+    clearance = civil.pipe_clearance(first_pipe["handle"], second_pipe["handle"], 0.5, 0.5)
+    assert clearance["minimum_distance"] == pytest.approx(3.0)
+    assert clearance["surface_clearance"] == pytest.approx(2.5)
+    assert clearance["crossings"][0]["vertical_gap"] == pytest.approx(-3.0)

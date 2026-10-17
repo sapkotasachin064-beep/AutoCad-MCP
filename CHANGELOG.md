@@ -81,7 +81,7 @@ lineweight (see `test-results/v0.3.0/*/failures-and-blockers.md`).
   (headless, ezdxf). The backend is fixed for the process; there is no
   automatic fallback. Operations a backend does not implement are refused
   with `E_UNSUPPORTED_BACKEND` and the reason.
-* **42 new tools** (64 in total), grouped into 10 toolsets that
+* **48 new tools** (70 in total), grouped into 11 toolsets that
   `AUTOCAD_MCP_TOOLSETS` can restrict:
   * core: `autocad_get_capabilities`, `autocad_pin_document`,
     `autocad_unpin_document`, `autocad_list_drawings`, `autocad_open_drawing`,
@@ -104,7 +104,17 @@ lineweight (see `test-results/v0.3.0/*/failures-and-blockers.md`).
   * analysis: `autocad_check_drawing`, `autocad_quantity_takeoff`,
     `autocad_save_report`, `autocad_compare_dxf`, `autocad_validate_dxf_file`;
   * output: `autocad_list_layouts`, `autocad_export_dxf`, `autocad_plot_pdf`,
-    `autocad_render_preview`.
+    `autocad_render_preview`;
+  * civil: `autocad_civil_alignment_station`, `autocad_civil_station_point`,
+    `autocad_civil_ground_profile`, `autocad_civil_surface_volumes`,
+    `autocad_civil_pipe_clearance`, `autocad_civil_place_points`.
+* **Civil/survey toolset** on both backends: stationing and offsets along a
+  LINE or polyline, ground profiles sampled from POINT spot levels,
+  grid-method cut/fill volumes between two POINT layers, pipe clearance, and
+  numbered COGO point placement with labels. Pure maths in
+  `src/domain/civil.py`; no Civil 3D objects, no Civil 3D installation and
+  no command execution. Values interpolated beyond the spot levels are
+  reported (`extrapolated_nodes`), not hidden.
 * **MCP resources** `autocad://capabilities`, `autocad://units`,
   `autocad://layer-standard` and **prompts** `residential_floor_plan`,
   `drawing_review`, `sheet_and_plot`. Server instructions in the initialize
@@ -126,12 +136,13 @@ lineweight (see `test-results/v0.3.0/*/failures-and-blockers.md`).
 * **Plan engine**: generators build a list of primitives first, then draw it
   on either backend through one emitter and verify the entity count. Every
   generator supports `dry_run`.
-* **Tests**: 283 tests, all passing with AutoCAD 2024 running (264 pass and
-  19 live tests skip without AutoCAD), including recorded-fake COM tests, a golden regression that
+* **Tests**: 322 tests -- 302 pass without AutoCAD and 20 live tests skip
+  (the 19 pre-civil live tests last passed on AutoCAD 2024; the civil live
+  test is added but not yet run), including recorded-fake COM tests, a golden regression that
   proves the V0.2.3 floor plan is reproduced entity-for-entity, headless DXF
   integration tests and real stdio sessions on both backends.
 * **Documentation**: reference-repository analysis (`docs/analysis/`), a
-  647-entry capability catalog with honest statuses
+  650-entry capability catalog with honest statuses
   (`docs/feature-catalog.md`), generated tool reference (`docs/tools.md`),
   and architecture, backend, installation, client, troubleshooting, testing
   and compatibility guides.
@@ -165,6 +176,9 @@ Full migration notes: [docs/compatibility.md](docs/compatibility.md#migration-fr
 
 * AutoCAD releases other than 2024, and COM tools no live test asserts
   (see the catalog's `tested` entries).
+* The `civil` toolset (stationing, ground profiles, volumes, pipe clearance,
+  point placement): unit, fake-COM and headless DXF tests only; its live
+  test is written but has not been run on AutoCAD.
 * Python 3.10-3.13, Linux and macOS (declared or designed for, not run).
 * Headless previews (matplotlib not installed on the development machine).
 * Codex CLI and Claude Desktop configurations (documented, not run).

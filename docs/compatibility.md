@@ -48,7 +48,7 @@ generated and parsed by the CLIs; Codex CLI and Claude Desktop documented only.
 | `generate_2d_floor_plan` draws in the drawing's units, adds `dry_run`, `drawing_unit`, `verified`, and `bounds_ft` when `units="FEET"` | identical entities in inch drawings (golden test) | none |
 | `create_new_drawing` gains `pin`; refuses while another drawing is pinned | protects pinned jobs | unpin or pass `pin=true` |
 | Template paths with folders must be existing `.dwt` files | early, clear errors | use a bare template name to let AutoCAD search its template path |
-| 42 new tools (64 total), grouped into toolsets | longer tool list | `AUTOCAD_MCP_TOOLSETS` |
+| 48 new tools (70 total), grouped into toolsets | longer tool list | `AUTOCAD_MCP_TOOLSETS` |
 | `pyproject.toml`: version 0.3.0, `mcp>=2.3,<3`, setuptools build backend, `autocad-mcp` entry point, `dxf`/`render` extras | installs fail early on SDK 1.x | install into a fresh venv |
 
 Rollback: everything is on branch `feat/v0.3.0-rebuild`; `main` still holds V0.2.3 (commit `3cf9254`).

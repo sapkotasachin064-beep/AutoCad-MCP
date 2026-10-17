@@ -14,11 +14,11 @@ quantities.
 
 | | |
 |---|---|
-| Public MCP tools | **64**, in 10 toolsets ([tool reference](docs/tools.md)) |
+| Public MCP tools | **70**, in 11 toolsets ([tool reference](docs/tools.md)) |
 | MCP resources / prompts | 3 / 3 |
 | Backends | `com` (live AutoCAD 2021+, Windows) and `dxf` (headless ezdxf) |
-| Catalogued capabilities | **647**: 62 live-verified, 160 tested, 26 implemented without a dedicated test, 399 planned ([catalog](docs/feature-catalog.md)) |
-| Tests | 283: all pass with AutoCAD 2024 running; without AutoCAD, 264 pass and the 19 live tests skip |
+| Catalogued capabilities | **650**: 62 live-verified, 165 tested, 26 implemented without a dedicated test, 397 planned ([catalog](docs/feature-catalog.md)) |
+| Tests | 322: 302 pass without AutoCAD, 20 live tests skip; live results recorded for 19 tests on AutoCAD 2024 (the civil live test is not yet run) |
 
 "Verified" means a live test asserted it on AutoCAD 2024 (R24.3) in this
 project ([results](docs/testing.md#live-autocad-results)). "Tested" means
@@ -81,7 +81,7 @@ Details: [docs/compatibility.md](docs/compatibility.md), [docs/backends.md](docs
 ## Architecture
 
 ```
-MCP client --stdio--> src/server.py (64 tools, error envelopes, state blocks, toolsets)
+MCP client --stdio--> src/server.py (70 tools, error envelopes, state blocks, toolsets)
                          |
                   src/backends/  com.py  -> src/tools/*  -> COM thread -> AutoCAD
                                  dxf.py  -> ezdxf document in memory
