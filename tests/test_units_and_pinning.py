@@ -11,10 +11,10 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-import cad_engine
+from backends import com_engine as cad_engine
 from core import session
 from core.errors import CadError, ConfigError
-from tools import primitives
+from tools import drawing as primitives
 
 
 class FakeDoc:
@@ -149,14 +149,14 @@ def test_pinned_session_accepts_the_pinned_drawing():
 
 def test_create_new_drawing_refuses_while_pinned_without_touching_autocad():
     session.pin_document("path:c:\\projects\\a.dwg")
-    with patch("tools.primitives.get_connected_app", side_effect=AssertionError("must not reach COM")):
+    with patch("tools.drawing.get_connected_app", side_effect=AssertionError("must not reach COM")):
         with pytest.raises(CadError) as info:
             primitives.create_new_drawing()
     assert info.value.code == "E_DOCUMENT_PINNED"
 
 
 def test_create_new_drawing_rejects_non_dwt_template_before_com():
-    with patch("tools.primitives.get_connected_app", side_effect=AssertionError("must not reach COM")):
+    with patch("tools.drawing.get_connected_app", side_effect=AssertionError("must not reach COM")):
         with pytest.raises(CadError) as info:
             primitives.create_new_drawing(template="layout.dwg")
     assert info.value.code == "E_INVALID_INPUT"

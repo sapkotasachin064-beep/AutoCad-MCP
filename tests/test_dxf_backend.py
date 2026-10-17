@@ -13,7 +13,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
 ezdxf = pytest.importorskip("ezdxf")
 
-import db  # noqa: E402
+from core import db  # noqa: E402
 from backends.dxf import DxfBackend  # noqa: E402
 from core import session  # noqa: E402
 from core.errors import CadError  # noqa: E402

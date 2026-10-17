@@ -1,4 +1,4 @@
-"""Static configuration and naming constants shared across cad_engine and tools.
+"""Static configuration and naming constants shared across backends/com_engine and tools.
 
 Covers AutoCAD release support, environment-configurable output/db paths,
 AutoCAD ObjectName groupings, and the architectural layer standard used by

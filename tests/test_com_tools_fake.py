@@ -14,14 +14,17 @@ import pytest
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-import cad_engine
+from backends import com_engine as cad_engine
 from core import session
 from core.errors import CadError
 from fakes import FakeApp, FakeBlock
-from tools import annotation, blocks, civil, documents, editing, layers, modify, output, primitives, query
+from tools import annotation, civil, documents, drawing, editing, output
 
-MODULES = ("documents", "query", "modify", "annotation", "blocks", "output", "layers", "primitives", "editing",
-           "civil")
+# Pre-merge module names kept as aliases for the call sites below.
+blocks = layers = primitives = drawing
+modify = query = editing
+
+MODULES = ("documents", "editing", "annotation", "drawing", "output", "civil")
 
 
 @pytest.fixture

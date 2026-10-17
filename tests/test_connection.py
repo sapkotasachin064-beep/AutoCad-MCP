@@ -5,7 +5,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from cad_engine import _parse_release, get_active_document, is_installed, verify_connection
+from backends.com_engine import _parse_release, get_active_document, is_installed, verify_connection
 from utils.constants import get_output_dir
 
 

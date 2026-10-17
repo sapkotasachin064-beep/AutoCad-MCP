@@ -15,14 +15,14 @@ import os
 
 import pywintypes
 
-import cad_engine
-from cad_engine import _retry_com, com_initialized, get_connected_app, get_drawing_identity
+from backends import com_engine as cad_engine
+from backends.com_engine import _retry_com, com_initialized, get_connected_app, get_drawing_identity
 from core import session
 from core.errors import CadError, CadStateError, VerificationError
 from core.evidence import file_evidence
 from core.paths import input_path, output_path
 from domain import units
-from tools._common import read
+from tools.common import read
 
 # AcSaveAsType (AutoCAD type library): DWG and DXF codes per release format.
 SAVE_AS_TYPES = {

@@ -110,23 +110,23 @@ class ComTarget:
     com_initialized(), with doc opened through get_active_document."""
 
     def __init__(self, doc):
-        import cad_engine
-        from tools._common import model_space
+        from backends import com_engine as cad_engine
+        from tools.common import model_space
 
         self.doc = doc
         self.space = model_space(doc)
         self.insunits = cad_engine.read_insunits(doc)
 
     def count(self) -> int:
-        from cad_engine import _retry_com
+        from backends.com_engine import _retry_com
 
         return _retry_com(lambda: self.space.Count)
 
     def ensure_layer(self, name, color=None, linetype=None, force=False):
         import pywintypes
 
-        from cad_engine import _retry_com
-        from tools.layers import ensure_linetype
+        from backends.com_engine import _retry_com
+        from tools.drawing import ensure_linetype
 
         layers = self.doc.Layers
         try:
@@ -142,9 +142,9 @@ class ComTarget:
             _retry_com(lambda: setattr(layer, "Linetype", loaded))
 
     def draw(self, p) -> str:
-        from cad_engine import _retry_com, flat_variant, point_variant
+        from backends.com_engine import _retry_com, flat_variant, point_variant
         from tools.annotation import AC_HATCH_PATTERN_PREDEFINED
-        from tools._common import dispatch_array, double_array
+        from tools.common import dispatch_array, double_array
 
         space = self.space
 

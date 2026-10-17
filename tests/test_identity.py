@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from cad_engine import get_drawing_identity
+from backends.com_engine import get_drawing_identity
 
 
 def test_saved_document_identity_uses_path():

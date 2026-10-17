@@ -17,9 +17,9 @@ import math
 
 import pywintypes
 
-from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity
+from backends.com_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity
 from core.errors import CadError, VerificationError
-from tools._common import (
+from tools.common import (
     as_list,
     deg_to_rad,
     dispatch_array,
@@ -31,7 +31,7 @@ from tools._common import (
     read,
     verify_count_and_type,
 )
-from tools.layers import apply_layer_to_entity
+from tools.drawing import apply_layer_to_entity
 from utils import geometry
 
 AC_HATCH_PATTERN_PREDEFINED = 1

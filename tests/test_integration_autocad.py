@@ -4,7 +4,7 @@ every call in this file is a genuine COM round trip.
 These are skipped (not faked as passing) when AutoCAD is not installed, not
 running, or not a supported release. Launch AutoCAD yourself first:
 
-    python -c "import sys; sys.path.insert(0,'src'); import cad_engine; print(cad_engine.launch_and_wait())"
+    python -c "import sys; sys.path.insert(0,'src'); from backends import com_engine as cad_engine; print(cad_engine.launch_and_wait())"
 
 then run:
 
@@ -18,11 +18,12 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-import cad_engine as connection
-import db
-from tools import editing, layers
-from tools import analysis as scanning
-from tools import primitives as entities
+from backends import com_engine as connection
+from core import db
+from tools import drawing, editing
+from tools import output as scanning
+
+layers = entities = drawing
 
 
 def _autocad_available() -> bool:
@@ -219,7 +220,10 @@ def test_scan_all_entities_and_execute_query_round_trip(fresh_drawing, tmp_path)
 import math  # noqa: E402
 
 from core import session  # noqa: E402
-from tools import annotation, blocks, civil, documents, modify, output, query  # noqa: E402
+from tools import annotation, civil, documents, output  # noqa: E402
+
+blocks = drawing
+modify = query = editing
 
 
 @pytest.fixture

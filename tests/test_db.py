@@ -5,9 +5,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-import db
-
-
+from core import db
 def _entity(handle, object_name="AcDbLine", layer="0"):
     return {"handle": handle, "object_name": object_name, "layer": layer, "properties": {"n": handle}}
 

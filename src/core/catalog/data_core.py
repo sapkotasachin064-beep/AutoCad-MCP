@@ -42,7 +42,7 @@ A = ("A", "MCP protocol and client interoperability", {"inputs": ["MCP JSON-RPC 
 
 B = ("B", "Connection lifecycle and session management", {"inputs": ["tool call"], "outputs": ["result or error"],
      "failure_modes": ["E_COM_TIMEOUT", "E_COM_BUSY", "E_AUTOCAD_NOT_RESPONDING"]}, [
-    ("com_thread", "Run every COM call on one dedicated, COM-initialised thread", "Concurrent tool calls never drive AutoCAD from several threads", "tested", "com", "read", [], T, {"reference": "core/com_executor.py; U-C4N/beiming183 ideas (MIT)"}),
+    ("com_thread", "Run every COM call on one dedicated, COM-initialised thread", "Concurrent tool calls never drive AutoCAD from several threads", "tested", "com", "read", [], T, {"reference": "core/executor.py; U-C4N/beiming183 ideas (MIT)"}),
     ("com_timeout", "Bound every COM call by AUTOCAD_MCP_COM_TIMEOUT", "A modal dialog cannot hang the server forever", "tested", "com", "read", [], T),
     ("worker_replacement", "Abandon a stuck COM worker after a timeout and serve later calls on a fresh one", "One hung call does not block every later call", "tested", "com", "read", [], T),
     ("busy_not_started", "Cancel a call still queued behind a slow call and say nothing was sent", "Safe retry when AutoCAD was merely busy", "tested", "com", "read", [], T),

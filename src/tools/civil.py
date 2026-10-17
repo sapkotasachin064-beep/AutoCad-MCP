@@ -11,15 +11,15 @@ and where IDW extrapolated beyond them.
 
 import pywintypes
 
-import cad_engine
-from cad_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity, point_variant
+from backends import com_engine as cad_engine
+from backends.com_engine import _retry_com, com_initialized, get_active_document, get_connected_app, get_drawing_identity, point_variant
 from core import session
 from core.errors import CadStateError, VerificationError
 from core.evidence import validate_limit
 from domain import civil, units
-from tools._common import as_list, dxf_type, model_space, point3, read
-from tools._common import get_entity as lookup_entity
-from tools.layers import apply_layer_to_entity, get_or_create_layer
+from tools.common import as_list, dxf_type, model_space, point3, read
+from tools.common import get_entity as lookup_entity
+from tools.drawing import apply_layer_to_entity, get_or_create_layer
 from utils import geometry
 from utils.validation import MAX_CIVIL_PLACE_POINTS, MAX_CIVIL_PROFILE_SAMPLES, MAX_CIVIL_QUERY_POINTS
 

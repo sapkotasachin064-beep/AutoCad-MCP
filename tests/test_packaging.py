@@ -28,7 +28,9 @@ def test_mcp_dependency_requires_sdk_v2():
 
 def test_every_src_package_and_module_is_packaged():
     src = ROOT / "src"
-    packages = {p.name for p in src.iterdir() if p.is_dir() and (p / "__init__.py").exists()}
+    # Every package (nested ones included, e.g. core.catalog) and top-level module.
+    packages = {str(p.relative_to(src)).replace("\\", ".").replace("/", ".")
+                for p in src.rglob("*") if p.is_dir() and (p / "__init__.py").exists()}
     modules = {p.stem for p in src.glob("*.py") if p.stem != "__init__"}
     setuptools_cfg = PYPROJECT["tool"]["setuptools"]
     assert set(setuptools_cfg["packages"]) == packages

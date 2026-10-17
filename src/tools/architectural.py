@@ -12,7 +12,7 @@ drawing, and verifies that model space grew by exactly the planned count.
 """
 
 from backends.targets import ComTarget, emit
-from cad_engine import (
+from backends.com_engine import (
     com_initialized,
     get_active_document,
     get_connected_app,
@@ -21,8 +21,8 @@ from cad_engine import (
 )
 from domain import architecture, units
 from domain.architecture import Plan
-from tools.layers import ensure_layer
-from tools.primitives import draw_polyline
+from tools.drawing import ensure_layer
+from tools.drawing import draw_polyline
 from utils import geometry
 
 INCH = 1  # INSUNITS code

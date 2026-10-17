@@ -30,10 +30,10 @@ from mcp.server.mcpserver import MCPServer
 from mcp.server.mcpserver.exceptions import ToolError
 from mcp.types import CallToolResult, TextContent, ToolAnnotations
 
-import db
+from core import db
 from backends import get_backend
 from core import registry, session
-from core.com_executor import get_executor
+from core.executor import get_executor
 from core.hosts import detect_opencode
 from core.errors import CadError, error_text
 from core.evidence import validate_limit

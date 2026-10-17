@@ -268,7 +268,7 @@ MCP client --stdio--> src/server.py        (tools, resources, prompts, envelopes
 Generators build a plan first, then draw it through one emitter on either
 backend and verify the entity count.
 
-One-way imports: `server -> tools -> backends -> core/domain/utils`. `domain`
+One-way imports: `server -> backends -> tools -> core/domain/utils`. `domain`
 and `core` never import pywin32 or ezdxf; `server`, `backends.dxf` and `domain`
 import without pywin32 (test-enforced).
 
@@ -323,7 +323,7 @@ Never skip or loosen a failing test to get a green run.
 | `src/core/` | errors, session, registry, catalog, paths, evidence, reports, hosts, executor, `db.py` (scan cache) |
 | `src/backends/` | `base.py` (operation contract), `com.py` (live), `com_engine.py` (COM plumbing), `dxf.py` (headless), `targets.py` (plan emitters) |
 | `src/domain/` | pure logic: `units.py`, `architecture.py`, `analysis.py`, `civil.py` |
-| `src/tools/` | COM implementations: `core.py`, `drawing.py`, `editing.py`, `annotation.py`, `output.py`, `civil.py` |
+| `src/tools/` | COM implementations: `common.py` (entity helpers), `documents.py`, `drawing.py`, `editing.py`, `annotation.py`, `architectural.py`, `output.py`, `civil.py` |
 | `tests/` | unit, fake-COM (`fakes.py`), golden, headless, stdio e2e, live (`test_integration_autocad.py`) |
 | `scripts/` | `build_capabilities.py` (generates `docs/capabilities.json` and this README's tables) |
 
@@ -358,7 +358,7 @@ binding:
 11. **Evidence.** Status words mean exactly `planned` (no code),
     `implemented` (code, no automated test), `tested` (automated tests:
     unit, mock_com, headless_dxf, stdio_e2e, golden_regression), `verified`
-    (a live AutoCAD test asserts it, listed in `src/core/catalog/data.py`).
+    (a live AutoCAD test asserts it, listed in a `src/core/catalog/data_*.py` module).
     Never promote without evidence. Fake-COM tests are never described as live.
 12. **Live tests** use only scratch drawings they create and close. Never point
     tests or tools at a real project drawing. Do not launch AutoCAD without the
@@ -373,7 +373,7 @@ Adding a tool: pure logic in `src/domain/` with unit tests; operation name in
 it refuses with `E_UNSUPPORTED_BACKEND`, reason in `UNSUPPORTED_REASONS`);
 register in `src/server.py` with `@cad_tool(...)`; typed parameters with
 descriptions in the signature; tests (fake-COM, headless, expected-tools set,
-live); catalog entry in `src/core/catalog/data.py` with the honest status;
+live); catalog entry in a `src/core/catalog/data_*.py` module with the honest status;
 regenerate with `python scripts\build_capabilities.py`.
 
 ## Licence and acknowledgements

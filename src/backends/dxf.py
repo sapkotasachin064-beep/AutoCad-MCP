@@ -96,7 +96,7 @@ def lwpolyline_metrics(points_with_bulge, closed):
 
 
 def describe(entity, full: bool = True) -> dict:
-    """Normalised dict for one ezdxf entity; same keys as tools.query.describe_entity."""
+    """Normalised dict for one ezdxf entity; same keys as tools.editing.describe_entity."""
     t = entity.dxftype()
     kind = t
     if t == "POLYLINE":
@@ -1025,8 +1025,7 @@ class DxfBackend(Backend):
         return self._run(run)
 
     def scan_all_entities(self):
-        import db
-
+        from core import db
         def run():
             self._require_doc(write=False)
             entities, skipped = [], 0

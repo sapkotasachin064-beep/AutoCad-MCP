@@ -1,4 +1,4 @@
-"""The dedicated COM thread (core/com_executor.py), exercised with plain
+"""The dedicated COM thread (core/executor.py), exercised with plain
 Python callables: no AutoCAD and no COM objects are involved."""
 
 import sys
@@ -10,7 +10,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from core.com_executor import ComExecutor
+from core.executor import ComExecutor
 from core.errors import CadError, ComTimeoutError
 
 

@@ -30,8 +30,8 @@ autocad-mcp = "server:main"
 # Flat src/ layout (V0.2.2). Installing exposes these as top-level modules and
 # packages, so install into a dedicated virtual environment.
 package-dir = { "" = "src" }
-packages = ["backends", "core", "domain", "tools", "utils"]
-py-modules = ["cad_engine", "db", "server", "version"]
+packages = ["backends", "core", "core.catalog", "domain", "tools", "utils"]
+py-modules = ["server", "version"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

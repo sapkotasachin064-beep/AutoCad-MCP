@@ -1,5 +1,5 @@
 """Live AutoCAD backend: every operation runs the COM implementation in
-tools/* on the dedicated COM thread (core/com_executor.py) with a timeout,
+tools/* on the dedicated COM thread (core/executor.py) with a timeout,
 collecting the notices it produced (units applied, command cancelled).
 
 The tools/* functions are unchanged library functions that can still be
@@ -10,24 +10,19 @@ where and how long they run.
 import dataclasses
 import os
 
-import cad_engine
+from backends import com_engine as cad_engine
 from backends.base import Backend
 from core import session
-from core.com_executor import get_executor
+from core.executor import get_executor
 from core.errors import ConfigError
 from tools import (
-    analysis,
     annotation,
     architectural,
-    blocks,
     civil,
     documents,
+    drawing,
     editing,
-    layers,
-    modify,
     output,
-    primitives,
-    query,
 )
 
 DEFAULT_TIMEOUT_SECONDS = 120.0
@@ -74,7 +69,7 @@ class ComBackend(Backend):
         # The executor deadline must outlast launch_and_wait's own polling.
         return self._call(
             "launch_application",
-            lambda: dataclasses.asdict(cad_engine.launch_and_wait(timeout=timeout_seconds)),
+            lambda: dataclasses.asdict(com_engine.launch_and_wait(timeout=timeout_seconds)),
             timeout=max(float(timeout_seconds), 0) + 30.0,
         )
 
@@ -93,11 +88,11 @@ class ComBackend(Backend):
     # ======= documents =======
 
     def create_test_drawing_with_line(self, output_dir=None):
-        return self._call("create_test_drawing_with_line", primitives.create_test_drawing_with_line,
+        return self._call("create_test_drawing_with_line", drawing.create_test_drawing_with_line,
                           output_dir=output_dir)
 
     def create_new_drawing(self, template=None, pin=False):
-        return self._call("create_new_drawing", primitives.create_new_drawing, template=template, pin=pin)
+        return self._call("create_new_drawing", drawing.create_new_drawing, template=template, pin=pin)
 
     def list_drawings(self):
         return self._call("list_drawings", documents.list_drawings)
@@ -122,20 +117,20 @@ class ComBackend(Backend):
     # ======= primitives =======
 
     def draw_line(self, start_point, end_point, layer=None):
-        return self._call("draw_line", primitives.draw_line, start_point, end_point, layer=layer)
+        return self._call("draw_line", drawing.draw_line, start_point, end_point, layer=layer)
 
     def draw_polyline(self, points, closed=False, layer=None):
-        return self._call("draw_polyline", primitives.draw_polyline, points, closed=closed, layer=layer)
+        return self._call("draw_polyline", drawing.draw_polyline, points, closed=closed, layer=layer)
 
     def draw_rectangle(self, corner1=None, corner2=None, base_point=None, width=None, height=None, layer=None):
-        return self._call("draw_rectangle", primitives.draw_rectangle, corner1=corner1, corner2=corner2,
+        return self._call("draw_rectangle", drawing.draw_rectangle, corner1=corner1, corner2=corner2,
                           base_point=base_point, width=width, height=height, layer=layer)
 
     def draw_circle(self, center, radius, layer=None):
-        return self._call("draw_circle", primitives.draw_circle, center, radius, layer=layer)
+        return self._call("draw_circle", drawing.draw_circle, center, radius, layer=layer)
 
     def draw_text(self, text, insertion_point, height, rotation_degrees=0.0, layer=None):
-        return self._call("draw_text", primitives.draw_text, text, insertion_point, height,
+        return self._call("draw_text", drawing.draw_text, text, insertion_point, height,
                           rotation_degrees=rotation_degrees, layer=layer)
 
     def draw_arc(self, center, radius, start_angle_degrees, end_angle_degrees, layer=None):
@@ -163,17 +158,17 @@ class ComBackend(Backend):
     # ======= blocks =======
 
     def list_blocks(self, include_anonymous=False):
-        return self._call("list_blocks", blocks.list_blocks, include_anonymous=include_anonymous)
+        return self._call("list_blocks", drawing.list_blocks, include_anonymous=include_anonymous)
 
     def insert_block(self, name, insertion_point, scale=1.0, rotation_degrees=0.0, layer=None, attributes=None):
-        return self._call("insert_block", blocks.insert_block, name, insertion_point, scale=scale,
+        return self._call("insert_block", drawing.insert_block, name, insertion_point, scale=scale,
                           rotation_degrees=rotation_degrees, layer=layer, attributes=attributes)
 
     def get_block_attributes(self, handle):
-        return self._call("get_block_attributes", blocks.get_block_attributes, handle)
+        return self._call("get_block_attributes", drawing.get_block_attributes, handle)
 
     def set_block_attributes(self, handle, values):
-        return self._call("set_block_attributes", blocks.set_block_attributes, handle, values)
+        return self._call("set_block_attributes", drawing.set_block_attributes, handle, values)
 
     # ======= output =======
 
@@ -191,17 +186,17 @@ class ComBackend(Backend):
     # ======= layers =======
 
     def create_layer(self, name, color_index=None, linetype=None):
-        return self._call("create_layer", layers.create_layer, name, color_index=color_index, linetype=linetype)
+        return self._call("create_layer", drawing.create_layer, name, color_index=color_index, linetype=linetype)
 
     def ensure_layer(self, name, color_index=None, linetype=None):
-        return self._call("ensure_layer", layers.ensure_layer, name, color_index=color_index, linetype=linetype)
+        return self._call("ensure_layer", drawing.ensure_layer, name, color_index=color_index, linetype=linetype)
 
     def list_layers(self):
-        return self._call("list_layers", query.list_layers)
+        return self._call("list_layers", editing.list_layers)
 
     def set_layer_properties(self, name, on=None, frozen=None, locked=None, color_index=None, linetype=None,
                              lineweight=None, plottable=None):
-        return self._call("set_layer_properties", layers.set_layer_properties, name, on=on, frozen=frozen,
+        return self._call("set_layer_properties", drawing.set_layer_properties, name, on=on, frozen=frozen,
                           locked=locked, color_index=color_index, linetype=linetype, lineweight=lineweight,
                           plottable=plottable)
 
@@ -230,48 +225,48 @@ class ComBackend(Backend):
                           method=method, color=color, clear=clear)
 
     def scale_entity(self, handle, base_point, factor):
-        return self._call("scale_entity", modify.scale_entity, handle, base_point, factor)
+        return self._call("scale_entity", editing.scale_entity, handle, base_point, factor)
 
     def mirror_entity(self, handle, axis_start, axis_end, keep_original=True):
-        return self._call("mirror_entity", modify.mirror_entity, handle, axis_start, axis_end,
+        return self._call("mirror_entity", editing.mirror_entity, handle, axis_start, axis_end,
                           keep_original=keep_original)
 
     def offset_entity(self, handle, distance):
-        return self._call("offset_entity", modify.offset_entity, handle, distance)
+        return self._call("offset_entity", editing.offset_entity, handle, distance)
 
     def array_rectangular(self, handle, rows, columns, row_spacing, column_spacing):
-        return self._call("array_rectangular", modify.array_rectangular, handle, rows, columns, row_spacing,
+        return self._call("array_rectangular", editing.array_rectangular, handle, rows, columns, row_spacing,
                           column_spacing)
 
     def delete_entities(self, handles, dry_run=True):
-        return self._call("delete_entities", modify.delete_entities, handles, dry_run=dry_run)
+        return self._call("delete_entities", editing.delete_entities, handles, dry_run=dry_run)
 
     def set_entity_properties(self, handles, layer=None, color_index=None, linetype=None, lineweight=None):
-        return self._call("set_entity_properties", modify.set_entity_properties, handles, layer=layer,
+        return self._call("set_entity_properties", editing.set_entity_properties, handles, layer=layer,
                           color_index=color_index, linetype=linetype, lineweight=lineweight)
 
     # ======= query =======
 
     def drawing_summary(self, max_entities=20000):
-        return self._call("drawing_summary", query.drawing_summary, max_entities=max_entities)
+        return self._call("drawing_summary", editing.drawing_summary, max_entities=max_entities)
 
     def list_entities(self, entity_types=None, layers=None, bbox=None, offset=0, limit=100, include_bbox=False,
                       max_entities=20000):
-        return self._call("list_entities", query.list_entities, entity_types=entity_types, layers=layers,
+        return self._call("list_entities", editing.list_entities, entity_types=entity_types, layers=layers,
                           bbox=bbox, offset=offset, limit=limit, include_bbox=include_bbox,
                           max_entities=max_entities)
 
     def get_entity(self, handle):
-        return self._call("get_entity", query.get_entity, handle)
+        return self._call("get_entity", editing.get_entity, handle)
 
     def snapshot_entities(self, max_entities=20000):
-        return self._call("snapshot_entities", query.snapshot_entities, max_entities=max_entities)
+        return self._call("snapshot_entities", editing.snapshot_entities, max_entities=max_entities)
 
     def scan_all_entities(self):
-        return self._call("scan_all_entities", analysis.scan_all_entities)
+        return self._call("scan_all_entities", output.scan_all_entities)
 
     def count_text_patterns(self, pattern, use_regex=False, limit=500):
-        return self._call("count_text_patterns", analysis.count_text_patterns, pattern,
+        return self._call("count_text_patterns", output.count_text_patterns, pattern,
                           use_regex=use_regex, limit=limit)
 
     # ======= architecture =======

@@ -12,18 +12,19 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from tools import architectural, editing, layers
-from tools import analysis as scanning
-from tools import primitives as entities
+from tools import architectural, drawing, editing
+from tools import output as scanning
 from utils import geometry
 
-# Old (pre-v0.2.2) module name -> real dotted module path, so call sites
-# below can keep using the short names entities/editing/layers/scanning.
+# Short names kept for the call sites below; the pre-merge modules merged into
+# tools.drawing (entities/layers) and tools.output (scanning).
+layers = entities = drawing
+
 _MODULE_PATHS = {
-    "entities": "tools.primitives",
+    "entities": "tools.drawing",
     "editing": "tools.editing",
-    "layers": "tools.layers",
-    "scanning": "tools.analysis",
+    "layers": "tools.drawing",
+    "scanning": "tools.output",
 }
 
 

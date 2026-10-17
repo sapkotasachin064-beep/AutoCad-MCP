@@ -904,7 +904,7 @@
     "unit",
     "live_autocad"
    ],
-   "reference": "core/com_executor.py; U-C4N/beiming183 ideas (MIT)",
+   "reference": "core/executor.py; U-C4N/beiming183 ideas (MIT)",
    "overlaps": [],
    "live_evidence": {
     "test": "test_v030_generators_live (server tools through ComBackend and the COM executor)",
@@ -1987,7 +1987,7 @@
    "reference": "",
    "overlaps": [],
    "live_evidence": {
-    "test": "cad_engine.launch_and_wait from not running to connected",
+    "test": "backends/com_engine.launch_and_wait from not running to connected",
     "run": "2026-10-16",
     "autocad": "AutoCAD 2024 (R24.3, 24.3s (LMS Tech)), Windows 11"
    }

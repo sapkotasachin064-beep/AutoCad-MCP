@@ -12,7 +12,7 @@ import pywintypes
 import pythoncom
 import win32com.client
 
-from cad_engine import _retry_com, point_variant
+from backends.com_engine import _retry_com, point_variant
 from core.errors import CadStateError, VerificationError
 
 from utils.validation import DXF_TYPES, OBJECT_TO_DXF  # noqa: F401  (re-exported)

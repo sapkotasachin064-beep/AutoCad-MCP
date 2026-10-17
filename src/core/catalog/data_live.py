@@ -24,7 +24,7 @@ LIVE_VERIFIED = {
     "C:release_detection": "launch_and_wait / get_status: 24.3 -> 2024",
     "D:status": "every live test's skip gate (get_status connected + supported)",
     "D:install_detection": "get_status installed=True",
-    "D:launch": "cad_engine.launch_and_wait from not running to connected",
+    "D:launch": "backends/com_engine.launch_and_wait from not running to connected",
     # documents
     "E:new_drawing": "fresh_drawing fixture, test_create_new_drawing_becomes_active",
     "E:list_drawings": "test_v030_list_drawings_and_units",
