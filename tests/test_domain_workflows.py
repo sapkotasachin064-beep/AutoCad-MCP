@@ -78,6 +78,26 @@ def test_room_names_must_be_unique():
         floorplan.plan_room_floor_plan(L_SHAPE + [{"name": "living", "x": 10, "y": 0, "width": 2, "depth": 2}], M, MM)
 
 
+def test_floor_plan_dimensions_are_sized_from_the_room_label_height_in_any_unit():
+    metric = floorplan.plan_room_floor_plan(L_SHAPE, M, MM)
+    dims = [p for p in metric.primitives if p.kind == "dim_linear"]
+    assert len(dims) == 2 and all(p.height == pytest.approx(150.0) for p in dims)
+    imperial = floorplan.plan_room_floor_plan(L_SHAPE, M, IN)
+    assert all(p.height == pytest.approx(6.0) for p in imperial.primitives if p.kind == "dim_linear")
+    custom = floorplan.plan_room_floor_plan(L_SHAPE, M, MM, label_height=0.2)  # 0.2 m, in metres
+    assert all(p.height == pytest.approx(200.0) for p in custom.primitives if p.kind == "dim_linear")
+    bare = floorplan.plan_room_floor_plan(L_SHAPE, M, MM, dimensions=False)
+    assert not [p for p in bare.primitives if p.kind == "dim_linear"]
+
+
+def test_grid_dimensions_are_sized_from_the_bubble_text_height():
+    plan = grids.plan_grid([4, 5, 4], [6, 6], M, MM)
+    dims = [p for p in plan.primitives if p.kind == "dim_linear"]
+    assert len(dims) == 7 and all(p.height == pytest.approx(350.0) for p in dims)
+    custom = grids.plan_grid([4, 5], [6], M, MM, text_height=0.5)
+    assert all(p.height == pytest.approx(500.0) for p in custom.primitives if p.kind == "dim_linear")
+
+
 # ======= grid =======
 
 

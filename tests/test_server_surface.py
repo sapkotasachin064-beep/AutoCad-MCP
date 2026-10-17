@@ -36,6 +36,19 @@ def test_units_resource_lists_presets_and_defaults():
     assert data["drafting_defaults"]["imperial_inches"]["exterior_wall"] == pytest.approx(9.0)
 
 
+def test_units_resource_lists_macro_sizes_window_types_and_annotation_scale():
+    data = _read("autocad://units")
+    assert data["macro_sizes"]["metric_mm"]["column"] == [300.0, 300.0]
+    assert data["macro_sizes"]["imperial_inches"]["column"] == [9.0, 12.0]
+    assert data["macro_sizes"]["metric_mm"]["stair_width"] == 900.0 and data["macro_sizes"]["imperial_inches"]["tread_depth"] == 10.0
+    assert data["window_types"]["metric_mm"]["W2"] == {"name": "wide window", "sashes": 3, "width": 1800.0,
+                                                      "height": 1200.0, "sill_height": 900.0}
+    assert data["window_types"]["imperial_inches"]["W3"]["width"] == 24.0
+    assert data["annotation_scale"]["metric_mm"]["text_height"] == 150.0
+    assert data["annotation_scale"]["imperial_inches"]["text_height"] == 6.0
+    assert data["annotation_scale"]["metric_mm"]["dimension"]["arrow"] == 150.0
+
+
 def test_layer_standard_resource():
     data = _read("autocad://layer-standard")
     assert "A-WALL-EXT" in data["architectural"] and "S-GRID" in data["structural"]

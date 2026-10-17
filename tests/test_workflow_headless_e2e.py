@@ -115,9 +115,10 @@ def test_errors_carry_codes_through_the_boundary(headless):
 def test_capabilities_report_the_headless_backend(headless):
     caps = server.autocad_get_capabilities()
     assert caps["backend"] == "dxf"
-    assert caps["tools"]["autocad_plot_pdf"]["backends"] == ["com"]
-    assert caps["tools"]["autocad_render_preview"]["backends"] == ["dxf"]
-    assert "dxf" in caps["tools"]["autocad_generate_floor_plan"]["backends"]
+    tools = {tool["name"]: tool for tool in caps["tools"]}  # a JSON array since fe1d2bf, each entry carries its name
+    assert tools["autocad_plot_pdf"]["backends"] == ["com"]
+    assert tools["autocad_render_preview"]["backends"] == ["dxf"]
+    assert "dxf" in tools["autocad_generate_floor_plan"]["backends"]
 
 
 async def _stdio_session(tmp_path):

@@ -112,10 +112,18 @@ EXPECTED_V0_3_0_TOOLS = {
     "autocad_validate_dxf_file",
 }
 
+# Architectural drawing macros: staircase, column grid, window cut into a wall, furniture stamps.
+EXPECTED_MACRO_TOOLS = {
+    "autocad_draw_staircase",
+    "autocad_draw_column_grid",
+    "autocad_draw_wall_window",
+    "autocad_place_architectural_block",
+}
+
 LEGACY_TOOLS = (
     EXPECTED_V0_1_TOOLS | EXPECTED_V0_2_TOOLS | EXPECTED_V0_2_1_TOOLS | EXPECTED_V0_2_2_TOOLS | EXPECTED_V0_2_3_TOOLS
 )
-ALL_EXPECTED_TOOLS = LEGACY_TOOLS | EXPECTED_V0_3_0_TOOLS
+ALL_EXPECTED_TOOLS = LEGACY_TOOLS | EXPECTED_V0_3_0_TOOLS | EXPECTED_MACRO_TOOLS
 
 
 def _list_tools():
@@ -207,3 +215,47 @@ def test_generate_2d_floor_plan_schema_has_no_required_params():
     schema = tools["autocad_generate_2d_floor_plan"].input_schema
     assert {"width_ft", "length_ft", "units", "rooms_config"} <= schema["properties"].keys()
     assert not schema.get("required")
+
+
+def test_macro_tools_are_registered():
+    names = {tool.name for tool in _list_tools()}
+    assert EXPECTED_MACRO_TOOLS <= names
+
+
+def test_staircase_schema_takes_the_documented_arguments():
+    schema = {t.name: t for t in _list_tools()}["autocad_draw_staircase"].input_schema
+    assert {"start_point", "width", "tread_depth", "riser_count", "direction"} <= schema["properties"].keys()
+    assert set(schema["required"]) == {"start_point", "riser_count"}
+    assert schema["properties"]["riser_count"]["type"] == "integer"
+    assert schema["properties"]["direction"]["default"] == "UP"
+    assert schema["properties"]["rotation_degrees"]["default"] == 90.0
+
+
+def test_column_grid_schema_defaults_to_the_columns_layer():
+    schema = {t.name: t for t in _list_tools()}["autocad_draw_column_grid"].input_schema
+    assert {"x_spacings", "y_spacings", "points", "at_wall_intersections", "column_size", "layer"} <= schema[
+        "properties"].keys()
+    assert schema["properties"]["layer"]["default"] == "COLUMNS"
+    assert not schema.get("required")
+
+
+def test_wall_window_schema_and_destructive_hint():
+    tools = {t.name: t for t in _list_tools()}
+    tool = tools["autocad_draw_wall_window"]
+    assert {"window_type", "wall_handle", "wall_start", "wall_end", "offset", "trim_wall", "dry_run"} <= tool.input_schema[
+        "properties"].keys()
+    assert tool.input_schema["properties"]["window_type"]["default"] == "W1"
+    assert tool.annotations.destructive_hint is True  # replacing a wall deletes its outline
+
+
+def test_furniture_schema_requires_type_and_position_and_defaults_to_a_furn():
+    schema = {t.name: t for t in _list_tools()}["autocad_place_architectural_block"].input_schema
+    assert set(schema["required"]) == {"block_type", "position"}
+    assert schema["properties"]["layer"]["default"] == "A-FURN"
+
+
+def test_every_macro_parameter_has_a_description():
+    tools = {t.name: t for t in _list_tools()}
+    for name in EXPECTED_MACRO_TOOLS:
+        for param, spec in tools[name].input_schema["properties"].items():
+            assert spec.get("description"), f"{name}.{param} has no description"

@@ -344,6 +344,31 @@ def test_v030_generators_live(fresh_drawing, clean_session):
     assert check["entity_count"] > 0 and not math.isnan(check["issue_count"])
 
 
+@requires_autocad
+def test_architectural_macros_live(fresh_drawing, clean_session):
+    """Written without a live run: the first run against AutoCAD is the first live evidence for these four
+    tools (the catalog lists them as `tested`, not `verified`, until it is recorded in data_live.py)."""
+    import server
+
+    stair = server.autocad_draw_staircase([0, 0], 12, direction="DN")
+    assert stair["verified"] is True and stair["entity_count"] == 30
+    grid = server.autocad_draw_column_grid(x_spacings=[4000, 4000], y_spacings=[3000], unit="mm", origin=[100, 0])
+    assert grid["verified"] is True and grid["column_count"] == 6
+    wall = server.autocad_draw_wall([0, 300], [240, 300])
+    window = server.autocad_draw_wall_window("W1", wall_handle=wall["handle"], dry_run=False)
+    assert window["verified"] is True and window["trimmed_wall"]["deleted"] is True
+    assert len(window["trimmed_wall"]["new_handles"]) == 2
+    placed = [server.autocad_place_architectural_block(kind, [600, 100 + 100 * i], label=True)
+              for i, kind in enumerate(("bed", "dining_table", "sofa_set", "wc", "kitchen_countertop"))]
+    assert all(p["verified"] is True for p in placed)
+    takeoff = server.autocad_quantity_takeoff()
+    assert takeoff["layers"]["A-WALL"]["walls"]["count"] == 2
+    # AutoCAD accepted the text height, arrow, extension and precision set on every dimension
+    refused = [n for r in (stair, grid, window, *placed) for n in r.get("notices", [])
+               if n["kind"] == "dimension_size_not_applied"]
+    assert refused == []
+
+
 # ======= civil =======
 
 

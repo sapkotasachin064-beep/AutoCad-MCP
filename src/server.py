@@ -40,7 +40,7 @@ from core.executor import get_executor
 from core.hosts import detect_opencode
 from core.registry import ToolSpec
 from domain import units
-from schemas import Handle, Handles, Layer, LayerName, Point, Points
+from schemas import Handle, Handles, Layer, LayerName, MacroUnit, Point, Points
 from utils.constants import get_db_path, get_output_dir
 from version import __version__
 
@@ -926,6 +926,269 @@ def autocad_draw_sheet(
                                                                                 "drawing_area", "fields")})
 
 
+# ======= architectural macros: staircase, column grid, wall window, furniture =======
+
+
+def _check_unit(unit) -> None:
+    """Reject an unknown `unit` before the drawing is touched."""
+    if unit is not None:
+        units.unit_code(unit)
+
+
+@cad_tool(toolset="architecture", kind="write", title="Draw staircase", operation="emit_plan")
+def autocad_draw_staircase(
+    start_point: Point,
+    riser_count: Annotated[int, Field(description='Number of risers, 2 to 60; the flight has riser_count - 1 treads.')],
+    width: Annotated[float | None, Field(description='Flight width in `unit`; null = 900 mm in a metric drawing, 36 in in an imperial one.')] = None,
+    tread_depth: Annotated[float | None, Field(description='Tread depth (the going) in `unit`; null = 250 mm in a metric drawing, 10 in in an imperial one.')] = None,
+    direction: Annotated[str, Field(description="'UP' or 'DN': the label on the walking-line arrow. The arrow always points along the flight, away from start_point.")] = "UP",
+    rotation_degrees: Annotated[float, Field(description='Direction the flight runs from start_point, degrees counterclockwise from +X (90 = towards +Y). The flight is `width` wide to the right of that direction.')] = 90.0,
+    landing_depth: Annotated[float | None, Field(description='Landing length after the last riser in `unit`; null = the flight width (a square landing); 0 = no landing.')] = None,
+    handrails: Annotated[bool, Field(description='Draw a handrail along each side of the flight.')] = True,
+    unit: MacroUnit = None,
+    text_height: Annotated[float | None, Field(description="Text height in `unit`; null = the standard for the drawing's units (150 mm / 6 in). Arrow and note scale with it.")] = None,
+    dry_run: Annotated[bool, Field(description='Plan and report without drawing.')] = False,
+) -> dict:
+    """Draw a parametric straight staircase in plan from start_point, width, tread_depth, riser_count and
+    direction ('UP' or 'DN'): tread rectangles (A-FLOR-TRED), riser lines (A-FLOR-RISR), a landing after the
+    last riser (A-FLOR-LAND), a handrail along each side (A-FLOR-HRAL), and a walking-line arrow
+    (A-ANNO-SYMB) with an 'UP 12R' / 'DN 12R' note (A-ANNO-NOTE). start_point is the left end of the first
+    riser line looking along the run; rotation_degrees turns the flight (0 = +X, 90 = +Y) and the flight is
+    `width` wide to the right of that direction. Default sizes and the text height follow the drawing's
+    units (metric 900 mm wide, 250 mm treads, 150 mm text; imperial 36 in, 10 in, 6 in); `unit` lets you give
+    lengths in another unit. The arrow always points away from start_point: 'UP' and 'DN' differ only in the
+    label. Drafting only: riser height, headroom and code limits are not checked (autocad_design_stair
+    checks riser/tread rules). dry_run=true returns the plan without drawing."""
+    from domain import macros
+
+    _check_unit(unit)
+    macros.check_staircase(start_point, riser_count, width=width, tread_depth=tread_depth, direction=direction,
+                           rotation_degrees=rotation_degrees, landing_depth=landing_depth, handrails=handrails,
+                           text_height=text_height)
+
+    def build(code):
+        return macros.plan_staircase(start_point, riser_count, code, units.length_factor(unit, code), width=width,
+                                     tread_depth=tread_depth, direction=direction,
+                                     rotation_degrees=rotation_degrees, landing_depth=landing_depth,
+                                     handrails=handrails, text_height=text_height)
+
+    outcome = backend().emit_plan(build, dry_run=dry_run)
+    meta = outcome[0][0].meta
+    return _plan_result("staircase", outcome, dry_run,
+                        extra={"staircase": meta["staircase"], "annotation": meta["annotation"]})
+
+
+@cad_tool(toolset="architecture", kind="write", title="Draw column grid", operation="emit_plan")
+def autocad_draw_column_grid(
+    x_spacings: Annotated[list[float] | None, Field(description='Bay widths left to right in `unit`, for a regular grid (give with y_spacings). Columns go at every grid intersection.')] = None,
+    y_spacings: Annotated[list[float] | None, Field(description='Bay depths bottom to top in `unit`, for a regular grid (give with x_spacings).')] = None,
+    points: Annotated[list[list[float]] | None, Field(description='Custom column centres [x, y] in drawing units, in addition to any grid.')] = None,
+    at_wall_intersections: Annotated[bool, Field(description='Also put a column at every place two wall centrelines meet (corners, T and X junctions), found from the rectangular wall outlines already in the drawing.')] = False,
+    wall_layers: Annotated[list[str] | None, Field(description='Layers holding the wall outlines for at_wall_intersections; null = every layer starting with A-WALL.')] = None,
+    column_size: Annotated[list[float] | None, Field(description='Column [width, depth] in `unit` (width along X before rotation); null = 300 x 300 mm in a metric drawing, 9 x 12 in in an imperial one.')] = None,
+    origin: Annotated[list[float] | None, Field(description='Grid origin [x, y] in drawing units; null = (0, 0).')] = None,
+    rotation_degrees: Annotated[float, Field(description='Rotation of every column about its own centre, degrees counterclockwise.')] = 0.0,
+    layer: Annotated[str, Field(description='Layer for the column outlines and hatches; labels go on <layer>-TEXT and dimensions on <layer>-DIM. Created if missing.')] = "COLUMNS",
+    labels: Annotated[bool, Field(description='Label each column C1, C2, ... (bottom to top, left to right).')] = True,
+    dimensions: Annotated[bool, Field(description='Add bay and overall dimensions along the bottom and left of a regular grid.')] = True,
+    unit: MacroUnit = None,
+    text_height: Annotated[float | None, Field(description="Label and dimension text height in `unit`; null = the standard for the drawing's units (150 mm / 6 in). Dimension arrows scale with it.")] = None,
+    dry_run: Annotated[bool, Field(description='Plan and report without drawing.')] = False,
+) -> dict:
+    """Place rectangular structural columns on layer COLUMNS (change with layer), each a closed outline with a
+    SOLID hatch fill. Positions come from a regular grid (x_spacings + y_spacings from origin), from custom
+    points, and/or from the intersections of the walls already drawn (at_wall_intersections=true reads the
+    rectangular wall outlines on A-WALL* layers and puts one column where wall centrelines meet). A position
+    given twice is drawn once. Default column size follows the drawing's units (300 x 300 mm metric, 9 x 12 in
+    imperial); labels, dimensions and text scale with the units. Marks C1, C2, ... are returned with each
+    column's centre and source. Drafting only: no column is sized or checked structurally. dry_run=true
+    returns the plan without drawing."""
+    from domain import macros
+
+    _check_unit(unit)
+    macros.check_column_grid(x_spacings=x_spacings, y_spacings=y_spacings, origin=origin, points=points,
+                             column_size=column_size, rotation_degrees=rotation_degrees, layer=layer,
+                             labels=labels, dimensions=dimensions, text_height=text_height,
+                             wall_intersections_wanted=at_wall_intersections)
+    wall_points, walls_report = None, None
+    if at_wall_intersections:
+        snapshot = backend().snapshot_entities()
+        walls, ignored = macros.wall_segments(snapshot["entities"], wall_layers)
+        junctions = macros.wall_intersections(walls)
+        wall_points = [j["point"] for j in junctions]
+        walls_report = {"walls_found": len(walls), "outlines_ignored": ignored, "intersections": len(junctions),
+                        "layers": wall_layers or "A-WALL*", "scan_truncated": snapshot["truncated"]}
+
+    def build(code):
+        return macros.plan_column_grid(code, units.length_factor(unit, code), x_spacings=x_spacings,
+                                       y_spacings=y_spacings, origin=origin, points=points, wall_points=wall_points,
+                                       column_size=column_size, rotation_degrees=rotation_degrees, layer=layer,
+                                       labels=labels, dimensions=dimensions, text_height=text_height)
+
+    outcome = backend().emit_plan(build, dry_run=dry_run)
+    meta = outcome[0][0].meta
+    extra = {k: meta[k] for k in ("columns", "column_count", "by_source", "column_size", "layer", "grid",
+                                  "duplicates_skipped", "annotation")}
+    if walls_report is not None:
+        extra["wall_scan"] = walls_report
+    return _plan_result("column_grid", outcome, dry_run, extra=extra)
+
+
+@cad_tool(toolset="architecture", kind="destructive", title="Draw wall window", operation="emit_plan",
+          notes="with wall_handle and trim_wall it replaces the wall (deletes the original outline); dry run first")
+def autocad_draw_wall_window(
+    window_type: Annotated[str, Field(description="'W1' (standard, 1200 x 1200 mm / 48 x 48 in, 2 sashes), 'W2' (wide, 1800 x 1200 mm / 72 x 48 in, 3 sashes) or 'W3' (ventilator, 600 x 450 mm / 24 x 18 in, 1 sash). Sizes follow the drawing's unit system.")] = "W1",
+    wall_handle: Annotated[str | None, Field(description='Handle of an existing wall outline (a closed rectangular polyline as autocad_draw_wall or the floor-plan generators draw). Give this, or wall_start and wall_end.')] = None,
+    wall_start: Annotated[list[float] | None, Field(description='Start of the wall centreline [x, y] in drawing units, to draw a new wall with the window in it (give with wall_end).')] = None,
+    wall_end: Annotated[list[float] | None, Field(description='End of the wall centreline [x, y] in drawing units (give with wall_start).')] = None,
+    thickness: Annotated[float | None, Field(description='Thickness of the new wall in `unit` (with wall_start/wall_end only); null = the standard exterior wall (230 mm / 9 in).')] = None,
+    offset: Annotated[float | None, Field(description='Distance in `unit` from the wall start to the CENTRE of the window; null = the middle of the wall.')] = None,
+    width: Annotated[float | None, Field(description="Window width in `unit`; null = the type's width.")] = None,
+    trim_wall: Annotated[bool, Field(description='Cut the opening: replace the wall by two pieces that stop at the window. false leaves the wall as it is and only draws the jamb lines.')] = True,
+    tag: Annotated[bool, Field(description='Write the type tag (W1, W2 or W3) beside the wall.')] = True,
+    tag_side: Annotated[str, Field(description="Side of the wall for the tag, looking from start to end: 'left' or 'right'.")] = "left",
+    layer: Annotated[str, Field(description='Layer for the glass-pane lines and mullions; sill lines go on <layer>-SILL and the tag on <layer>-IDEN. Created if missing.')] = "A-GLAZ",
+    wall_layer: Annotated[str, Field(description="Layer of the new wall (wall_start/wall_end only); with wall_handle the existing wall's own layer is kept. Created if missing.")] = "A-WALL",
+    unit: MacroUnit = None,
+    text_height: Annotated[float | None, Field(description="Tag text height in `unit`; null = the standard for the drawing's units (150 mm / 6 in).")] = None,
+    dry_run: Annotated[bool | None, Field(description='true plans without drawing; false draws. null = true when the call would replace an existing wall (wall_handle with trim_wall), false otherwise.')] = None,
+) -> dict:
+    """Cut a window of type W1, W2 or W3 into a wall: the opening is trimmed out of the wall, and the window is
+    drawn as two glass-pane lines across the middle of the wall, a sill line on each wall face
+    (layer + '-SILL'), mullion ticks between the sashes, and the W1/W2/W3 tag (layer + '-IDEN'). The wall
+    is either an existing outline (wall_handle: the original is deleted and replaced by two wall pieces on
+    its own layer, new handles in trimmed_wall) or a new wall drawn from wall_start to wall_end on wall_layer
+    with the opening already in it. offset is measured to the window centre. Window width, wall thickness and
+    text follow the drawing's units (or `unit`); the result lists the type's height, sill and head heights in
+    drawing units and mm. To add a second window use a piece's new handle. Because replacing a wall deletes
+    its outline (Ctrl+Z in AutoCAD undoes it), dry_run defaults to true in that case: read the plan, then
+    repeat with dry_run=false. Drafting only."""
+    from core.errors import VerificationError
+    from domain import macros
+    from utils import geometry
+
+    _check_unit(unit)
+    macros.check_wall_window(window_type, offset=offset, width=width, trim_wall=trim_wall, show_tag=tag,
+                             tag_side=tag_side, text_height=text_height, window_layer=layer)
+    geometry.validate_layer_name(wall_layer, "wall_layer")
+    if wall_handle is not None:
+        if wall_start is not None or wall_end is not None or thickness is not None:
+            raise CadError("give wall_handle, or wall_start and wall_end (with an optional thickness), not both",
+                           code="E_INVALID_INPUT")
+        wall = macros.wall_from_entity(backend().get_entity(handle=wall_handle)["entity"])
+    else:
+        if wall_start is None or wall_end is None:
+            raise CadError("give wall_handle, or both wall_start and wall_end", code="E_INVALID_INPUT")
+        macros.check_wall_points(wall_start, wall_end)
+        if thickness is not None:
+            geometry.validate_positive(thickness, "thickness")
+        wall = None
+    replaces_wall = wall_handle is not None and trim_wall
+    if dry_run is None:
+        dry_run = replaces_wall
+
+    def build(code):
+        factor = units.length_factor(unit, code)
+        target = wall or macros.explicit_wall(wall_start, wall_end, thickness, code, factor, layer=wall_layer)
+        return macros.plan_wall_window(target, window_type, code, factor, offset=offset, width=width,
+                                       trim_wall=trim_wall, show_tag=tag, tag_side=tag_side,
+                                       text_height=text_height, window_layer=layer, wall_layer=wall_layer)
+
+    outcome = backend().emit_plan(build, dry_run=dry_run)
+    (plan, handles, _identity, _code), _notices = outcome
+    meta = plan.meta
+    result = _plan_result("wall_window", outcome, dry_run,
+                          extra={"window": meta["window"], "wall": meta["wall"], "annotation": meta["annotation"]})
+    if replaces_wall:
+        pieces = [handles[p["tag"]] for p in meta["wall"]["pieces"]] if handles else []
+        if dry_run:
+            result["would_replace_wall"] = {"handle": wall_handle,
+                                            "message": "The original wall outline would be deleted after the wall pieces are drawn."}
+        else:
+            try:
+                deletion = backend().delete_entities(handles=[wall_handle], dry_run=False)
+            except Exception as exc:
+                raise VerificationError(
+                    f"The window and the wall pieces {pieces} were drawn, but the original wall {wall_handle} "
+                    f"could not be deleted ({exc}). Delete it with autocad_delete_entities.",
+                    details={"wall_handle": wall_handle, "new_wall_handles": pieces}) from exc
+            if deletion.get("verified") is not True:
+                raise VerificationError(
+                    f"The window and the wall pieces {pieces} were drawn, but deleting the original wall "
+                    f"{wall_handle} could not be verified. Check the drawing, then delete it with autocad_delete_entities.",
+                    details={"wall_handle": wall_handle, "new_wall_handles": pieces})
+            result["trimmed_wall"] = {"replaced_handle": wall_handle, "deleted": True, "new_handles": pieces}
+            result["message"] += f" Replaced wall {wall_handle} by {len(pieces)} piece(s)."
+    elif not dry_run and meta["wall"]["pieces"]:
+        result["trimmed_wall"] = {"replaced_handle": None, "deleted": False,
+                                  "new_handles": [handles[p["tag"]] for p in meta["wall"]["pieces"]]}
+    return result
+
+
+@cad_tool(toolset="architecture", kind="write", title="Place furniture or fixture", operation="emit_plan")
+def autocad_place_architectural_block(
+    block_type: Annotated[str, Field(description="'bed', 'dining_table', 'sofa_set', 'wc' or 'kitchen_countertop'.")],
+    position: Point,
+    rotation_degrees: Annotated[float, Field(description='Rotation about position, degrees counterclockwise. At 0 the back of the item (headboard, sofa back, cistern, counter edge against the wall) faces +Y.')] = 0.0,
+    variant: Annotated[str | None, Field(description="bed: 'single', 'double' (default) or 'king'. kitchen_countertop: 'straight' (default), 'l_left' or 'l_right' (return leg on that side). Other types have none.")] = None,
+    width: Annotated[float | None, Field(description="Override in `unit`: bed width across, dining table length, sofa length, WC bowl width, counter run length. null = the standard size for the drawing's units.")] = None,
+    depth: Annotated[float | None, Field(description="Override in `unit`: bed length head to foot, dining table width, sofa depth, WC overall depth, counter depth. null = the standard size.")] = None,
+    seats: Annotated[int | None, Field(description='dining_table: even number of seats 2-12 (default 4, chairs on both long sides). sofa_set: seats in the main sofa 2-4 (default 3).')] = None,
+    return_length: Annotated[float | None, Field(description="Length of the return leg of an L-shaped kitchen_countertop in `unit`; null = 1800 mm / 72 in.")] = None,
+    label: Annotated[bool, Field(description='Write the item name (BED, DINING TABLE, ...) in front of it.')] = False,
+    block_name: Annotated[str | None, Field(description='Insert this block, already defined in the drawing, instead of drawing the parametric shape. Then only position, rotation_degrees, scale and layer apply.')] = None,
+    scale: Annotated[float, Field(description='Insertion scale for block_name; must be positive.')] = 1.0,
+    layer: Annotated[str, Field(description='Layer for the shape or the block reference; labels go on <layer>-TEXT. Created if missing.')] = "A-FURN",
+    unit: MacroUnit = None,
+    text_height: Annotated[float | None, Field(description="Label text height in `unit`; null = the standard for the drawing's units (150 mm / 6 in).")] = None,
+    dry_run: Annotated[bool, Field(description='Plan and report without drawing.')] = False,
+) -> dict:
+    """Stamp a bed, dining table (with chairs), sofa set (sofa, coffee table and two armchairs), WC or kitchen
+    countertop (with sink and hob; straight or L-shaped) on layer A-FURN. The shape is parametric: standard
+    sizes follow the drawing's unit system (metric: double bed 1500 x 2000 mm; imperial: 60 x 80 in) and
+    width/depth/seats/variant change it. position is the centre of the item's footprint, which the result
+    returns with its corners. Pass block_name to insert a block from your own library instead of drawing the
+    shape. Text and labels scale with the drawing's units. dry_run=true returns the plan without drawing."""
+    from domain import macros
+    from utils import geometry
+
+    _check_unit(unit)
+    macros.check_furniture(block_type, position, rotation_degrees=rotation_degrees, variant=variant, width=width,
+                           depth=depth, seats=seats, return_length=return_length, label=label,
+                           text_height=text_height, layer=layer)
+    if block_name is not None:
+        shape_arguments = {"variant": variant, "width": width, "depth": depth, "seats": seats,
+                           "return_length": return_length}
+        given = sorted(k for k, v in shape_arguments.items() if v is not None)
+        if given or label:
+            raise CadError(f"{given + (['label'] if label else [])} describe the parametric shape and cannot be "
+                           "combined with block_name; use scale to resize a block", code="E_INVALID_INPUT")
+        scale = geometry.validate_positive(scale, "scale")
+        if dry_run:
+            known = {b["name"].lower() for b in backend().list_blocks()["blocks"]}
+            if block_name.strip().lower() not in known:
+                raise CadError(f"Block {block_name!r} is not defined in this drawing.", code="E_BLOCK_NOT_FOUND")
+            return {"status": "ok", "generator": "furniture_block", "dry_run": True, "block_name": block_name.strip(),
+                    "block_type": macros.furniture_type(block_type), "position": list(position[:2]), "layer": layer,
+                    "rotation_degrees": rotation_degrees, "scale": scale,
+                    "message": f"Dry run: block {block_name.strip()!r} exists and would be inserted; nothing was changed."}
+        inserted = backend().insert_block(name=block_name, insertion_point=position, scale=scale,
+                                          rotation_degrees=rotation_degrees, layer=layer)
+        return {**inserted, "generator": "furniture_block", "block_type": macros.furniture_type(block_type),
+                "block_name": block_name.strip()}
+
+    def build(code):
+        return macros.plan_furniture(block_type, position, code, units.length_factor(unit, code),
+                                     rotation_degrees=rotation_degrees, variant=variant, width=width, depth=depth,
+                                     seats=seats, return_length=return_length, label=label,
+                                     text_height=text_height, layer=layer)
+
+    outcome = backend().emit_plan(build, dry_run=dry_run)
+    meta = outcome[0][0].meta
+    return _plan_result("furniture", outcome, dry_run,
+                        extra={"furniture": meta["furniture"], "annotation": meta["annotation"]})
+
+
 # ======= civil / survey =======
 
 
@@ -1181,11 +1444,16 @@ def resource_capabilities() -> str:
 def resource_units() -> str:
     import json
 
+    from domain import macros
+
     return json.dumps({
         "presets": {k: dict(v) for k, v in units.UNIT_PRESETS.items()},
         "default_preset": units.DEFAULT_PRESET,
         "insunits": {code: name for code, (name, _mm) in units.INSUNITS.items()},
         "drafting_defaults": {"imperial_inches": units.defaults_for(1), "metric_mm": units.defaults_for(4)},
+        "macro_sizes": {"imperial_inches": macros.sizes(1), "metric_mm": macros.sizes(4)},
+        "window_types": {"imperial_inches": macros.window_catalog(1), "metric_mm": macros.window_catalog(4)},
+        "annotation_scale": {"imperial_inches": units.annotation_scale(1), "metric_mm": units.annotation_scale(4)},
         "note": "Drafting conventions, not building-code requirements.",
     }, indent=1)
 
@@ -1195,7 +1463,7 @@ def resource_units() -> str:
 def resource_layer_standard() -> str:
     import json
 
-    from domain import architecture
+    from domain import architecture, macros
     from utils.constants import ARCHITECTURAL_LAYERS
 
     return json.dumps({
@@ -1203,6 +1471,7 @@ def resource_layer_standard() -> str:
         "structural": {name: {"color_index": c, "linetype": lt} for name, (c, lt) in architecture.LAYERS.items()},
         "sheet": ["G-ANNO-TTLB", "G-ANNO-TTLB-TEXT"],
         "stairs": ["A-FLOR-STRS", "A-ANNO-NOTE"],
+        "macros": macros.LAYERS,
         "paper_sizes_mm": architecture.PAPER_SIZES_MM,
     }, indent=1)
 

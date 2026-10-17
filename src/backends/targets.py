@@ -8,7 +8,37 @@ and verifies model-space entity count grew by exactly len(plan.primitives).
 
 import math
 
+from core import session
 from core.errors import VerificationError
+from domain import units
+
+# Dimension primitives that carry a text `height` get their text, arrows and
+# extension lines sized from it (units.dimension_sizes), so a dimension drawn in a
+# millimetre drawing is as readable as one in an inch drawing. Primitives without
+# a height (the older generators) keep the drawing's current dimension style.
+_COM_DIMENSION_PROPERTIES = (
+    ("TextHeight", "text_height"),
+    ("ArrowheadSize", "arrow"),
+    ("ExtensionLineExtend", "extension_beyond"),
+    ("ExtensionLineOffset", "extension_offset"),
+    ("TextGap", "text_gap"),
+    ("PrimaryUnitsPrecision", "decimals"),  # AcDimPrecision: the value is the number of decimal places
+)
+
+
+def dxf_dimension_override(height, insunits=None) -> dict:
+    """ezdxf dimension style overrides.
+
+    Always dimlfac=1: ezdxf's default dimension style shows every measurement times 100 (it assumes metres
+    displayed as centimetres), so a 4000 mm span would read 400000. With a text height the text, arrows and
+    extension lines are sized from it and the text shows the decimals that suit the drawing's units."""
+    override = {"dimlfac": 1.0}
+    if height:
+        sizes = units.dimension_sizes(height)
+        override.update(dimtxt=sizes["text_height"], dimasz=sizes["arrow"], dimexe=sizes["extension_beyond"],
+                        dimexo=sizes["extension_offset"], dimgap=sizes["text_gap"],
+                        dimdec=units.dimension_decimals(insunits))
+    return override
 
 
 class RecordingTarget:
@@ -77,12 +107,13 @@ class DxfTarget:
                                                         "rotation": p.rotation})
             entity.set_location(p.location, attachment_point=5 if p.attach == "middle_center" else 1)
         elif p.kind in ("dim_aligned", "dim_linear"):
+            override = dxf_dimension_override(p.height, self.insunits)
             if p.kind == "dim_aligned":
                 dim = msp.add_aligned_dim(p1=p.points[0][:2], p2=p.points[1][:2],
-                                          distance=_aligned_distance(p), dxfattribs=attribs)
+                                          distance=_aligned_distance(p), override=override, dxfattribs=attribs)
             else:
                 dim = msp.add_linear_dim(base=p.location[:2], p1=p.points[0][:2], p2=p.points[1][:2],
-                                         angle=p.rotation, dxfattribs=attribs)
+                                         angle=p.rotation, override=override, dxfattribs=attribs)
             dim.render()
             entity = dim.dimension
         elif p.kind == "hatch":
@@ -141,6 +172,21 @@ class ComTarget:
             loaded = ensure_linetype(self.doc, linetype)
             _retry_com(lambda: setattr(layer, "Linetype", loaded))
 
+    def _size_dimension(self, entity, p):
+        """Scale one dimension's text, arrows and extension lines from p.height
+        (see units.dimension_sizes). A property AutoCAD refuses is reported as a
+        notice, not hidden: the dimension is still drawn, with the style's size."""
+        if not p.height:
+            return
+        import pywintypes
+
+        sizes = {**units.dimension_sizes(p.height), "decimals": units.dimension_decimals(self.insunits)}
+        for prop, key in _COM_DIMENSION_PROPERTIES:
+            try:
+                setattr(entity, prop, sizes[key])
+            except (pywintypes.com_error, AttributeError) as exc:
+                session.add_notice("dimension_size_not_applied", property=prop, tag=p.tag, error=str(exc))
+
     def draw(self, p) -> str:
         from backends.com_engine import _retry_com, flat_variant, point_variant
         from tools.annotation import AC_HATCH_PATTERN_PREDEFINED
@@ -179,9 +225,11 @@ class ComTarget:
                 _retry_com(lambda: setattr(entity, "InsertionPoint", pt(p.location)))
         elif p.kind == "dim_aligned":
             entity = _retry_com(lambda: space.AddDimAligned(pt(p.points[0]), pt(p.points[1]), pt(p.location)))
+            self._size_dimension(entity, p)
         elif p.kind == "dim_linear":
             entity = _retry_com(lambda: space.AddDimRotated(pt(p.points[0]), pt(p.points[1]), pt(p.location),
                                                             math.radians(p.rotation)))
+            self._size_dimension(entity, p)
         elif p.kind == "hatch":
             flat = [c for q in p.points for c in q[:2]]
             boundary = _retry_com(lambda: space.AddLightWeightPolyline(double_array(flat)))
