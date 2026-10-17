@@ -1,0 +1,23 @@
+PASS test_create_new_drawing_becomes_active 3.662
+PASS test_draw_line_creates_real_entity 3.801
+PASS test_draw_circle_and_create_layer 5.022
+PASS test_draw_rectangle_and_polyline 5.315
+PASS test_draw_text 7.927
+PASS test_move_rotate_copy_entity 5.270
+PASS test_highlight_entity_temporary_preserves_color 4.687
+PASS test_highlight_entity_persistent_changes_color 5.631
+PASS test_highlight_text_matches_does_not_modify_text 5.067
+PASS test_count_text_patterns_literal_and_regex 5.758
+PASS test_scan_all_entities_and_execute_query_round_trip 6.072
+PASS test_v030_list_drawings_and_units 4.318
+PASS test_v030_summary_list_and_detail 9.112
+PASS test_v030_modify_suite 7.628
+PASS test_v030_annotation_live 5.490
+PASS test_v030_blocks_live 6.332
+PASS test_v030_export_and_plot_live 11.302
+PASS test_v030_save_as_then_close 6.783
+PASS test_v030_generators_live 18.308
+{'tests': '19', 'failures': '0', 'errors': '0', 'skipped': '0', 'time': '128.350'}
+[PASS] PTF-1 (pytest output files): PDF written by the project's live plot test is a real PDF (header, size, %%EOF)
+[PASS] PTF-2 (pytest output files): DXF written by the project's live export test is readable by ezdxf
+[PASS] PTF-3 (pytest output files): DWG written by the project's live save-as test has a DWG header

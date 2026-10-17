@@ -1,0 +1,97 @@
+baseline drawings (never touched): []
+[PASS] ST01 autocad_design_stair: stair for 3000 mm on the live backend: 16 risers of 187.5, 15 treads of 250, 3750 run, 2R+G and pitch re-derived here; labelled as rule-of-thumb, not a code
+[PASS] ST02 autocad_design_stair: zero rise rejected
+[PASS] ST03 autocad_draw_stair_plan: stair plan dry run: 18 entities announced, nothing drawn (direct COM count unchanged)
+[PASS] ST04 autocad_draw_stair_plan: draw the stair plan: all 18 entities read back from AutoCAD one by one equal the announced plan (geometry, layer, text, height); layers and colours exist
+[PASS] ST05 (autocad_draw_stair_plan): stair geometry checked against numbers derived by hand (tread spacing, width, run, note)
+[PASS] ST06 (autocad_draw_stair_plan): direction 0 climbs along +X: footprint 3750 x 900 mm (AutoCAD bounding box)
+[PASS] ST07 autocad_draw_stair_plan: a 45-degree direction is refused and nothing is drawn
+[PASS] SH01 autocad_draw_sheet: A3 sheet at 1:100, dry run: 20 entities, 420 x 297 mm, usable area (-1000,-7000)..(38000,20700) as derived by hand; nothing drawn
+[PASS] SH02 autocad_draw_sheet: draw the A3 sheet: all 20 entities read back from AutoCAD equal the plan; edge is 42000 x 29700 from the chosen origin; label / value text heights are 250 / 350 (paper 2.5 / 3.5 mm x 100)
+[PASS] SH03 autocad_draw_sheet: unknown paper size rejected and nothing is drawn
+[PASS] SH04 autocad_draw_sheet: zero scale rejected and nothing is drawn
+[PASS] SH05 autocad_draw_sheet: an unknown title-block field is rejected and nothing is drawn
+[PASS] SH06 autocad_draw_sheet: unknown orientation rejected and nothing is drawn
+drawn: {'total': 13, 'by_type': {'AcDb3dPolyline': 4, 'AcDbCircle': 1, 'AcDbLine': 2, 'AcDbArc': 1, 'AcDbHatch': 1, 'AcDbBlockReference': 2, 'AcDbText': 2}, 'by_layer': {'A-WALL': 2, 'ROOM': 1, 'COL': 1, 'LINES': 3, 'ARCS': 1, 'HATCH': 1, 'BLOCKS': 2, 'NOTES': 2}}
+[FAIL] TK01 autocad_quantity_takeoff: takeoff on a drawing built from known numbers: wall length 8000, wall area 1.84e6, face area 21.6e6, volume 4.968e9, room 12 m2, circle pi*500^2, lines 3000 + 7000, arc pi/2*1000, hatch 12 m2, 2 blocks, 2 texts - every figure computed here from the coordinates
+       -> call failed: {"ok": false, "error": {"code": "E_DOCUMENT_CHANGED", "message": "The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.", "recoverable": true, "recommended_action": "activate_the_pinned_drawing_in_autocad_or_call_autocad_unpin_docu...
+[FAIL] TK02 autocad_quantity_takeoff: layer filter (case-insensitive) keeps only ROOM
+       -> call failed: {"ok": false, "error": {"code": "E_DOCUMENT_CHANGED", "message": "The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.", "recoverable": true, "recommended_action": "activate_the_pinned_drawing_in_autocad_or_call_autocad_unpin_docu...
+[FAIL] TK03 autocad_quantity_takeoff: a negative wall height is rejected
+       -> expected error code in ['E_INVALID_INPUT'], got 'E_DOCUMENT_CHANGED': The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.
+[FAIL] TK04 autocad_quantity_takeoff: max_entities=5 truncates and says so
+       -> call failed: {"ok": false, "error": {"code": "E_DOCUMENT_CHANGED", "message": "The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.", "recoverable": true, "recommended_action": "activate_the_pinned_drawing_in_autocad_or_call_autocad_unpin_docu...
+[FAIL] RP01 autocad_save_report: save the takeoff as json: file exists, size and SHA-256 equal a fresh hash, content has the layers
+       -> call failed: {"ok": false, "error": {"code": "E_INTERNAL", "message": "ToolError: {\"ok\": false, \"error\": {\"code\": \"E_DOCUMENT_CHANGED\", \"message\": \"The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.\", \"recoverable\": true, \"rec...
+[FAIL] RP02 autocad_save_report: save the takeoff as csv: file exists, size and SHA-256 equal a fresh hash, content has the layers
+       -> call failed: {"ok": false, "error": {"code": "E_INTERNAL", "message": "ToolError: {\"ok\": false, \"error\": {\"code\": \"E_DOCUMENT_CHANGED\", \"message\": \"The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.\", \"recoverable\": true, \"rec...
+[FAIL] RP03 autocad_save_report: save the takeoff as md: file exists, size and SHA-256 equal a fresh hash, content has the layers
+       -> call failed: {"ok": false, "error": {"code": "E_INTERNAL", "message": "ToolError: {\"ok\": false, \"error\": {\"code\": \"E_DOCUMENT_CHANGED\", \"message\": \"The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.\", \"recoverable\": true, \"rec...
+[FAIL] RP04 autocad_save_report: an existing report is not overwritten (E_OUTPUT_EXISTS)
+       -> expected error code in ['E_OUTPUT_EXISTS'], got 'E_INTERNAL': ToolError: {"ok": false, "error": {"code": "E_DOCUMENT_CHANGED", "message": "The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsav
+[PASS] RP05 autocad_save_report: an unknown report kind is rejected
+[FAIL] RP06 autocad_save_report: an unknown format is rejected
+       -> expected error code in ['E_INVALID_INPUT'], got 'E_INTERNAL': ToolError: {"ok": false, "error": {"code": "E_DOCUMENT_CHANGED", "message": "The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsav
+cleanup closed scratch drawings: ['Drawing46.dwg', 'Drawing47.dwg']
+  + Exception Group Traceback (most recent call last):
+  |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\07_architecture.py", line 315, in <module>
+  |     asyncio.run(main())
+  |     ~~~~~~~~~~~^^^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 205, in run
+  |     return runner.run(main)
+  |            ~~~~~~~~~~^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\asyncio\runners.py", line 128, in run
+  |     return self._loop.run_until_complete(task)
+  |            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\asyncio\base_events.py", line 720, in run_until_complete
+  |     return future.result()
+  |            ~~~~~~~~~~~~~^^
+  |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\07_architecture.py", line 305, in main
+  |     async with h.open_session("07_architecture", env=h.server_env("com")) as (session, log):
+  |                ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 235, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\mcp_harness.py", line 81, in open_session
+  |     async with stdio_client(params, errlog=errfile) as (read, write):
+  |                ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\contextlib.py", line 235, in __aexit__
+  |     await self.gen.athrow(value)
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\mcp\client\stdio.py", line 201, in stdio_client
+  |     async with anyio.create_task_group() as tg:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\anyio\_backends\_asyncio.py", line 847, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Exception Group Traceback (most recent call last):
+    |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\mcp\client\stdio.py", line 205, in stdio_client
+    |     yield read_stream, write_stream
+    |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\mcp_harness.py", line 82, in open_session
+    |     async with ClientSession(read, write) as session:
+    |                ~~~~~~~~~~~~~^^^^^^^^^^^^^
+    |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\mcp\client\session.py", line 514, in __aexit__
+    |     result = await self._task_group.__aexit__(exc_type, exc_val, exc_tb)
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "C:\Users\This PC\AppData\Local\Programs\Python\Python314\Lib\site-packages\anyio\_backends\_asyncio.py", line 847, in __aexit__
+    |     raise BaseExceptionGroup(
+    |         "unhandled errors in a TaskGroup", self._exceptions
+    |     ) from None
+    | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+    +-+---------------- 1 ----------------
+      | Traceback (most recent call last):
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\mcp_harness.py", line 89, in open_session
+      |     yield session, log
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\07_architecture.py", line 308, in main
+      |     await run(ctx, base)
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\07_architecture.py", line 276, in run
+      |     dup = await draw("autocad_draw_line", {"start_point": [0, -2000], "end_point": [1000, -2000], "layer": "LINES"})
+      |           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\07_architecture.py", line 201, in draw
+      |     must(not r["is_error"], f"{name} {args}: {short(r['payload'])}")
+      |     ~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+      |   File "C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\harness\cases.py", line 83, in must
+      |     raise AssertionError(message)
+      | AssertionError: autocad_draw_line {'start_point': [0, -2000], 'end_point': [1000, -2000], 'layer': 'LINES'}: {"ok": false, "error": {"code": "E_DOCUMENT_CHANGED", "message": "The active drawing is 'unsaved:drawing46.dwg', but this session is pinned to 'unsaved:drawing47.dwg'. Nothing was changed.", "recoverable": true, "recommended_action": "activate_the_pinned_drawing_in_autocad_or_call_autocad_unpin_docu...
+      +------------------------------------

@@ -1,0 +1,29 @@
+{
+  "acad_exe_pids": [
+    15472
+  ],
+  "drawings_open_before_probe": [],
+  "Application.Version": "24.3s (LMS Tech)",
+  "Application.Name": "AutoCAD",
+  "Application.Caption": "Autodesk AutoCAD 2024 - [Drawing53.dwg]",
+  "Application.FullName": "C:\\Program Files\\Autodesk\\AutoCAD 2024\\acad.exe",
+  "Application.Path": "C:\\Program Files\\Autodesk\\AutoCAD 2024",
+  "Application.LocaleId": 1033,
+  "Application.Visible": true,
+  "Application.HWND": 329744,
+  "Documents.Count": 1,
+  "var.ACADVER": "24.3s (LMS Tech)",
+  "var._VERNUM": "U.61.0.0 (UNICODE)",
+  "var.PRODUCT": "AutoCAD",
+  "var.RELEASE": "<com_error -2147352567>",
+  "var.PROGRAM": "acad",
+  "var.PLATFORM": "Microsoft Windows NT Version 10.0 (x64)",
+  "var.MEASUREMENT": 0,
+  "var.INSUNITS": 1,
+  "var.LUNITS": 2,
+  "var.BACKGROUNDPLOT": 2,
+  "var.FILEDIA": 1,
+  "var.CMDDIA": 1,
+  "ACADVER": "24.3s (LMS Tech)",
+  "drawings_open_after_probe": []
+}

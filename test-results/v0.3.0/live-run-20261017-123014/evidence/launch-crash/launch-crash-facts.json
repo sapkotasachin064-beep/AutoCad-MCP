@@ -1,0 +1,23 @@
+{
+  "note": "collected after the first, tool-started AutoCAD launch failed (logs/01_launch.*); AutoCAD's own crash reporter output",
+  "cer_log_copied": true,
+  "minidump": {
+    "file": "AppData/Local/Autodesk/CER/be2ccf74547c04f0063873f12064f78647a2a370/1/acminidump.dmp",
+    "dump_time_utc": "2026-10-17T06:48:27Z",
+    "exception_code": "0xE0434352",
+    "meaning": "0xE0434352 = a .NET (CLR) exception thrown inside AutoCAD; first parameter 0x80131534 = TypeInitializationException",
+    "exception_parameters": [
+      "0xffffffff80131534",
+      "0x0",
+      "0x0",
+      "0x0",
+      "0x7ffd1cf80000"
+    ]
+  },
+  "dcom_event_10010": {
+    "TimeCreated": "/Date(1792219793127)/",
+    "ProviderName": "Microsoft-Windows-DistributedCOM",
+    "Id": 10010,
+    "Message": "The server {8B4929F8-076F-4AEC-AFEE-8928747B7AE3} did not register with DCOM within the required timeout."
+  }
+}

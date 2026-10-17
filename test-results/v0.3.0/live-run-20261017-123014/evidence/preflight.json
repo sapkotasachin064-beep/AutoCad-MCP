@@ -1,0 +1,33 @@
+{
+  "recorded_at": "2026-10-17T12:33:08",
+  "windows": "Windows-11-10.0.26300-SP0",
+  "system_python": "3.14.7 (tags/v3.14.7:823f032, Aug  5 2026, 10:51:32) [MSC v.1944 64 bit (AMD64)]",
+  "system_python_exe": "C:\\Users\\This PC\\AppData\\Local\\Programs\\Python\\Python314\\python.exe",
+  "acad_exe_pids_before_run": [],
+  "git_branch": "feat/v0.3.0-rebuild",
+  "git_head": "c591f7a2c181ac613081fb936d686961ebb32ac2 fix: live AutoCAD 2024 findings; record live-verified capabilities",
+  "git_status_short": [
+    "M .gitignore",
+    " M CHANGELOG.md",
+    " M src/core/errors.py",
+    " M src/db.py",
+    " M tests/test_db.py",
+    " M tests/test_errors.py",
+    "?? start.bat"
+  ],
+  "packages": {
+    "mcp": "2.3.0",
+    "pywin32": "312",
+    "pytest": "9.1.1",
+    "ezdxf": "1.4.4",
+    "pillow": "12.3.0",
+    "pdfplumber": "0.11.10"
+  },
+  "registry_ProgID_CurVer": "AutoCAD.Application.24",
+  "acad_exe_exists": true,
+  "acad_exe_file_version": {
+    "FileVersion": "R24.3.61.0.0",
+    "ProductVersion": "R24.3.61.0.0",
+    "ProductName": "AutoCAD"
+  }
+}

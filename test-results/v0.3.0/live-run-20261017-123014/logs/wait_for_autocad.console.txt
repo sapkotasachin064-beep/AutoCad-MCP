@@ -1,0 +1,2 @@
+12:39:14 {'pids': [15472], 'com': True, 'docs': 0, 'version': '24.3s (LMS Tech)'}
+12:39:20 READY {'pids': [15472], 'com': True, 'docs': 0, 'version': '24.3s (LMS Tech)'}

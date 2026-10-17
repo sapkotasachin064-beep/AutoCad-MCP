@@ -1,0 +1,57 @@
+{
+  "handles_in_drawing_A": {
+    "L1": "7E",
+    "L2": "7F",
+    "C1": "80",
+    "T1": "82",
+    "T2": "83",
+    "T3": "84",
+    "T4": "85",
+    "M1": "86"
+  },
+  "handles_in_drawing_B": {
+    "L1": "7E",
+    "L2": "7F",
+    "C1": "80"
+  },
+  "identical_handles": {
+    "L1": [
+      "7E",
+      "7E"
+    ],
+    "L2": [
+      "7F",
+      "7F"
+    ],
+    "C1": [
+      "80",
+      "80"
+    ]
+  },
+  "query_result": {
+    "status": "ok",
+    "method": "persistent",
+    "color": 6,
+    "row_count": 1,
+    "highlighted_count": 1,
+    "highlighted_handles": [
+      "80"
+    ],
+    "not_found": [],
+    "drawing_identity": "unsaved:drawing37.dwg",
+    "message": "Highlighted 1 of 1 entity(ies) from query result.",
+    "backend": "com",
+    "state": {
+      "accepted": true,
+      "preflight_passed": true,
+      "executed": true,
+      "verified": null,
+      "saved": false
+    }
+  },
+  "colours_in_B_after": {
+    "L1": 256,
+    "L2": 256,
+    "C1": 6
+  }
+}

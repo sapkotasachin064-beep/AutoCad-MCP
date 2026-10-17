@@ -1,0 +1,30 @@
+{
+  "E0_vs_E1 highlight on": {
+    "pw": 26940,
+    "grab": 393965
+  },
+  "E1_vs_E2 regen after highlight": {
+    "pw": 9701,
+    "grab": 9701
+  },
+  "E0_vs_E2 highlight then regen vs baseline": {
+    "pw": 28007,
+    "grab": 392225
+  },
+  "E0_vs_E3 highlight off": {
+    "pw": 3635,
+    "grab": 0
+  },
+  "E3_vs_E4 colour set, no redraw": {
+    "pw": 0,
+    "grab": 137916
+  },
+  "E4_vs_E5 regen after colour": {
+    "pw": 24089,
+    "grab": 272866
+  },
+  "E3_vs_E5 colour visible after regen": {
+    "pw": 24089,
+    "grab": 391863
+  }
+}

@@ -1,0 +1,5 @@
+tool autocad_quantity_takeoff failed: ValidationError: wall_height must be positive, got -5.0
+tool autocad_save_report failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace\reports\takeoff-live.json already exists; pass overwrite=true to replace it
+tool autocad_save_report failed: CadError: report must be "qc" or "takeoff"
+tool autocad_save_report failed: CadError: format must be one of ['csv', 'json', 'md']
+tool autocad_check_drawing failed: CadError: rules must be a list drawn from ['degenerate_polyline', 'duplicate', 'empty_text', 'layer_name', 'on_layer_0', 'text_height_variety', 'tiny_circle', 'unclosed_wall_outline', 'zero_length']

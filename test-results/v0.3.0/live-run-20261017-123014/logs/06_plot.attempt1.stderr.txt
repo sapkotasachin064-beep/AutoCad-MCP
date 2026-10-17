@@ -1,0 +1,9 @@
+tool autocad_plot_pdf failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace\plots\model-default.pdf already exists; pass overwrite=true to replace it
+tool autocad_plot_pdf failed: CadError: paper 'A' is ambiguous; pick one of the listed canonical media names
+tool autocad_plot_pdf failed: CadError: Layout 'NoSuchLayout' not found.
+tool autocad_plot_pdf failed: com_error: (-2147352567, 'Exception occurred.', (0, 'AutoCAD.Application', 'Invalid input', 'C:\\Program Files\\Autodesk\\AutoCAD 2024\\HELP\\OLE_ERR.CHM', -2145386493, -2145386493), None)
+tool autocad_plot_pdf failed: CadError: file extension must be one of ['.pdf'], got '.txt'
+tool autocad_plot_pdf failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\outside_sandbox\x.pdf is outside AUTOCAD_MCP_ALLOWED_DIRS (C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace)
+tool autocad_plot_pdf failed: CadError: '..' path components are not accepted; pass an absolute path
+tool autocad_plot_pdf failed: CadError: folder C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace\plots\no-such-folder does not exist; create it first or choose another path
+tool autocad_export_dxf failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace\exports\plot-scratch.dxf already exists; pass overwrite=true to replace it

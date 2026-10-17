@@ -1,0 +1,12 @@
+tool autocad_create_new_drawing failed: CadStateError: This session is pinned to 'unsaved:drawing20.dwg'; creating a drawing would switch the active drawing away from it. Pass pin=true to move the pin to the new drawing, or unpin first.
+tool autocad_activate_drawing failed: CadStateError: This session is pinned to 'unsaved:drawing21.dwg'; switching drawings would break the pinned job. Pass pin=true to move the pin, or call autocad_unpin_document first.
+tool autocad_draw_line failed: CadStateError: The active drawing is 'unsaved:drawing21.dwg', but this session is pinned to 'unsaved:drawing20.dwg'. Nothing was changed.
+tool autocad_list_entities failed: CadStateError: The active drawing is 'unsaved:drawing21.dwg', but this session is pinned to 'unsaved:drawing20.dwg'. Nothing was changed.
+tool autocad_activate_drawing failed: CadError: No open drawing has identity 'unsaved:no-such-drawing.dwg'.
+tool autocad_save_drawing failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace\scratch\live_s1.dwg already exists; pass overwrite=true to replace it
+tool autocad_close_drawing failed: CadError: live_s1.dwg has unsaved changes; save it first or pass discard_changes=true.
+tool autocad_save_drawing failed: CadError: This drawing is open read-only; pass a new path to save a copy.
+tool autocad_open_drawing failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace\scratch\does-not-exist.dwg does not exist or is not a file
+tool autocad_open_drawing failed: CadError: C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\outside_sandbox\x.dwg is outside AUTOCAD_MCP_ALLOWED_DIRS (C:\Users\This PC\Desktop\Autocad Mcp Server\.claude\worktrees\elated-austin-a13117\test-results\v0.3.0\live-run-20261017-123014\workspace)
+tool autocad_open_drawing failed: CadError: file extension must be one of ['.dwg', '.dws', '.dwt', '.dxf'], got '.txt'
+tool autocad_create_test_drawing_with_line failed: AttributeError: AddLine.Handle

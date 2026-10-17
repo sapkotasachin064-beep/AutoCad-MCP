@@ -1,0 +1,5 @@
+COM worker 1 abandoned after a timeout in create_new_drawing
+tool autocad_create_new_drawing failed: ComTimeoutError: create_new_drawing did not finish within 1s. AutoCAD may be showing a modal dialog or waiting at a command prompt. The call could still complete inside AutoCAD after this error, so inspect the drawing before retrying a change. Increase AUTOCAD_MCP_COM_TIMEOUT if long operations are expected.
+tool autocad_list_drawings failed: CadError: list_drawings was not started: AutoCAD was still busy with an earlier call (create_new_drawing) after 1s. Nothing was sent to AutoCAD.
+COM worker 2 abandoned after a timeout in create_new_drawing
+tool autocad_create_new_drawing failed: ComTimeoutError: create_new_drawing did not finish within 1s. AutoCAD may be showing a modal dialog or waiting at a command prompt. The call could still complete inside AutoCAD after this error, so inspect the drawing before retrying a change. Increase AUTOCAD_MCP_COM_TIMEOUT if long operations are expected.

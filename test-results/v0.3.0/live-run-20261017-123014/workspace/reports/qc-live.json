@@ -1,0 +1,85 @@
+{
+ "report": "qc",
+ "context": {
+  "drawing_identity": "unsaved:drawing48.dwg",
+  "backend": "com",
+  "server_version": "0.3.0",
+  "generated_utc": "2026-10-17T07:28:34+00:00"
+ },
+ "result": {
+  "status": "ok",
+  "drawing_identity": "unsaved:drawing48.dwg",
+  "scan_truncated": false,
+  "rules_run": [
+   "zero_length",
+   "degenerate_polyline",
+   "tiny_circle",
+   "duplicate",
+   "empty_text",
+   "on_layer_0",
+   "unclosed_wall_outline",
+   "text_height_variety"
+  ],
+  "entity_count": 16,
+  "issue_count": 3,
+  "counts_by_rule": {
+   "zero_length": 0,
+   "degenerate_polyline": 0,
+   "tiny_circle": 0,
+   "duplicate": 1,
+   "empty_text": 0,
+   "on_layer_0": 1,
+   "unclosed_wall_outline": 1,
+   "text_height_variety": 0
+  },
+  "counts_by_severity": {
+   "warning": 2,
+   "info": 1
+  },
+  "passed": true,
+  "issues": [
+   {
+    "rule": "duplicate",
+    "severity": "warning",
+    "handle": "AB",
+    "layer": "LINES",
+    "type": "LINE",
+    "message": "duplicates 98",
+    "duplicate_of": "98"
+   },
+   {
+    "rule": "on_layer_0",
+    "severity": "info",
+    "handle": "AC",
+    "layer": "0",
+    "type": "LINE",
+    "message": "drawn on layer 0"
+   },
+   {
+    "rule": "unclosed_wall_outline",
+    "severity": "warning",
+    "handle": "AD",
+    "layer": "A-WALL",
+    "type": "POLYLINE3D",
+    "message": "wall outline polyline is open"
+   }
+  ],
+  "issues_truncated": false,
+  "text_heights": {
+   "200.0": 2
+  },
+  "rule_descriptions": {
+   "zero_length": "line or polyline with (near) zero length",
+   "degenerate_polyline": "polyline with fewer than 2 distinct vertices",
+   "tiny_circle": "circle or arc with (near) zero radius",
+   "duplicate": "entity identical to another (same type, layer and geometry)",
+   "empty_text": "TEXT/MTEXT with no visible characters",
+   "on_layer_0": "geometry drawn on layer 0 instead of a named layer",
+   "unclosed_wall_outline": "polyline on a wall layer (A-WALL*) that is not closed",
+   "text_height_variety": "many different text heights (inconsistent annotation)"
+  },
+  "note": "Drafting hygiene checks only; not building-code or standards compliance.",
+  "message": "3 finding(s) in 16 entities.",
+  "backend": "com"
+ }
+}
