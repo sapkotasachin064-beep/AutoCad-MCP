@@ -10,7 +10,7 @@ produces is a structural design, a building-code check, or a professional bill
 of quantities.
 
 <!-- generated:start summary -->
-**70 MCP tools** in 11 toolsets; **650 catalogued capabilities**: 62 verified live, 165 tested, 26 implemented, 397 planned. Status words mean exactly what `docs/capabilities.json` says: only a live AutoCAD test promotes a capability to `verified`.
+**74 MCP tools** in 11 toolsets; **656 catalogued capabilities**: 62 verified live, 175 tested, 26 implemented, 393 planned. Status words mean exactly what `docs/capabilities.json` says: only a live AutoCAD test promotes a capability to `verified`.
 <!-- generated:end summary -->
 
 ## Quick start
@@ -107,7 +107,7 @@ Tools are grouped in toolsets; `AUTOCAD_MCP_TOOLSETS` hides the ones a client
 does not need.
 
 <!-- generated:start tools -->
-70 tools in 11 toolsets. Argument schemas are generated from typed signatures; every parameter carries a description. 
+74 tools in 11 toolsets. Argument schemas are generated from typed signatures; every parameter carries a description. 
 
 | Toolset | Tools | Purpose |
 |---|---|---|
@@ -118,7 +118,7 @@ does not need.
 | `query` | 6 | drawing summary, entity listing and detail, scan to SQLite, read-only SQL, text search |
 | `annotation` | 2 | dimensions and hatches |
 | `blocks` | 4 | block definitions, insertion and attributes |
-| `architecture` | 7 | walls, floor plans, stairs, structural grids, sheets and title blocks |
+| `architecture` | 11 | walls, floor plans, stairs and staircases, structural and column grids, windows, furniture, sheets and title blocks |
 | `analysis` | 5 | drawing checks, quantity takeoff, DXF comparison |
 | `output` | 4 | DXF export, PDF plotting, layouts, previews, file evidence |
 | `civil` | 6 | alignment stationing, ground profiles, cut/fill volumes, pipe clearance, COGO points |
@@ -211,12 +211,16 @@ does not need.
 | Tool | Kind | Backends | Description |
 |---|---|---|---|
 | `autocad_design_stair` | read-only | com, dxf | Calculate a straight stair flight: number of risers, riser height, tread depth, run length, pitch and the 2R+G step relation, checked against limits. Defaults are residential rules of thumb (max riser 190 mm, min tread 250 mm, 2R+G 550-700 mm, pitch <= 42 deg), NOT a building code -- pass your code's limits. Headroom, handrails and landings are not checked. Pure calculation; draws nothing. |
+| `autocad_draw_column_grid` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Place rectangular structural columns on layer COLUMNS (change with layer), each a closed outline with a SOLID hatch fill. Positions come from a regular grid (x_spacings + y_spacings from origin), from custom points, and/or from the intersections of the walls already drawn (at_wall_intersections=true reads the rectangular wall outlines on A-WALL* layers and puts one column where wall centrelines meet). A position given twice is drawn once. Default column size follows the drawing's units (300 x 300 mm metric, 9 x 12 in imperial); labels, dimensions and text scale with the units. Marks C1, C2, ... are returned with each column's centre and source. Drafting only: no column is sized or checked structurally. dry_run=true returns the plan without drawing. |
 | `autocad_draw_sheet` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a sheet border, drawing frame and title block in model space at plot scale 1:scale (paper: A0-A4, ANSI_A-ANSI_E, ARCH_A-ARCH_E). fields fills the title block: project, title, drawing_number, scale (defaults to "1:scale"), date, drawn_by, checked_by, sheet, revision. Text sizes are paper sizes times the scale. Returns the usable drawing area. |
 | `autocad_draw_stair_plan` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Design a straight flight (same rules and defaults as autocad_design_stair) and draw it in plan: outline, tread nosings, walking line with arrow and an "UP nR" note, starting at origin and climbing towards direction_degrees (0, 90, 180 or 270). |
+| `autocad_draw_staircase` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a parametric straight staircase in plan from start_point, width, tread_depth, riser_count and direction ('UP' or 'DN'): tread rectangles (A-FLOR-TRED), riser lines (A-FLOR-RISR), a landing after the last riser (A-FLOR-LAND), a handrail along each side (A-FLOR-HRAL), and a walking-line arrow (A-ANNO-SYMB) with an 'UP 12R' / 'DN 12R' note (A-ANNO-NOTE). start_point is the left end of the first riser line looking along the run; rotation_degrees turns the flight (0 = +X, 90 = +Y) and the flight is `width` wide to the right of that direction. Default sizes and the text height follow the drawing's units (metric 900 mm wide, 250 mm treads, 150 mm text; imperial 36 in, 10 in, 6 in); `unit` lets you give lengths in another unit. The arrow always points away from start_point: 'UP' and 'DN' differ only in the label. Drafting only: riser height, headroom and code limits are not checked (autocad_design_stair checks riser/tread rules). dry_run=true returns the plan without drawing. |
 | `autocad_draw_structural_grid` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a column grid: x_spacings are bay widths left to right (lines numbered 1, 2, 3...), y_spacings bay depths bottom to top (lettered A, B, C...; I and O skipped unless skip_letters=false), in `unit`. Lines (layer S-GRID, CENTER linetype) end in labelled bubbles; column_size [width, depth] adds a filled column mark at every intersection; bay and overall dimensions are added. Drafting of a chosen grid, not structural design. |
 | `autocad_draw_wall` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a wall as a closed double-line outline (4-point polyline) centered on start_point-end_point, offset by thickness/2 on each side. Coordinates and thickness are in the drawing's units. thickness defaults to the standard exterior wall for those units (9 in in inch drawings -- the V0.2.x default -- or 230 mm in millimetre drawings). Creates the layer via autocad_ensure_layer if it doesn't already exist. |
+| `autocad_draw_wall_window` | can remove or overwrite work | com, dxf | Cut a window of type W1, W2 or W3 into a wall: the opening is trimmed out of the wall, and the window is drawn as two glass-pane lines across the middle of the wall, a sill line on each wall face (layer + '-SILL'), mullion ticks between the sashes, and the W1/W2/W3 tag (layer + '-IDEN'). The wall is either an existing outline (wall_handle: the original is deleted and replaced by two wall pieces on its own layer, new handles in trimmed_wall) or a new wall drawn from wall_start to wall_end on wall_layer with the opening already in it. offset is measured to the window centre. Window width, wall thickness and text follow the drawing's units (or `unit`); the result lists the type's height, sill and head heights in drawing units and mm. To add a second window use a piece's new handle. Because replacing a wall deletes its outline (Ctrl+Z in AutoCAD undoes it), dry_run defaults to true in that case: read the plan, then repeat with dry_run=false. Drafting only. |
 | `autocad_generate_2d_floor_plan` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Generate a complete residential floor plan in one call: 9" exterior walls, 4.5" interior partitions splitting the footprint into a fixed 2x3 room grid (Living Room, Kitchen, Bath, 2 Bedrooms by default -- override with rooms_config), a 36" main entry door and a 30" interior door per room, a 48" window per room touching an exterior wall, and an MTEXT room label per room. width_ft/length_ft is the footprint in feet; drawing happens in inches, matching the Engineering units preset applied by default (in a millimetre drawing the same plan is drawn converted to mm). units ("INCHES" or "FEET") adds room bounds in feet when "FEET". dry_run=true returns the planned entities without drawing anything. |
 | `autocad_generate_floor_plan` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Draw a residential floor plan from explicit rooms. rooms: [{name, x, y, width, depth}] in `unit` (ft, in, m, mm), measured to wall centrelines; rooms must not overlap and may form any rectilinear footprint. Exterior walls follow the outline, interior walls the shared edges (defaults 9"/4.5" or 230/115 mm, override with exterior_wall/interior_wall in `unit`). Doors: omit to connect every room to the entry room (entry_room, default the first) through shared walls, or give [{between: [roomA, roomB], width?, position? 0-1}]; a main door goes on the entry room's outside wall. windows="auto" puts one per room on its longest outside wall, "none" skips them. Labels show the clear (net) area. Returns room, door and window schedules. dry_run=true shows the plan without drawing. Drafting aid, not a design check. |
+| `autocad_place_architectural_block` | changes the drawing or AutoCAD's state, never removes work | com, dxf | Stamp a bed, dining table (with chairs), sofa set (sofa, coffee table and two armchairs), WC or kitchen countertop (with sink and hob; straight or L-shaped) on layer A-FURN. The shape is parametric: standard sizes follow the drawing's unit system (metric: double bed 1500 x 2000 mm; imperial: 60 x 80 in) and width/depth/seats/variant change it. position is the centre of the item's footprint, which the result returns with its corners. Pass block_name to insert a block from your own library instead of drawing the shape. Text and labels scale with the drawing's units. dry_run=true returns the plan without drawing. |
 
 ### `analysis`
 
@@ -252,6 +256,53 @@ does not need.
 The machine-readable capability catalog (status evidence per capability, never
 promoted without a test) is in [`docs/capabilities.json`](docs/capabilities.json).
 
+## Architectural macros
+
+Four one-call drafting macros are built on the plan engine, so each draws the
+same entities on the live (`com`) and headless (`dxf`) backends and takes
+`dry_run`:
+
+| Tool | Draws | Layers |
+|---|---|---|
+| `autocad_draw_staircase` | straight flight in plan: treads, risers, landing, handrails, walking-line arrow with an `UP 12R` / `DN 12R` note | `A-FLOR-TRED`, `A-FLOR-RISR`, `A-FLOR-LAND`, `A-FLOR-HRAL`, `A-ANNO-SYMB`, `A-ANNO-NOTE` |
+| `autocad_draw_column_grid` | rectangular columns (outline + SOLID hatch) at grid points, custom points and wall intersections | `COLUMNS`, `COLUMNS-TEXT`, `COLUMNS-DIM` |
+| `autocad_draw_wall_window` | window W1, W2 or W3 cut into a wall: opening, double glass-pane lines, sill lines, mullions, tag | `A-GLAZ`, `A-GLAZ-SILL`, `A-GLAZ-IDEN`, plus the wall's own layer |
+| `autocad_place_architectural_block` | bed, dining table, sofa set, WC or kitchen countertop; or one of your own blocks (`block_name`) | `A-FURN` (`A-FURN-TEXT` for labels) |
+
+**Units.** Lengths are in the drawing's own units unless the call passes `unit`
+(`mm`, `cm`, `m`, `in`, `ft`); coordinates are always drawing units. Default
+sizes follow the drawing's unit system, and text, dimension text, arrows,
+extension lines and dimension decimals all scale from one text height
+(`text_height` overrides it), so a drawing in millimetres and one in inches
+print the same size on paper. The floor-plan and structural-grid generators
+size their dimensions the same way, and headless dimension text now shows the
+measured value (ezdxf's default style multiplied every dimension by 100):
+
+| | metric drawing | imperial drawing |
+|---|---|---|
+| column | 300 x 300 mm | 9 x 12 in |
+| stair width, tread | 900, 250 mm | 36, 10 in |
+| W1, W2, W3 (width x height) | 1200 x 1200, 1800 x 1200, 600 x 450 mm | 48 x 48, 72 x 48, 24 x 18 in |
+| double bed | 1500 x 2000 mm | 60 x 80 in |
+| text height | 150 mm | 6 in |
+
+**Wall windows replace walls.** Given a `wall_handle`, `autocad_draw_wall_window`
+deletes that wall outline and draws two pieces that stop at the opening (new
+handles in `trimmed_wall`; Ctrl+Z undoes it). Because that removes an entity it
+defaults to `dry_run: true` in that case: read the plan, then repeat with
+`dry_run: false`. Given `wall_start` and `wall_end` it draws a new wall with the
+opening already in it and deletes nothing. For a second window on the same wall
+use one of the pieces' new handles.
+
+**Limits.** These are drafting aids: sizes are conventions, not code values.
+`UP` and `DN` only change the stair's label (the arrow always points away from
+`start_point`). Wall intersections are found from closed 4-point rectangular
+outlines (as `autocad_draw_wall` and the floor-plan generators draw them) on
+`A-WALL*` layers; other outlines are counted in `wall_scan.outlines_ignored`.
+Doors are not cut into walls. The macros are covered by unit, headless-DXF,
+fake-COM and stdio tests; none has been run against a live AutoCAD, so their
+capabilities are `tested`, not `verified`.
+
 ## Architecture
 
 ```
@@ -261,7 +312,7 @@ MCP client --stdio--> src/server.py        (tools, resources, prompts, envelopes
                |                  evidence, reports, COM executor, SQLite cache
                src/backends/      base (contract), com (live), dxf (headless),
                |                  com_engine (COM plumbing), targets (plan emitters)
-               src/domain/        pure logic: units, architecture, analysis, civil
+               src/domain/        pure logic: units, architecture, macros, analysis, civil
                src/tools/         COM implementations used by ComBackend
 ```
 
@@ -294,7 +345,8 @@ import without pywin32 (test-enforced).
   (see `docs/capabilities.json`, status `verified`). Other releases have not
   been run.
 * No undo-group or transaction tool yet; use AutoCAD's Undo.
-* Floor plans draw doors and windows over walls, not cut into them.
+* The floor-plan generators draw doors and windows over walls, not cut into
+  them; `autocad_draw_wall_window` cuts window openings (doors are not cut).
 * Scans, checks and takeoff read top-level model space only.
 * Headless backend: DXF only, one drawing at a time; DWG, plotting, highlighting
   and launching are refused with the reason.
@@ -305,9 +357,14 @@ import without pywin32 (test-enforced).
 ```powershell
 pip install pytest
 python -m pytest tests -q          # live tests skip without AutoCAD
+python -m pytest tests -q --ignore=tests\test_integration_autocad.py   # never touches AutoCAD
 python -m pytest tests\test_integration_autocad.py -v   # needs a running AutoCAD
 python scripts\build_capabilities.py --check            # generated files fresh
 ```
+
+The live tests run on their own whenever AutoCAD answers over COM: they create
+and close scratch drawings in the AutoCAD you have open and switch its active
+drawing. If you have real drawings open, use the `--ignore` form.
 
 Test layers: unit (pure logic), fake-COM (what this code sends to AutoCAD),
 headless DXF (real files re-read with ezdxf), golden regression, stdio
@@ -323,7 +380,7 @@ Never skip or loosen a failing test to get a green run.
 | `src/schemas.py` | Reusable `Annotated[..., Field(description=...)]` argument types; the SDK turns them into each tool's JSON input schema |
 | `src/core/` | errors, session, registry, catalog, paths, evidence, reports, hosts, executor, `db.py` (scan cache) |
 | `src/backends/` | `base.py` (operation contract), `com.py` (live), `com_engine.py` (COM plumbing), `dxf.py` (headless), `targets.py` (plan emitters) |
-| `src/domain/` | pure logic: `units.py`, `architecture.py`, `analysis.py`, `civil.py` |
+| `src/domain/` | pure logic: `units.py`, `architecture.py`, `macros.py` (staircase, column grid, window, furniture), `analysis.py`, `civil.py` |
 | `src/tools/` | COM implementations: `common.py` (entity helpers), `documents.py`, `drawing.py`, `editing.py`, `annotation.py`, `architectural.py`, `output.py`, `civil.py` |
 | `tests/` | unit, fake-COM (`fakes.py`), golden, headless, stdio e2e, live (`test_integration_autocad.py`) |
 | `scripts/` | `build_capabilities.py` (generates `docs/capabilities.json` and this README's tables) |

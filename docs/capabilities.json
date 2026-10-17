@@ -7,11 +7,11 @@
   "verified"
  ],
  "summary": {
-  "total": 650,
+  "total": 656,
   "by_status": {
-   "tested": 165,
+   "tested": 175,
    "implemented": 26,
-   "planned": 397,
+   "planned": 393,
    "verified": 62
   },
   "by_category": {
@@ -68,8 +68,8 @@
    },
    "I. Text, MTEXT, dimensions, leaders and annotation": {
     "verified": 5,
-    "total": 34,
-    "tested": 3,
+    "total": 36,
+    "tested": 5,
     "implemented": 1,
     "planned": 25
    },
@@ -145,9 +145,9 @@
     "planned": 5
    },
    "V. Architectural plans: walls, doors, windows, stairs and rooms": {
-    "tested": 10,
-    "total": 30,
-    "planned": 20
+    "tested": 16,
+    "total": 32,
+    "planned": 16
    },
    "W. Residential building layouts and drafting automation": {
     "verified": 2,
@@ -158,8 +158,8 @@
    },
    "X. Structural drafting: grids, columns, beams and reinforcement": {
     "verified": 1,
-    "total": 17,
-    "tested": 3,
+    "total": 19,
+    "tested": 5,
     "planned": 13
    },
    "Y. Civil 3D surfaces, alignments, profiles, corridors and grading": {
@@ -243,7 +243,7 @@
     "planned": 7
    }
   },
-  "public_tools_referenced": 70
+  "public_tools_referenced": 74
  },
  "capabilities": [
   {
@@ -6700,6 +6700,83 @@
    "overlaps": []
   },
   {
+   "id": "I-035",
+   "slug": "annotation_unit_scale",
+   "category": "I. Text, MTEXT, dimensions, leaders and annotation",
+   "description": "Text, dimension arrows and dimension precision sized from the drawing's units (150 mm or 6 in text)",
+   "user_problem": "Annotation as readable in millimetres as in inches",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "text",
+    "points",
+    "style"
+   ],
+   "outputs": [
+    "handle",
+    "measurement"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_staircase",
+    "autocad_draw_column_grid",
+    "autocad_draw_wall_window",
+    "autocad_place_architectural_block",
+    "autocad_generate_floor_plan",
+    "autocad_draw_structural_grid"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf"
+   ],
+   "reference": "",
+   "overlaps": []
+  },
+  {
+   "id": "I-036",
+   "slug": "dim_text_value",
+   "category": "I. Text, MTEXT, dimensions, leaders and annotation",
+   "description": "Headless dimension text shows the measured value, not ezdxf's default times-100 linear factor",
+   "user_problem": "Dimensions read correctly in DXF files",
+   "status": "tested",
+   "backend": "dxf",
+   "app_version": "any OS with Python + ezdxf (no AutoCAD)",
+   "inputs": [
+    "text",
+    "points",
+    "style"
+   ],
+   "outputs": [
+    "handle",
+    "measurement"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_add_dimension",
+    "autocad_draw_column_grid",
+    "autocad_generate_floor_plan",
+    "autocad_draw_structural_grid"
+   ],
+   "test_evidence": [
+    "unit",
+    "headless_dxf"
+   ],
+   "reference": "",
+   "overlaps": []
+  },
+  {
    "id": "J-001",
    "slug": "layer_create",
    "category": "J. Layers, blocks, attributes and external references",
@@ -12420,7 +12497,7 @@
    "category": "V. Architectural plans: walls, doors, windows, stairs and rooms",
    "description": "Window types with sill and head heights",
    "user_problem": "Window data for elevations",
-   "status": "planned",
+   "status": "tested",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -12437,8 +12514,15 @@
    ],
    "safety": "write",
    "kind": "capability",
-   "exposed_by": [],
-   "test_evidence": [],
+   "exposed_by": [
+    "autocad_draw_wall_window"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
    "overlaps": []
   },
@@ -12504,7 +12588,7 @@
    "category": "V. Architectural plans: walls, doors, windows, stairs and rooms",
    "description": "Insert furniture and sanitary blocks with nominal sizes",
    "user_problem": "Furnished plans",
-   "status": "planned",
+   "status": "tested",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -12521,8 +12605,15 @@
    ],
    "safety": "write",
    "kind": "capability",
-   "exposed_by": [],
-   "test_evidence": [],
+   "exposed_by": [
+    "autocad_place_architectural_block"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
    "overlaps": []
   },
@@ -12532,7 +12623,7 @@
    "category": "V. Architectural plans: walls, doors, windows, stairs and rooms",
    "description": "Kitchen counter run layout",
    "user_problem": "Kitchen planning",
-   "status": "planned",
+   "status": "tested",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -12549,8 +12640,15 @@
    ],
    "safety": "write",
    "kind": "capability",
-   "exposed_by": [],
-   "test_evidence": [],
+   "exposed_by": [
+    "autocad_place_architectural_block"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
    "overlaps": []
   },
@@ -12672,7 +12770,7 @@
    "category": "V. Architectural plans: walls, doors, windows, stairs and rooms",
    "description": "Columns embedded in walls",
    "user_problem": "Framed buildings",
-   "status": "planned",
+   "status": "tested",
    "backend": "both",
    "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
    "inputs": [
@@ -12689,8 +12787,15 @@
    ],
    "safety": "write",
    "kind": "capability",
-   "exposed_by": [],
-   "test_evidence": [],
+   "exposed_by": [
+    "autocad_draw_column_grid"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
    "overlaps": []
   },
@@ -12831,6 +12936,76 @@
    "kind": "capability",
    "exposed_by": [],
    "test_evidence": [],
+   "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
+   "overlaps": []
+  },
+  {
+   "id": "V-031",
+   "slug": "staircase_macro",
+   "category": "V. Architectural plans: walls, doors, windows, stairs and rooms",
+   "description": "Parametric straight staircase from start point, width, tread depth and riser count: treads, risers, landing, handrails and an UP/DN walking-line arrow on separate layers",
+   "user_problem": "Stairs drawn from a few numbers",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "dimensions in a declared unit"
+   ],
+   "outputs": [
+    "handles",
+    "schedules"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_UNITS_MISMATCH",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_staircase"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
+   "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
+   "overlaps": []
+  },
+  {
+   "id": "V-032",
+   "slug": "window_openings_cut",
+   "category": "V. Architectural plans: walls, doors, windows, stairs and rooms",
+   "description": "Cut a window opening into a wall: the wall outline is replaced by two pieces that stop at the opening",
+   "user_problem": "Walls broken at windows",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "dimensions in a declared unit"
+   ],
+   "outputs": [
+    "handles",
+    "schedules"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT",
+    "E_UNITS_MISMATCH",
+    "E_VERIFICATION_FAILED"
+   ],
+   "safety": "destructive",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_wall_window"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
    "reference": "drafting aid from user-supplied dimensions and limits; not a design or code check",
    "overlaps": []
   },
@@ -13911,6 +14086,74 @@
    "kind": "capability",
    "exposed_by": [],
    "test_evidence": [],
+   "reference": "drafting only: no spans, loads or member sizes are designed or checked",
+   "overlaps": []
+  },
+  {
+   "id": "X-018",
+   "slug": "column_grid_macro",
+   "category": "X. Structural drafting: grids, columns, beams and reinforcement",
+   "description": "Rectangular columns with a solid fill on layer COLUMNS from a grid, custom points or wall intersections",
+   "user_problem": "Column layouts that follow the plan",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "bay spacings",
+    "member sizes"
+   ],
+   "outputs": [
+    "handles",
+    "marks"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT"
+   ],
+   "safety": "write",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_column_grid"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
+   "reference": "drafting only: no spans, loads or member sizes are designed or checked",
+   "overlaps": []
+  },
+  {
+   "id": "X-019",
+   "slug": "wall_intersections",
+   "category": "X. Structural drafting: grids, columns, beams and reinforcement",
+   "description": "Find where wall centrelines meet (corners, T and X junctions) from the rectangular wall outlines in the drawing",
+   "user_problem": "Columns where walls meet",
+   "status": "tested",
+   "backend": "both",
+   "app_version": "AutoCAD 2021+ (live) or ezdxf (headless)",
+   "inputs": [
+    "bay spacings",
+    "member sizes"
+   ],
+   "outputs": [
+    "handles",
+    "marks"
+   ],
+   "failure_modes": [
+    "E_INVALID_INPUT"
+   ],
+   "safety": "read",
+   "kind": "capability",
+   "exposed_by": [
+    "autocad_draw_column_grid"
+   ],
+   "test_evidence": [
+    "unit",
+    "mock_com",
+    "headless_dxf",
+    "stdio_e2e"
+   ],
    "reference": "drafting only: no spans, loads or member sizes are designed or checked",
    "overlaps": []
   },
